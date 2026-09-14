@@ -1,0 +1,6 @@
+@CodeQuest2026.Server_HostAddress = http://localhost:5107
+
+GET {{CodeQuest2026.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
