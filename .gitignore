@@ -1,0 +1,30 @@
+# IDE and local settings
+.idea/
+.vscode/
+*.user
+*.suo
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Backend
+backend/bin/
+backend/obj/
+backend/.vs/
+backend/appsettings.Development.json
+backend/appsettings.Local.json
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+secrets/
+
+# Logs and operating-system files
+*.log
+coverage/
+Thumbs.db
+.DS_Store
