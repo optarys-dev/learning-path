@@ -1,7 +1,6 @@
 using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Pgvector.EntityFrameworkCore;
 
 namespace CodeQuest2026.Server.Extensions;
 
@@ -9,7 +8,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection ConfigureService(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        string? connectionString =
+            configuration.GetConnectionString("DefaultConnection") ??
+            Environment.GetEnvironmentVariable("DefaultConnection");
+
         ArgumentNullException.ThrowIfNullOrWhiteSpace(connectionString, "ConnectionStrings");
 
         services.AddDbContext<AppDbContext>(
