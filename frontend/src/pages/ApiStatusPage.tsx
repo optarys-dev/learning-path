@@ -1,54 +1,78 @@
 import { useEffect, useState } from 'react';
+
 import { apiUrl } from '../config/api';
 import '../App.css';
 
-type ApiConnectionStatus = 'checking' | 'connected' | 'error';
+type HealthStatus = 'checking' | 'healthy' | 'unhealthy';
 
-interface HealthResponse {
-  status: string;
+interface HealthState {
+  api: HealthStatus;
+  database: HealthStatus;
+}
+
+const initialHealthState: HealthState = {
+  api: 'checking',
+  database: 'checking',
+};
+
+function getStatusMessage({ api, database }: HealthState) {
+  if (api === 'checking' || database === 'checking') {
+    return 'Comprobando conexión con la API y PostgreSQL…';
+  }
+
+  if (api === 'unhealthy') {
+    return '🔴 No se pudo conectar con la API';
+  }
+
+  if (database === 'unhealthy') {
+    return '🟡 API conectada, pero PostgreSQL no responde';
+  }
+
+  return '🟢 API y PostgreSQL conectados correctamente';
 }
 
 export function ApiStatusPage() {
-  const [connectionStatus, setConnectionStatus] = useState<ApiConnectionStatus>('checking');
+  const [health, setHealth] = useState<HealthState>(initialHealthState);
 
   useEffect(() => {
     const abortController = new AbortController();
 
-    async function checkApiHealth() {
+    async function getHealthStatus(path: string): Promise<HealthStatus> {
+      const response = await fetch(`${apiUrl}${path}`, {
+        headers: { Accept: 'text/plain' },
+        signal: abortController.signal,
+      });
+
+      return response.ok ? 'healthy' : 'unhealthy';
+    }
+
+    async function checkHealth() {
       try {
-        const response = await fetch(`${apiUrl}/health`, {
-          signal: abortController.signal,
-        });
+        const [api, database] = await Promise.all([
+          getHealthStatus('/health/api'),
+          getHealthStatus('/health/db'),
+        ]);
 
-        if (!response.ok) {
-          throw new Error(`La API respondió con ${response.status}.`);
+        if (!abortController.signal.aborted) {
+          setHealth({ api, database });
         }
-
-        const health = (await response.json()) as HealthResponse;
-        setConnectionStatus(health.status === 'ok' ? 'connected' : 'error');
       } catch {
         if (!abortController.signal.aborted) {
-          setConnectionStatus('error');
+          setHealth({ api: 'unhealthy', database: 'unhealthy' });
         }
       }
     }
 
-    void checkApiHealth();
+    void checkHealth();
 
     return () => abortController.abort();
   }, []);
-
-  const messages: Record<ApiConnectionStatus, string> = {
-    checking: 'Comprobando conexión con la API…',
-    connected: '🟢 API conectada correctamente',
-    error: '🔴 No se pudo conectar con la API',
-  };
 
   return (
     <main className="api-status">
       <p className="api-status__eyebrow">CODE QUEST 2026</p>
       <h1>Base técnica lista para integrar</h1>
-      <p>{messages[connectionStatus]}</p>
+      <p aria-live="polite">{getStatusMessage(health)}</p>
       <small>API: {apiUrl}</small>
     </main>
   );

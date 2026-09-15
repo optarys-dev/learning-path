@@ -1,3 +1,7 @@
 <Solution>
+  <Folder Name="/Elementos de la solución/">
+    <File Path="database/seeds/Database.sql" />
+    <File Path="database/seeds/Seed Courses.sql" />
+  </Folder>
   <Project Path="backend/CodeQuest2026.Server.csproj" />
 </Solution>
