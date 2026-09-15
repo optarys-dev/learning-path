@@ -1,0 +1,144 @@
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+
+#nullable disable
+
+namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
+{
+    /// <inheritdoc />
+    public partial class InitialCreate : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "courses",
+                columns: table => new
+                {
+                    course_id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                    slug = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    course_url = table.Column<string>(type: "text", nullable: false),
+                    image_url = table.Column<string>(type: "text", nullable: false),
+                    image_alt = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    track = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    level = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    topics = table.Column<string>(type: "jsonb", nullable: false, defaultValueSql: "'[]'::jsonb"),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    source_verified_at = table.Column<DateOnly>(type: "date", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("courses_pkey", x => x.course_id);
+                    table.UniqueConstraint("courses_slug_key", x => x.slug);
+                    table.CheckConstraint("ck_courses_image_url", "image_url LIKE 'https://import.cdn.thinkific.com/%'");
+                    table.CheckConstraint("ck_courses_level", "level IS NULL OR level IN ('Principiante', 'Intermedio', 'Avanzado')");
+                    table.CheckConstraint("ck_courses_track", "track IN ('Fundamentos', 'Frontend', 'Backend', 'CSharp', 'Datos', 'IA', 'Movil', 'Herramientas', 'Automatizacion')");
+                    table.CheckConstraint("ck_courses_url", "course_url LIKE 'https://cursos.devtalles.com/courses/%'");
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_courses_track_active",
+                table: "courses",
+                columns: new[] { "track", "is_active" });
+
+            // Frozen copy of the initial catalog from database/seeds/Seed Courses.sql.
+            migrationBuilder.Sql(
+                """
+                INSERT INTO courses (slug, title, course_url, track, image_url, image_alt, source_verified_at) VALUES
+                ('git-github-control-versiones-desde-cero', 'GIT+GitHub: Control de versiones desde Cero', 'https://cursos.devtalles.com/courses/git-github-control-versiones-desde-cero', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/vyhm8XioTSeV0KPWLzrI_COVER-DEVTALLES-github2026.jpg', 'Portada del curso: GIT+GitHub: Control de versiones desde Cero', DATE '2026-09-14'),
+                ('golang-backend-profesional', 'Golang: Backend Profesional', 'https://cursos.devtalles.com/courses/golang-backend-profesional', 'Backend', 'https://import.cdn.thinkific.com/643563/ChXFDCgeRKjOyfa2ppDQ_COVER-DEVTALLES-GO-BACKEND.jpg', 'Portada del curso: Golang: Backend Profesional', DATE '2026-09-14'),
+                ('laravel-ai', 'Laravel 13: AI, REST, JWT, Repository Pattern', 'https://cursos.devtalles.com/courses/laravel-ai', 'Backend', 'https://import.cdn.thinkific.com/643563/A9hqhmn1Qm6aYwAJAoL9_COVER-DEVTALLES%20LARAVEL.jpg', 'Portada del curso: Laravel 13: AI, REST, JWT, Repository Pattern', DATE '2026-09-14'),
+                ('spring-ai', 'Spring AI: LLMs, Tools, RAG, Agentes y Deploy en AWS', 'https://cursos.devtalles.com/courses/spring-AI', 'IA', 'https://import.cdn.thinkific.com/643563/is89v3RgS22dqMndJMVZ_COVER-DEVTALLES-SPRING-IA.jpg', 'Portada del curso: Spring AI: LLMs, Tools, RAG, Agentes y Deploy en AWS', DATE '2026-09-14'),
+                ('open-code-guia-completa', 'OpenCode: Guía completa para desarrolladores de software', 'https://cursos.devtalles.com/courses/open-code-guia-completa', 'Herramientas', 'https://import.cdn.thinkific.com/643563/5VQqSJ32SE6MgrM6fHPv_COVER-DEVTALLES-OPENCODE.jpg', 'Portada del curso: OpenCode: Guía completa para desarrolladores de software', DATE '2026-09-14'),
+                ('claude-code-guia-completa', 'Claude Code: Guía completa para desarrolladores de software', 'https://cursos.devtalles.com/courses/claude-code-guia-completa', 'Herramientas', 'https://import.cdn.thinkific.com/643563/hWQRull4RXmytJSqs3e4_COVER-DEVTALLES-CLAUDE-CODE.jpg', 'Portada del curso: Claude Code: Guía completa para desarrolladores de software', DATE '2026-09-14'),
+                ('ia-para-developers', 'IA para Developers: Claude API, RAG y Agentes con Node', 'https://cursos.devtalles.com/courses/ia-para-developers', 'IA', 'https://import.cdn.thinkific.com/643563/GqifE6ONSsOHYhVpNPRS_COVER-DEVTALLES.jpg', 'Portada del curso: IA para Developers: Claude API, RAG y Agentes con Node', DATE '2026-09-14'),
+                ('python-ia-aplicada', 'Python: Inteligencia artificial aplicada', 'https://cursos.devtalles.com/courses/python-ia-aplicada', 'IA', 'https://import.cdn.thinkific.com/643563/S221KTnsQESSijuA5CPO_COVER-DEVTALLES-python-ia.jpg', 'Portada del curso: Python: Inteligencia artificial aplicada', DATE '2026-09-14'),
+                ('spring-boot-patrones-arquitectura', 'Spring Boot 4: Patrones de arquitectura', 'https://cursos.devtalles.com/courses/spring-boot-patrones-arquitectura', 'Backend', 'https://import.cdn.thinkific.com/643563/50BIjVSQ6m0KbI6hAzlA_COVER-DEVTALLES2.jpg', 'Portada del curso: Spring Boot 4: Patrones de arquitectura', DATE '2026-09-14'),
+                ('ingenieria-de-prompts', 'Ingeniería de prompts: Para la vida real', 'https://cursos.devtalles.com/courses/Ingenier%C3%ADa-de-prompts', 'IA', 'https://import.cdn.thinkific.com/643563/p5tNOanKQAeu2lWSccuA_COVER-DEVTALLES.jpg', 'Portada del curso: Ingeniería de prompts: Para la vida real', DATE '2026-09-14'),
+                ('vibe-coding', 'Vibe Coding: De forma responsable', 'https://cursos.devtalles.com/courses/vibe-coding', 'IA', 'https://import.cdn.thinkific.com/643563/QerNZaF2SpWnZLFLnxvR_VIBE%20CODING%20COVER%20DEVTALLES.png', 'Portada del curso: Vibe Coding: De forma responsable', DATE '2026-09-14'),
+                ('golang-fundamentos-lenguaje', 'GoLang: Fundamentos del lenguaje', 'https://cursos.devtalles.com/courses/golang-fundamentos-lenguaje', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/Jp4CugOyRxOPbI0IERhE_COVER_DEVTALLES_GO.png', 'Portada del curso: GoLang: Fundamentos del lenguaje', DATE '2026-09-14'),
+                ('php-moderno', 'PHP moderno: Empieza tu camino en el lenguaje', 'https://cursos.devtalles.com/courses/PHP-moderno', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/eQFwBD7MQhivG5bVLTx1_php.png', 'Portada del curso: PHP moderno: Empieza tu camino en el lenguaje', DATE '2026-09-14'),
+                ('spring-boot-microservicios', 'Spring Boot 4: Arquitectura de Microservicios', 'https://cursos.devtalles.com/courses/spring-boot-microservicios', 'Backend', 'https://import.cdn.thinkific.com/643563/eajq3CPwT1ovajpqVu2O_image.png', 'Portada del curso: Spring Boot 4: Arquitectura de Microservicios', DATE '2026-09-14'),
+                ('angular-sockets-bun', 'Angular + Sockets: Aplicaciones en tiempo real con Bun', 'https://cursos.devtalles.com/courses/Angular_socket_bun', 'Frontend', 'https://import.cdn.thinkific.com/643563/abdhTcCTQCmySk3eb8Ma_ANGULAR_WEBSOCKET_BUN_DEVTALLES.png', 'Portada del curso: Angular + Sockets: Aplicaciones en tiempo real con Bun', DATE '2026-09-14'),
+                ('react-sockets', 'React+Sockets: Aplicaciones en tiempo real con Bun', 'https://cursos.devtalles.com/courses/react-sockets', 'Frontend', 'https://import.cdn.thinkific.com/643563/ajXXN4TCTwuZ6uhDapF1_image.png', 'Portada del curso: React+Sockets: Aplicaciones en tiempo real con Bun', DATE '2026-09-14'),
+                ('tailwindcss-para-desarrolladores', 'TailwindCSS: Para desarrolladores de software', 'https://cursos.devtalles.com/courses/tailwindcss-para-desarrolladores', 'Frontend', 'https://import.cdn.thinkific.com/643563/8w7MKPqvQtaLpLNVTgq6_TAILWIND1.jpg', 'Portada del curso: TailwindCSS: Para desarrolladores de software', DATE '2026-09-14'),
+                ('python-n8n-automatiza-rutinas', 'Python + n8n: Automatiza rutinas cotidianas', 'https://cursos.devtalles.com/courses/python-n8n-automatiza-rutinas', 'Automatizacion', 'https://import.cdn.thinkific.com/643563/ZEyBqiQ2S8KjhgvA87t2_PYTHON-N8N.jpg', 'Portada del curso: Python + n8n: Automatiza rutinas cotidianas', DATE '2026-09-14'),
+                ('springboot-mvc-hexagonal', 'Spring Boot: De MVC a Hexagonal', 'https://cursos.devtalles.com/courses/springboot-mvc-hexagonal', 'Backend', 'https://import.cdn.thinkific.com/643563/onRaVfSdR56WUL2jXpQz_COVER-DEVTALLES-MINI-CURSO-SPRING-BOOT.jpg', 'Portada del curso: Spring Boot: De MVC a Hexagonal', DATE '2026-09-14'),
+                ('net-pruebascompletas', '.NET: Pruebas completas para minimal API', 'https://cursos.devtalles.com/courses/net-pruebascompletas', 'CSharp', 'https://import.cdn.thinkific.com/643563/h80J6Pb5SHeRvZM6pdz5_NET-PRUEBAS-MINIMAL-API.jpg', 'Portada del curso: .NET: Pruebas completas para minimal API', DATE '2026-09-14'),
+                ('nuxt', 'Nuxt: El marco de trabajo web progresivo', 'https://cursos.devtalles.com/courses/nuxt', 'Frontend', 'https://import.cdn.thinkific.com/643563/0QSiNkebRGFH4hPY25zf_NUXT-COVER-DEVTALLES.jpg', 'Portada del curso: Nuxt: El marco de trabajo web progresivo', DATE '2026-09-14'),
+                ('netfullstack', 'Blazor: Desde cero con arquitectura limpia', 'https://cursos.devtalles.com/courses/netfullstack', 'CSharp', 'https://import.cdn.thinkific.com/643563/LcwHwtf1Q0WlRGiv9VY3_COVER-DEVTALLES%20(1).jpg', 'Portada del curso: Blazor: Desde cero con arquitectura limpia', DATE '2026-09-14'),
+                ('fastapi', 'FastAPI: Crea APIs eficientes con Python', 'https://cursos.devtalles.com/courses/fastapi', 'Backend', 'https://import.cdn.thinkific.com/643563/7yccvWpWRC669uDvMnqd_FASTAPICOVER-DEVTALLES.jpg', 'Portada del curso: FastAPI: Crea APIs eficientes con Python', DATE '2026-09-14'),
+                ('spring-boot', 'Java: Spring Boot - Guía definitiva', 'https://cursos.devtalles.com/courses/spring-boot', 'Backend', 'https://import.cdn.thinkific.com/643563/ueDsP3FS6aHlcy3KlSLL_SPRING5.jpg', 'Portada del curso: Java: Spring Boot - Guía definitiva', DATE '2026-09-14'),
+                ('n8n-mcp', 'n8n + MCP: Automatización y agentes de IA inteligentes', 'https://cursos.devtalles.com/courses/n8n-mcp', 'Automatizacion', 'https://import.cdn.thinkific.com/643563/V4CDk5iUSKCh2Xw4MfX2_COVER-DEVTALLES-n8n-2.jpg', 'Portada del curso: n8n + MCP: Automatización y agentes de IA inteligentes', DATE '2026-09-14'),
+                ('react-de-cero', 'React: de cero a experto', 'https://cursos.devtalles.com/courses/react-de-cero', 'Frontend', 'https://import.cdn.thinkific.com/643563/TTTUJiUVTvGC5cy5Z3UW_COVER-DEVTALLES-REACT.jpg', 'Portada del curso: React: de cero a experto', DATE '2026-09-14'),
+                ('expo-gemini', 'Expo + Gemini: Aplicaciones con inteligencia artificial', 'https://cursos.devtalles.com/courses/expo-gemini', 'Movil', 'https://import.cdn.thinkific.com/643563/hVinmMVNQq6v8R7Was0K_COVER-DEVTALLES2.jpg', 'Portada del curso: Expo + Gemini: Aplicaciones con inteligencia artificial', DATE '2026-09-14'),
+                ('java-avanzado', 'Java avanzado: reactividad, concurrencia y patrones', 'https://cursos.devtalles.com/courses/java-avanzado', 'Backend', 'https://import.cdn.thinkific.com/643563/rJCXtKQUQSmgJSQbArul_java-avanzado-devtalles.jpg', 'Portada del curso: Java avanzado: reactividad, concurrencia y patrones', DATE '2026-09-14'),
+                ('net-backend', '.NET Backend: .NET Core, SQL Server y seguridad JWT', 'https://cursos.devtalles.com/courses/NET-Backend', 'CSharp', 'https://import.cdn.thinkific.com/643563/7c18RVDvTFezQ4VL9JeM_NET-DEVTALLES.jpg', 'Portada del curso: .NET Backend: .NET Core, SQL Server y seguridad JWT', DATE '2026-09-14'),
+                ('django', 'Django: Crea aplicaciones web robustas con Python', 'https://cursos.devtalles.com/courses/django', 'Backend', 'https://import.cdn.thinkific.com/643563/aA89gxXgTQGtRR7YojXB_DJANGO1.jpg', 'Portada del curso: Django: Crea aplicaciones web robustas con Python', DATE '2026-09-14'),
+                ('flutter-gemini', 'Flutter + Gemini: Aplicaciones con inteligencia artificial', 'https://cursos.devtalles.com/courses/Flutter-Gemini', 'Movil', 'https://import.cdn.thinkific.com/643563/dMU9FLDmQETZktVFX7gX_COVER-DEVTALLES3.jpg', 'Portada del curso: Flutter + Gemini: Aplicaciones con inteligencia artificial', DATE '2026-09-14'),
+                ('react-router', 'React Router: Navegación declarativa y framework', 'https://cursos.devtalles.com/courses/react-router', 'Frontend', 'https://import.cdn.thinkific.com/643563/0gGwQplTkS4tKB7oNc5K_COVER-DEVTALLES-REACT_ROUTER.jpg', 'Portada del curso: React Router: Navegación declarativa y framework', DATE '2026-09-14'),
+                ('python', 'Python: Fundamentos hasta los detalles', 'https://cursos.devtalles.com/courses/python', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/gG1fvaYXRNmKMJTaMHYP_PYTHON-COVER%20(1).jpg', 'Portada del curso: Python: Fundamentos hasta los detalles', DATE '2026-09-14'),
+                ('csharp', 'C#: Empieza tu camino en el lenguaje', 'https://cursos.devtalles.com/courses/csharp', 'CSharp', 'https://import.cdn.thinkific.com/643563/ZQiNIKAJR4upzwEpMIVt_C-SHARP-COVER%20(1).jpg', 'Portada del curso: C#: Empieza tu camino en el lenguaje', DATE '2026-09-14'),
+                ('java', 'Java: Explora el lenguaje desde cero', 'https://cursos.devtalles.com/courses/Java', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/eGxuDHajSO2qp1HxEbvL_JAVA-COVER3.jpg', 'Portada del curso: Java: Explora el lenguaje desde cero', DATE '2026-09-14'),
+                ('nestjs-testing', 'NestJS + Testing: Pruebas unitarias y end to end', 'https://cursos.devtalles.com/courses/NestJS-Testing', 'Backend', 'https://import.cdn.thinkific.com/643563/ay0QQ3qaTkiHRwytCLnt_COVER-DEVTALLES-TESTING.jpg', 'Portada del curso: NestJS + Testing: Pruebas unitarias y end to end', DATE '2026-09-14'),
+                ('angular-moderno', 'Angular: De cero a experto', 'https://cursos.devtalles.com/courses/angular-moderno', 'Frontend', 'https://import.cdn.thinkific.com/643563/LeaTjvBRI6cldshD59jw_angular-de-cero.jpg', 'Portada del curso: Angular: De cero a experto', DATE '2026-09-14'),
+                ('patrones-diseno', 'Patrones de Diseño: Soluciones prácticas y eficientes', 'https://cursos.devtalles.com/courses/patrones-diseno', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/GAaAh0OtQAmUmEOc5qiS_COVER-PATRONES-DE-DISE%C3%91O-DEVTALLES.jpg', 'Portada del curso: Patrones de Diseño: Soluciones prácticas y eficientes', DATE '2026-09-14'),
+                ('react-native-expo', 'React Native Expo: Aplicaciones nativas para IOS y Android', 'https://cursos.devtalles.com/courses/react-native-expo', 'Movil', 'https://import.cdn.thinkific.com/643563/1NsQU7EaRiG7xLnvaHvc_COVER-DEVTALLES.jpg', 'Portada del curso: React Native Expo: Aplicaciones nativas para IOS y Android', DATE '2026-09-14'),
+                ('angular-pro', 'Angular Pro: Lleva tus bases al siguiente nivel', 'https://cursos.devtalles.com/courses/angular-pro', 'Frontend', 'https://import.cdn.thinkific.com/643563/EWRrDzSVRybXmB6yJMHU_Angular%20pro%20COVER-DEVTALLES-ANGULAR-PRO.jpg', 'Portada del curso: Angular Pro: Lleva tus bases al siguiente nivel', DATE '2026-09-14'),
+                ('astro', 'Astro: El framework para sitios web orientados al contenido', 'https://cursos.devtalles.com/courses/Astro', 'Frontend', 'https://import.cdn.thinkific.com/643563/8b0gaETkTXeL6iB3f1Pn_ASTRO.jpg', 'Portada del curso: Astro: El framework para sitios web orientados al contenido', DATE '2026-09-14'),
+                ('nestjs-reportes', 'NestJs + Reportes: Genera PDFs desde Node', 'https://cursos.devtalles.com/courses/nestjs-reportes', 'Backend', 'https://import.cdn.thinkific.com/643563/wceGycQdRnSJGdIFdaO3_NEST-JS-REPORTES.jpg', 'Portada del curso: NestJs + Reportes: Genera PDFs desde Node', DATE '2026-09-14'),
+                ('shadcn-ui', 'Shadcn/ui: Componentes accesibles y personalizables', 'https://cursos.devtalles.com/courses/shadcn-ui', 'Frontend', 'https://import.cdn.thinkific.com/643563/UnSGHDPtQKKGytbP0iBP_SHADCN.jpg', 'Portada del curso: Shadcn/ui: Componentes accesibles y personalizables', DATE '2026-09-14'),
+                ('vue-cero-a-experto', 'Vue.js: de Cero a Experto Composition API', 'https://cursos.devtalles.com/courses/vue-cero-a-experto', 'Frontend', 'https://import.cdn.thinkific.com/643563/fGtdD0wpSv2VEXdrM6vn_VUE-COMPOSITION-API.jpg', 'Portada del curso: Vue.js: de Cero a Experto Composition API', DATE '2026-09-14'),
+                ('nestjs-microservicios', 'NestJS + Microservicios: Aplicaciones escalables y modulares', 'https://cursos.devtalles.com/courses/nestjs-microservicios', 'Backend', 'https://import.cdn.thinkific.com/643563/vOOZ5j1Qta2gvaiOlMqE_MICROSERVICIOS.jpg', 'Portada del curso: NestJS + Microservicios: Aplicaciones escalables y modulares', DATE '2026-09-14'),
+                ('openai-angular-nestjs', 'OpenAI: Ejercicios y asistentes con Angular + NestJS', 'https://cursos.devtalles.com/courses/openai-angular-nestjs', 'IA', 'https://import.cdn.thinkific.com/643563/XUcRyW81RJS3xgf1CRNf_OPENAI-ANGULAR.jpg', 'Portada del curso: OpenAI: Ejercicios y asistentes con Angular + NestJS', DATE '2026-09-14'),
+                ('openai-react-nestjs', 'OpenAI: Ejercicios prácticos y asistentes con React + NestJS', 'https://cursos.devtalles.com/courses/openai', 'IA', 'https://import.cdn.thinkific.com/643563/fc1kmF7dS2SQojvt7q02_OPENAI-REACT.jpg', 'Portada del curso: OpenAI: Ejercicios prácticos y asistentes con React + NestJS', DATE '2026-09-14'),
+                ('zustand-react', 'Zustand: Gestor de estado para React', 'https://cursos.devtalles.com/courses/zustand-gestor-de-estado-para-react', 'Frontend', 'https://import.cdn.thinkific.com/643563/OqBxBndxTD6gtxlKMoWV_ZUSTAND.jpg', 'Portada del curso: Zustand: Gestor de estado para React', DATE '2026-09-14'),
+                ('node-clean-architecture', 'Node: Autenticación Rest con Clean Architecture', 'https://cursos.devtalles.com/courses/node-clean-architecture', 'Backend', 'https://import.cdn.thinkific.com/643563/QbFhQhHcRBCapBIpm9nf_NODE-AUTENTICATION-REST.jpg', 'Portada del curso: Node: Autenticación Rest con Clean Architecture', DATE '2026-09-14'),
+                ('flutter-bloc', 'Mini Curso: Flutter BLoC', 'https://cursos.devtalles.com/courses/flutter-bloc', 'Movil', 'https://import.cdn.thinkific.com/643563/If0EvY5HQpiOEvnnISAN_FLUTTER-BLOC.jpg', 'Portada del curso: Mini Curso: Flutter BLoC', DATE '2026-09-14'),
+                ('nodejs-de-cero-a-experto', 'Node Js: De cero a experto', 'https://cursos.devtalles.com/courses/nodejs-de-cero-a-experto', 'Backend', 'https://import.cdn.thinkific.com/643563/w47TVfD0T6OFrOPDxYlQ_NODE%20JS%20DE%20CERO%20A%20EXPERTO.jpg', 'Portada del curso: Node Js: De cero a experto', DATE '2026-09-14'),
+                ('riverpod-con-anotaciones', 'Mini Curso: Riverpod providers con anotaciones', 'https://cursos.devtalles.com/courses/riverpod-con-anotaciones', 'Movil', 'https://import.cdn.thinkific.com/643563/e2j5kc42TaKb8O9QQDSm_RIVERPOD.jpg', 'Portada del curso: Mini Curso: Riverpod providers con anotaciones', DATE '2026-09-14'),
+                ('sql-con-postgres', 'SQL de cero: Tu guía práctica con PostgreSQL', 'https://cursos.devtalles.com/courses/sql-con-postgres', 'Datos', 'https://import.cdn.thinkific.com/643563/k6V4tlGTXmUQS8CGxGID_SQL.jpg', 'Portada del curso: SQL de cero: Tu guía práctica con PostgreSQL', DATE '2026-09-14'),
+                ('nextjs', 'Next.js: El framework de React para producción', 'https://cursos.devtalles.com/courses/nextjs', 'Frontend', 'https://import.cdn.thinkific.com/643563/j1fWunR0QJa9diyy2e1t_NEXT-APP-ROUTER2.jpg', 'Portada del curso: Next.js: El framework de React para producción', DATE '2026-09-14'),
+                ('qwik-introduccion', 'Qwik: Introducción al Framework', 'https://cursos.devtalles.com/courses/qwik-introduccion', 'Frontend', 'https://import.cdn.thinkific.com/643563/rK74DwtRSZabgmUHhIdK_QWIK.jpg', 'Portada del curso: Qwik: Introducción al Framework', DATE '2026-09-14'),
+                ('flutter-movil-intermedio', 'Flutter Móvil: Recursos Nativos Nivel Intermedio', 'https://cursos.devtalles.com/courses/flutter-movil-intermedio', 'Movil', 'https://import.cdn.thinkific.com/643563/1KaCF2nnTI2eoV6HYpum_FLUTTER-MOVIL-RECURSOS-NATIVOS.jpg', 'Portada del curso: Flutter Móvil: Recursos Nativos Nivel Intermedio', DATE '2026-09-14'),
+                ('flutter-movil-cero-a-experto', 'Flutter Móvil: De cero a experto', 'https://cursos.devtalles.com/courses/flutter-movil-cero-a-experto', 'Movil', 'https://import.cdn.thinkific.com/643563/61TYzXMSTaKdnKUemoIn_FLUTTER-MOVIL-DE-CERO-A-EXPERTO.jpg', 'Portada del curso: Flutter Móvil: De cero a experto', DATE '2026-09-14'),
+                ('angular-clasico', 'Angular clásico: con Módulos', 'https://cursos.devtalles.com/courses/angular', 'Frontend', 'https://import.cdn.thinkific.com/643563/a51yLvxNTUiTs5FbiBsx_COVER-DEVTALLES2.jpeg', 'Portada del curso: Angular clásico: con Módulos', DATE '2026-09-14'),
+                ('docker-guia-practica', 'Docker: Guía práctica de uso para desarrolladores', 'https://cursos.devtalles.com/courses/docker-guia-practica', 'Herramientas', 'https://import.cdn.thinkific.com/643563/MtehrUISVW8hP7CfCWV1_DOCKER.jpg', 'Portada del curso: Docker: Guía práctica de uso para desarrolladores', DATE '2026-09-14'),
+                ('nest-graphql', 'Nest + GraphQL: Evoluciona tus APIs', 'https://cursos.devtalles.com/courses/nest-graphql', 'Backend', 'https://import.cdn.thinkific.com/643563/DYTo4ghhS2c799ZISyNu_NEST-GRAPHQL-NEW.jpg', 'Portada del curso: Nest + GraphQL: Evoluciona tus APIs', DATE '2026-09-14'),
+                ('programacion-para-principiantes', 'Programación para principiantes: Primeros pasos', 'https://cursos.devtalles.com/courses/programacion-para-principiantes', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/slRm7OvQRZySnHeaaw0w_PROGRAMACION%20PARA%20PRINCIPIANTES.jpg', 'Portada del curso: Programación para principiantes: Primeros pasos', DATE '2026-09-14'),
+                ('nest', 'Nest: Desarrollo backend escalable con Node', 'https://cursos.devtalles.com/courses/nest', 'Backend', 'https://import.cdn.thinkific.com/643563/T6It7zuNQPWizrBJvbaX_NEST-NEW.jpg', 'Portada del curso: Nest: Desarrollo backend escalable con Node', DATE '2026-09-14'),
+                ('legacy-vue-options-api', 'Legacy Vue.js Tradicional Options API', 'https://cursos.devtalles.com/courses/vue-js', 'Frontend', 'https://import.cdn.thinkific.com/643563/7Xfyuy5mSxKwKBzXHYEr_COVER-DEVTALLES-legacy-vue-option-api.jpg', 'Portada del curso: Legacy Vue.js Tradicional Options API', DATE '2026-09-14'),
+                ('tanstack-query', 'TanStack Query: Gestor de estado asíncrono', 'https://cursos.devtalles.com/courses/tanstack-query', 'Frontend', 'https://import.cdn.thinkific.com/643563/flpkTdo2TwGhr9wfvr33_COVER.jpg', 'Portada del curso: TanStack Query: Gestor de estado asíncrono', DATE '2026-09-14'),
+                ('legacy-flutter-web', 'Legacy Flutter Web: Aplicaciones y páginas web profesionales', 'https://cursos.devtalles.com/courses/flutter-web', 'Movil', 'https://import.cdn.thinkific.com/643563/0rSjGVxiQca8Tezfu4tG_COVER-DEVTALLES-web-legacy.jpg', 'Portada del curso: Legacy Flutter Web: Aplicaciones y páginas web profesionales', DATE '2026-09-14'),
+                ('visual-studio-code', 'Visual Studio Code: Mejora tu velocidad para codificar', 'https://cursos.devtalles.com/courses/visual-studio-code', 'Herramientas', 'https://import.cdn.thinkific.com/643563/ozPWxfNjQBKugksdaogB_VSCODE.jpg', 'Portada del curso: Visual Studio Code: Mejora tu velocidad para codificar', DATE '2026-09-14'),
+                ('dart-cero-hasta-detalles', 'Dart: De cero hasta los detalles', 'https://cursos.devtalles.com/courses/dart-cero-hasta-detalles', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/zCw5CYnStGlg2IlblHjd_DART-NEW.jpg', 'Portada del curso: Dart: De cero hasta los detalles', DATE '2026-09-14'),
+                ('javascript-moderno', 'JavaScript Moderno: Guía para dominar el lenguaje', 'https://cursos.devtalles.com/courses/javascript-moderno', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/rfX8tJ4ZRHi6L4WFj2sW_JAVASCRIPT.jpg', 'Portada del curso: JavaScript Moderno: Guía para dominar el lenguaje', DATE '2026-09-14'),
+                ('legacy-git-github', 'Legacy GIT+GitHub: Todo un sistema de control de versiones de cero', 'https://cursos.devtalles.com/courses/git-github-control-versiones', 'Herramientas', 'https://import.cdn.thinkific.com/643563/cO9RGLb7QXysw8c0hpJ8_devtalles-legacy-github.jpg', 'Portada del curso: Legacy GIT+GitHub: Todo un sistema de control de versiones de cero', DATE '2026-09-14'),
+                ('typescript-guia-completa', 'TypeScript: Tu completa guía y manual de mano', 'https://cursos.devtalles.com/courses/typescript-guia-completa', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/0jbP7pcMSAWjijc04uhG_TYPESCRIPT-NEW.jpg', 'Portada del curso: TypeScript: Tu completa guía y manual de mano', DATE '2026-09-14'),
+                ('react-pro', 'React PRO: Lleva tus bases al siguiente nivel', 'https://cursos.devtalles.com/courses/react-pro', 'Frontend', 'https://import.cdn.thinkific.com/643563/sHm63uuSkiPxQqbElhTQ_REACT-PRO-NEW.jpg', 'Portada del curso: React PRO: Lleva tus bases al siguiente nivel', DATE '2026-09-14'),
+                ('solid-clean-code', 'Principios SOLID y Clean Code', 'https://cursos.devtalles.com/courses/solid-clean-code', 'Fundamentos', 'https://import.cdn.thinkific.com/643563/eOnxKwRKRZ2vCYGEk8Lg_SOLID.jpg', 'Portada del curso: Principios SOLID y Clean Code', DATE '2026-09-14')
+                ON CONFLICT (slug) DO UPDATE SET
+                    title = EXCLUDED.title,
+                    course_url = EXCLUDED.course_url,
+                    image_url = EXCLUDED.image_url,
+                    image_alt = EXCLUDED.image_alt,
+                    track = EXCLUDED.track,
+                    is_active = TRUE,
+                    source_verified_at = EXCLUDED.source_verified_at,
+                    updated_at = NOW();
+                """);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "courses");
+        }
+    }
+}
