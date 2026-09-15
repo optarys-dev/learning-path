@@ -1,11 +1,29 @@
-﻿#root {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem;
-    text-align: center;
+#root {
+  min-height: 100vh;
 }
 
-th, td {
-    padding-left: 1rem;
-    padding-right: 1rem;
+.api-status {
+  display: grid;
+  place-content: center;
+  min-height: 100vh;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.api-status__eyebrow {
+  margin: 0;
+  color: #5a16c1;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.api-status h1,
+.api-status p {
+  margin: 0;
+}
+
+.api-status small {
+  color: #5d5768;
 }
