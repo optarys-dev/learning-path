@@ -81,6 +81,33 @@ dotnet run --project CodeQuest2026.Server.csproj --no-build --launch-profile htt
 
 El perfil escucha en https://localhost:7281 y http://localhost:5107. Activa el proxy SPA configurado para iniciar `npm run dev` en el cliente.
 
+## Docker: frontend y backend en una imagen
+
+El `Dockerfile` está en la raíz de la solución, junto a `CodeQuest2026.slnx`.
+Desde esa carpeta:
+
+```powershell
+docker build -t codequest:local .
+$env:ConnectionStrings__DefaultConnection = 'Host=host.docker.internal;Port=5432;Database=codequest2026;Username=TU_USUARIO;Password=TU_PASSWORD'
+docker run --rm --name codequest -p 5107:8080 -e ConnectionStrings__DefaultConnection codequest:local
+```
+
+La etapa Node.js ejecuta `npm ci` y `npm run build`. Su carpeta `dist` se copia a
+`backend/wwwroot` dentro de la construcción, antes de `dotnet publish`, para generar
+el manifiesto de recursos estáticos. La imagen final sirve React y la API mediante
+ASP.NET Core, sin necesitar Node.js en ejecución. No se genera `wwwroot` en el equipo anfitrión.
+`VITE_API_BASE_URL=/` se establece durante la compilación para que React consulte la
+API en el mismo origen. Se puede cambiar con `--build-arg VITE_API_BASE_URL=https://tu-api`.
+
+Abrir `http://localhost:5107/` para el frontend y `/health/api` para comprobar la API.
+La ejecución usa Production y HTTP en el puerto interno 8080. HTTPS requiere un proxy
+que termine TLS o certificados configurados por separado. Las migraciones de la base
+de datos se aplican por separado.
+
+Los archivos `appsettings*.json` y `.env*` se excluyen de la imagen; proporcionar la
+configuración mediante variables de entorno. `host.docker.internal` apunta al equipo
+anfitrión en Docker Desktop; para PostgreSQL remoto, usar su hostname.
+
 ## Comprobar el servicio
 
 | Ruta | Función |
