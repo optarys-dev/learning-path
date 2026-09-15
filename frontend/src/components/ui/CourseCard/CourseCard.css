@@ -1,0 +1,74 @@
+.cq-course-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--cq-color-text-primary);
+  background: var(--cq-color-bg-surface);
+  border: var(--cq-border-width) solid var(--cq-color-border-default);
+  border-radius: var(--cq-radius-card);
+  box-shadow: var(--cq-shadow-card);
+  transition: border-color var(--cq-transition-base), transform var(--cq-transition-base);
+}
+
+.cq-course-card:hover {
+  border-color: var(--cq-color-text-secondary);
+  transform: translateY(-2px);
+}
+
+.cq-course-card__image,
+.cq-course-card__image-placeholder {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  object-fit: cover;
+  background: linear-gradient(135deg, var(--cq-color-action-start), var(--cq-color-action-end));
+}
+
+.cq-course-card__content {
+  display: grid;
+  gap: var(--cq-space-3);
+  padding: var(--cq-space-4);
+}
+
+.cq-course-card__metadata {
+  margin: 0;
+  color: var(--cq-color-text-secondary);
+  font-size: var(--cq-font-size-caption);
+  line-height: var(--cq-line-height-caption);
+}
+
+.cq-course-card__title {
+  margin: 0;
+  font-family: var(--cq-font-heading);
+  font-size: var(--cq-font-size-card-title);
+  line-height: var(--cq-line-height-card-title);
+}
+
+.cq-course-card__status {
+  width: fit-content;
+  margin: 0;
+  padding: var(--cq-space-1) var(--cq-space-2);
+  color: var(--cq-color-bg-page);
+  font-size: var(--cq-font-size-caption);
+  font-weight: 700;
+  border-radius: var(--cq-radius-pill);
+}
+
+.cq-course-card__status--in-progress { background: var(--cq-color-info); }
+.cq-course-card__status--completed { background: var(--cq-color-success); }
+
+.cq-course-card__progress {
+  overflow: hidden;
+  height: var(--cq-space-2);
+  background: var(--cq-color-border-default);
+  border-radius: var(--cq-radius-pill);
+}
+
+.cq-course-card__progress > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--cq-color-action-start), var(--cq-color-action-end));
+  border-radius: inherit;
+}
+
+.cq-course-card__action { margin-top: var(--cq-space-1); }

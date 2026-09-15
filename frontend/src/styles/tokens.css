@@ -1,0 +1,54 @@
+:root {
+  /* Color */
+  --cq-color-bg-page: #171027;
+  --cq-color-bg-surface: #1c1829;
+  --cq-color-text-primary: #ffffff;
+  --cq-color-text-secondary: #c0b9fc;
+  --cq-color-border-default: #4b435f;
+  --cq-color-brand-primary: #7e70f9;
+  --cq-color-action-start: #3a14c4;
+  --cq-color-action-end: #5a16c1;
+  --cq-color-action-hover: #6d28d9;
+  --cq-color-focus: #c0b9fc;
+  --cq-color-success: #a7f3d0;
+  --cq-color-warning: #fde68a;
+  --cq-color-error: #fda4af;
+  --cq-color-info: #93c5fd;
+
+  /* Typography */
+  --cq-font-heading: "Space Grotesk", "Segoe UI", sans-serif;
+  --cq-font-body: "DM Sans", "Segoe UI", sans-serif;
+  --cq-font-size-caption: 0.75rem;
+  --cq-font-size-label: 0.875rem;
+  --cq-font-size-body: 1rem;
+  --cq-font-size-card-title: 1.25rem;
+  --cq-font-size-h2: 1.5rem;
+  --cq-font-size-h1: 2rem;
+  --cq-font-size-display: 3rem;
+  --cq-line-height-caption: 1.5;
+  --cq-line-height-label: 1.43;
+  --cq-line-height-body: 1.5;
+  --cq-line-height-card-title: 1.4;
+  --cq-line-height-h2: 1.333;
+  --cq-line-height-h1: 1.25;
+  --cq-line-height-display: 1.167;
+
+  /* Spacing */
+  --cq-space-1: 0.25rem;
+  --cq-space-2: 0.5rem;
+  --cq-space-3: 0.75rem;
+  --cq-space-4: 1rem;
+  --cq-space-6: 1.5rem;
+  --cq-space-8: 2rem;
+  --cq-space-12: 3rem;
+  --cq-space-16: 4rem;
+
+  /* Geometry and effects */
+  --cq-radius-sm: 0.5rem;
+  --cq-radius-card: 1.125rem;
+  --cq-radius-pill: 999px;
+  --cq-border-width: 1px;
+  --cq-shadow-card: 0 8px 24px rgb(0 0 0 / 16%);
+  --cq-focus-ring: 0 0 0 3px var(--cq-color-focus);
+  --cq-transition-base: 160ms ease;
+}

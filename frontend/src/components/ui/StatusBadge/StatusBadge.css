@@ -1,0 +1,16 @@
+.cq-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: var(--cq-space-1) var(--cq-space-2);
+  color: var(--cq-color-bg-page);
+  font-size: var(--cq-font-size-caption);
+  font-weight: 700;
+  line-height: var(--cq-line-height-caption);
+  border-radius: var(--cq-radius-pill);
+}
+
+.cq-status-badge--success { background: var(--cq-color-success); }
+.cq-status-badge--warning { background: var(--cq-color-warning); }
+.cq-status-badge--error { background: var(--cq-color-error); }
+.cq-status-badge--info { background: var(--cq-color-info); }

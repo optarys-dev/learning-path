@@ -1,0 +1,58 @@
+.cq-button {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cq-space-2);
+  border: var(--cq-border-width) solid transparent;
+  border-radius: var(--cq-radius-pill);
+  padding: var(--cq-space-3) var(--cq-space-6);
+  cursor: pointer;
+  font-family: var(--cq-font-body);
+  font-size: var(--cq-font-size-label);
+  font-weight: 700;
+  line-height: var(--cq-line-height-label);
+  text-decoration: none;
+  transition:
+    background-color var(--cq-transition-fast),
+    border-color var(--cq-transition-fast),
+    color var(--cq-transition-fast),
+    transform var(--cq-transition-fast);
+}
+
+.cq-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.cq-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.cq-button--primary {
+  background: linear-gradient(135deg, var(--cq-color-action-start), var(--cq-color-action-end));
+  color: var(--cq-color-text-primary);
+}
+
+.cq-button--primary:hover:not(:disabled) {
+  background: var(--cq-color-action-hover);
+}
+
+.cq-button--secondary {
+  border-color: var(--cq-color-brand-primary);
+  background: transparent;
+  color: var(--cq-color-text-secondary);
+}
+
+.cq-button--secondary:hover:not(:disabled) {
+  background: rgb(126 112 249 / 14%);
+}
+
+.cq-button--ghost {
+  background: transparent;
+  color: var(--cq-color-text-secondary);
+}
+
+.cq-button--ghost:hover:not(:disabled) {
+  background: rgb(192 185 252 / 12%);
+}
