@@ -40,3 +40,5 @@ a {
   outline: none;
   box-shadow: var(--cq-focus-ring);
 }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }

@@ -14,10 +14,10 @@
   line-height: var(--cq-line-height-label);
   text-decoration: none;
   transition:
-    background-color var(--cq-transition-fast),
-    border-color var(--cq-transition-fast),
-    color var(--cq-transition-fast),
-    transform var(--cq-transition-fast);
+    background-color var(--cq-transition-base),
+    border-color var(--cq-transition-base),
+    color var(--cq-transition-base),
+    transform var(--cq-transition-base);
 }
 
 .cq-button:hover:not(:disabled) {

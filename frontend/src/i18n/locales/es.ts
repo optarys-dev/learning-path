@@ -1,4 +1,18 @@
 export const es = {
+  layout: {
+    skip: 'Saltar al contenido', navigation: 'Navegación principal',
+    openMenu: 'Menú', closeMenu: 'Cerrar menú', home: 'Inicio', catalog: 'Catálogo', myPath: 'Mi ruta',
+    footer: 'Aprende a tu ritmo. Construye tu siguiente paso.',
+    retry: 'Volver a intentar', loading: 'Cargando…',
+    error: 'Algo salió mal', errorDescription: 'No pudimos mostrar esta sección. Inténtalo de nuevo.',
+    homeDescription: 'Tu espacio para descubrir qué aprender y avanzar con una dirección clara.',
+    catalogDescription: 'Explora las opciones de aprendizaje de DevTalles.',
+    myPathDescription: 'Aquí podrás consultar tu ruta de aprendizaje y tus próximos pasos.',
+    comingSoon: 'Estamos preparando este espacio',
+    comingSoonDescription: 'Esta sección estará disponible próximamente.',
+    notFound: 'Página no encontrada', notFoundDescription: 'La dirección que abriste no corresponde a una página disponible.',
+    notFoundState: 'Retoma tu camino', notFoundHelp: 'Vuelve al inicio para seguir explorando.', backHome: 'Volver al inicio',
+  },
   app: {
     name: 'CODE QUEST 2026',
   },

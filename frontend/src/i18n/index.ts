@@ -36,3 +36,5 @@ i18n.on('languageChanged', language => {
 });
 
 export default i18n;
+
+document.documentElement.lang = i18n.resolvedLanguage ?? "es";
