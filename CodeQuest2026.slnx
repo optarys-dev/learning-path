@@ -1,7 +1,3 @@
 <Solution>
-  <Project Path="frontend/codequest2026.client.esproj">
-    <Build />
-    <Deploy />
-  </Project>
   <Project Path="backend/CodeQuest2026.Server.csproj" />
 </Solution>
