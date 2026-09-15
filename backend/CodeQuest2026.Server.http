@@ -1,6 +1,17 @@
 @CodeQuest2026.Server_HostAddress = http://localhost:5107
 
-GET {{CodeQuest2026.Server_HostAddress}}/weatherforecast/
-Accept: application/json
+### Estado general (API y base de datos)
+GET {{CodeQuest2026.Server_HostAddress}}/health
+Accept: text/plain
 
-###
+### Estado de la API
+GET {{CodeQuest2026.Server_HostAddress}}/health/api
+Accept: text/plain
+
+### Estado de PostgreSQL
+GET {{CodeQuest2026.Server_HostAddress}}/health/db
+Accept: text/plain
+
+### Documento OpenAPI (solo en Development)
+GET {{CodeQuest2026.Server_HostAddress}}/openapi/v1.json
+Accept: application/json
