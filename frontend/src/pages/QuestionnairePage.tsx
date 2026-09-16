@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState, type TransitionEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import deviLaptop from '../assets/assessment/04_aprendiendo_con_laptop.svg';
+import deviSelection from '../assets/assessment/05_seleccion_correcta.svg';
+import deviNeedsAnswer from '../assets/assessment/06_necesita_una_respuesta.svg';
+import deviProgress from '../assets/assessment/07_progreso_de_la_ruta.svg';
+import deviReady from '../assets/assessment/08_perfil_completado.svg';
 import { Button } from '../components/ui/Button/Button';
 import { areas, desiredOutcomes, levels, practicalExperiences, questions } from '../questionnaire/config';
 import { clearQuestionnaireDraft, loadQuestionnaireDraft, saveQuestionnaireDraft } from '../questionnaire/draft';
@@ -23,6 +29,7 @@ function toggle(items: TechnologyId[], item: TechnologyId): TechnologyId[] {
 
 export function QuestionnairePage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [state, setState] = useState<QuestionnaireState>(loadQuestionnaireDraft);
   const [welcome, setWelcome] = useState(() => state.currentStep === 0 &&
     state.answers.goal === null && state.answers.level === null && state.answers.desiredOutcome === null &&
@@ -43,6 +50,13 @@ export function QuestionnairePage() {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const { answers, currentStep } = state;
   const question = questions[currentStep];
+  const stepMascot = {
+    learningGoal: deviSelection,
+    currentExperience: deviSelection,
+    knownSkills: deviLaptop,
+    desiredOutcome: deviSelection,
+    practicalExperience: deviProgress,
+  }[question.id];
   const technologies = answers.goal === null ? [] : areas[answers.goal];
   const progressPercent = questions.length > 1 ? (currentStep / (questions.length - 1)) * 100 : 100;
 
@@ -142,11 +156,14 @@ export function QuestionnairePage() {
         <div className="learning-profile__reveal-stack" ref={stackRef} onTransitionEnd={finishEntry}>
       {welcome && (
         <section className="learning-profile__welcome" aria-labelledby="welcome-title" ref={welcomeRef}>
-          <span className="learning-profile__eyebrow">{t('app.name')}</span>
-          <h1 id="welcome-title" ref={welcomeHeadingRef} tabIndex={-1}>{t('questionnaire.welcomeTitle')}</h1>
-          <p className="learning-profile__welcome-lead">{t('questionnaire.welcomeLead')}</p>
-          <p>{t('questionnaire.welcomeDescription')}</p>
-          <Button onClick={getStarted} disabled={entryPhase !== 'idle'}>{t('questionnaire.getStarted')}</Button>
+          <img className="learning-profile__mascot learning-profile__mascot--welcome" src={deviProgress} alt="" />
+          <div className="learning-profile__welcome-content">
+            <span className="learning-profile__eyebrow">{t('app.name')}</span>
+            <h1 id="welcome-title" ref={welcomeHeadingRef} tabIndex={-1}>{t('questionnaire.welcomeTitle')}</h1>
+            <p className="learning-profile__welcome-lead">{t('questionnaire.welcomeLead')}</p>
+            <p>{t('questionnaire.welcomeDescription')}</p>
+            <Button onClick={getStarted} disabled={entryPhase !== 'idle'}>{t('questionnaire.getStarted')}</Button>
+          </div>
         </section>
       )}
         <div className="learning-profile__flow" ref={flowRef} inert={welcome}>
@@ -157,6 +174,7 @@ export function QuestionnairePage() {
           {result === null ? (
         <section className="learning-profile__step" aria-labelledby="question-title">
           <p className="learning-profile__step-count">{t('questionnaire.stepCount', { current: currentStep + 1, total: questions.length })}</p>
+          <p className="learning-profile__step-name">{t(`questionnaire.stepNames.${question.id}`)}</p>
           <div className="learning-profile__progress-geometry">
             <div className="learning-profile__progress" role="progressbar" aria-label={t('questionnaire.progressLabel')}
               aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={currentStep + 1}>
@@ -170,7 +188,9 @@ export function QuestionnairePage() {
             </div>
           </div>
           <div className={`learning-profile__question-content${hasNavigated ? ' learning-profile__question-content--animated' : ''}`} key={currentStep}>
+          <img className="learning-profile__mascot learning-profile__mascot--explore" src={showError ? deviNeedsAnswer : stepMascot} alt="" />
           <h2 id="question-title" ref={headingRef} tabIndex={-1}>{t(`questionnaire.questions.${question.id}`)}</h2>
+          <p className="learning-profile__question-hint"><span aria-hidden="true">✦</span>{t(`questionnaire.stepHints.${question.id}`)}</p>
           {question.id === 'learningGoal' && (
             <>
               <fieldset className="learning-profile__options learning-profile__options--areas" aria-describedby={showError ? 'question-error' : undefined}>
@@ -258,8 +278,14 @@ export function QuestionnairePage() {
         </section>
       ) : (
         <section className="learning-profile__step learning-profile__complete" role="status">
-          <h2 ref={headingRef} tabIndex={-1}>{t('questionnaire.completeTitle')}</h2>
-          <p>{t('questionnaire.completeDescription')}</p>
+          <header className="learning-profile__complete-hero">
+            <img className="learning-profile__mascot learning-profile__mascot--ready" src={deviReady} alt="" />
+            <div>
+              <p className="learning-profile__complete-eyebrow">{t('questionnaire.completeEyebrow')}</p>
+              <h2 ref={headingRef} tabIndex={-1}>{t('questionnaire.completeTitle')}</h2>
+              <p>{t('questionnaire.completeDescription')}</p>
+            </div>
+          </header>
           <dl className="learning-profile__summary">
             <div><dt>{t('questionnaire.summaryArea')}</dt><dd>{result.goal && t(`questionnaire.areas.${result.goal}`)}</dd></div>
             <div><dt>{t('questionnaire.summaryLevel')}</dt><dd>{result.level && t(`questionnaire.levels.${result.level}`)}</dd></div>
@@ -268,7 +294,10 @@ export function QuestionnairePage() {
             <div><dt>{t('questionnaire.summaryInterests')}</dt><dd>{result.interests.length ? result.interests.map(item => t(`questionnaire.technologies.${item}`)).join(', ') : t('questionnaire.noneSelected')}</dd></div>
             <div><dt>{t('questionnaire.summarySkills')}</dt><dd>{result.knownSkills.length ? result.knownSkills.map(item => t(`questionnaire.technologies.${item}`)).join(', ') : t('questionnaire.noneSelected')}</dd></div>
           </dl>
-          <Button variant="secondary" onClick={editAnswers}>{t('questionnaire.editAnswers')}</Button>
+          <div className="learning-profile__complete-actions">
+            <Button variant="secondary" onClick={editAnswers}>{t('questionnaire.editAnswers')}</Button>
+            <Button onClick={() => navigate('/my-path')}>{t('questionnaire.generatePath')}</Button>
+          </div>
         </section>
           )}
         </div>
