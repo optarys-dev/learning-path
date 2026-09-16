@@ -6,15 +6,19 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
-namespace CodeQuest2026.Server.Extensions;
+namespace CodeQuest2026.Server.Application.Oauth2.Discord;
 
-public static class DiscordAuthenticationExtensions
+public static class DiscordAuthentication
 {
     public const string Scheme = "Discord";
 
     public static IServiceCollection AddDiscordAuthentication(
         this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
     {
+        var clientId = GetDiscordSetting(configuration, "DISCORD_CLIENT_ID");
+        var clientSecret = GetDiscordSetting(configuration, "DISCORD_CLIENT_SECRET");
+        var callbackPath = GetDiscordSetting(configuration, "DISCORD_CALLBACK_PATH");
+
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
             {
@@ -38,9 +42,9 @@ public static class DiscordAuthenticationExtensions
             })
             .AddOAuth(Scheme, options =>
             {
-                options.ClientId = configuration["Discord:DISCORD_CLIENT_ID"] ?? "";
-                options.ClientSecret = configuration["Discord:DISCORD_CLIENT_SECRET"] ?? "";
-                options.CallbackPath = configuration["Discord:DISCORD_CALLBACK_PATH"] ?? "";
+                options.ClientId = clientId;
+                options.ClientSecret = clientSecret;
+                options.CallbackPath = callbackPath;
                 options.AuthorizationEndpoint = "https://discord.com/oauth2/authorize";
                 options.TokenEndpoint = "https://discord.com/api/oauth2/token";
                 options.UserInformationEndpoint = "https://discord.com/api/v10/users/@me";
@@ -85,5 +89,18 @@ public static class DiscordAuthenticationExtensions
             });
         services.AddAuthorization();
         return services;
+    }
+
+    private static string GetDiscordSetting(
+        IConfiguration configuration,
+        string key,
+        string defaultValue = "")
+    {
+        var sectionValue = configuration[$"Discord:{key}"];
+        if (!string.IsNullOrWhiteSpace(sectionValue))
+            return sectionValue;
+
+        var rootValue = configuration[key];
+        return string.IsNullOrWhiteSpace(rootValue) ? defaultValue : rootValue;
     }
 }

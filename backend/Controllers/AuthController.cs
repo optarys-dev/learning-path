@@ -3,10 +3,10 @@ using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Users;
 using CodeQuest2026.Server.Application.Users.Queries;
 using MediatR;
-using CodeQuest2026.Server.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using CodeQuest2026.Server.Application.Oauth2.Discord;
 
 namespace CodeQuest2026.Server.Controllers;
 
@@ -35,7 +35,7 @@ public class AuthController(ISender sender) : ControllerBase
         return Challenge(new AuthenticationProperties
         {
             RedirectUri = returnUrl ?? "/auth/me"
-        }, DiscordAuthenticationExtensions.Scheme);
+        }, DiscordAuthentication.Scheme);
     }
 
     /// <summary>Obtiene el resumen del usuario de la sesión.</summary>

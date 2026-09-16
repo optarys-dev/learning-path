@@ -1,3 +1,4 @@
+using CodeQuest2026.Server.Application.Oauth2.Discord;
 using CodeQuest2026.Server.Extensions;
 using CodeQuest2026.Server.Infrastructure.OpenApi;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;

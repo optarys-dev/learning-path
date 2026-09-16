@@ -8,8 +8,14 @@ Discord no se guardan ni se envían al frontend. El callback crea o actualiza el
 
 ## Configuración
 
-Proporcionar `Discord:DISCORD_CLIENT_ID` y `Discord:DISCORD_CLIENT_SECRET` mediante
-User Secrets o variables de entorno (no guardar secretos en archivos versionados):
+La configuración busca primero `Discord:DISCORD_CLIENT_ID`,
+`Discord:DISCORD_CLIENT_SECRET` y `Discord:DISCORD_CALLBACK_PATH`. Si una clave de
+la sección no existe o está vacía, busca respectivamente `DISCORD_CLIENT_ID`,
+`DISCORD_CLIENT_SECRET` y `DISCORD_CALLBACK_PATH` en la raíz de configuración.
+Esto permite usar tanto variables con prefijo de sección como variables directas.
+No guardar secretos en archivos versionados.
+
+Variables con sección:
 
 ```powershell
 $env:Discord__DISCORD_CLIENT_ID = 'TU_CLIENT_ID'
@@ -18,6 +24,17 @@ $env:ASPNETCORE_ENVIRONMENT = 'Development'
 $env:Discord__DISCORD_CALLBACK_PATH = '/auth/discord/callback'
 dotnet run --launch-profile http
 ```
+
+Variables directas equivalentes:
+
+```powershell
+$env:DISCORD_CLIENT_ID = 'TU_CLIENT_ID'
+$env:DISCORD_CLIENT_SECRET = 'TU_CLIENT_SECRET'
+$env:DISCORD_CALLBACK_PATH = '/auth/discord/callback'
+```
+
+Si no se configura el callback se usa `/auth/discord/callback`. Una clave no vacía
+dentro de `Discord` tiene prioridad sobre su equivalente directo.
 
 En Discord Developer Portal → aplicación → OAuth2 → Redirects, registrar exactamente:
 
