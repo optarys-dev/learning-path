@@ -1,3 +1,10 @@
 .env
 .env.*
 !.env.example
+
+# Tests
+tests/bin/
+tests/obj/
+tests/.vs/
+tests/appsettings.Development.json
+tests/appsettings.Local.json

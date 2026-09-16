@@ -1,6 +1,8 @@
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
+using CodeQuest2026.Server.Application.Users.Commands;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -62,6 +64,13 @@ public static class DiscordAuthenticationExtensions
                     if (!user.RootElement.TryGetProperty("id", out var id) || string.IsNullOrWhiteSpace(id.GetString()))
                         throw new InvalidOperationException("Discord did not return a user identifier.");
                     context.RunClaimActions(user.RootElement);
+                    await context.HttpContext.RequestServices.GetRequiredService<ISender>().Send(
+                        new SyncDiscordUserCommand(
+                            id.GetString()!,
+                            context.Identity!.FindFirst(ClaimTypes.Name)?.Value ?? "",
+                            context.Identity.FindFirst("discord:global_name")?.Value,
+                            context.Identity.FindFirst("discord:avatar")?.Value),
+                        context.HttpContext.RequestAborted);
                 };
                 options.Events.OnRemoteFailure = async context =>
                 {
@@ -70,7 +79,7 @@ public static class DiscordAuthenticationExtensions
                     await context.Response.WriteAsJsonAsync(new
                     {
                         error = "discord_authentication_failed",
-                        message = "No se pudo completar el inicio de sesión. Inténtalo de nuevo desde /api/auth/discord."
+                        message = "No se pudo completar el inicio de sesión. Inténtalo de nuevo desde /auth/discord."
                     });
                 };
             });

@@ -1,4 +1,5 @@
 using CodeQuest2026.Server.Infrastructure.DataSource.Context;
+using CodeQuest2026.Server.Application.Users.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -8,6 +9,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection ConfigureService(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddMediatR(options =>
+            options.RegisterServicesFromAssemblyContaining<SyncDiscordUserCommand>());
         string? connectionString =
             configuration.GetConnectionString("DefaultConnection") ??
             Environment.GetEnvironmentVariable("DefaultConnection");

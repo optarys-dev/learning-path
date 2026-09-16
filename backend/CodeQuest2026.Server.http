@@ -17,17 +17,29 @@ Accept: text/plain
 GET {{CodeQuest2026.Server_HostAddress}}/openapi/v1.json
 Accept: application/json
 
+### Documento Swagger/OpenAPI (solo en Development)
+GET {{CodeQuest2026.Server_HostAddress}}/swagger/v1/swagger.json
+Accept: application/json
+
+### Panel interactivo Swagger (abrir en el navegador)
+GET {{CodeQuest2026.Server_HostAddress}}/swagger
+Accept: text/html
+
 ### Iniciar sesión con Discord (302 hacia Discord)
 # Para completar OAuth, abrir esta URL en el navegador y continuar en ese mismo navegador.
 # Usar el host y esquema registrados en Discord Developer Portal.
 GET {{CodeQuest2026.Server_HostAddress}}/auth/discord
 
 ### Iniciar sesión y consultar el usuario al terminar
-GET {{CodeQuest2026.Server_HostAddress}}/auth/discord?returnUrl=/me
+GET {{CodeQuest2026.Server_HostAddress}}/auth/discord?returnUrl=/users/me
 
 ### Consultar sesión (401 sin cookie de sesión)
 # El cliente HTTP no comparte automáticamente las cookies del navegador.
 GET {{CodeQuest2026.Server_HostAddress}}/auth/me
+Accept: application/json
+
+### Consultar perfil persistido (401 sin cookie de sesión)
+GET {{CodeQuest2026.Server_HostAddress}}/users/me
 Accept: application/json
 
 ### Rechazar redirección externa (400)

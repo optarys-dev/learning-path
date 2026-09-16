@@ -19,6 +19,11 @@ backend/.vs/
 backend/appsettings.Development.json
 backend/appsettings.Local.json
 
+# Tests
+*bin/
+*obj/
+*.vs/
+
 # Environment and secrets
 .env
 .env.*

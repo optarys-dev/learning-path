@@ -4,7 +4,7 @@ El backend usa el flujo Authorization Code y el middleware OAuth de ASP.NET Core
 El middleware atiende el callback, valida `state` y la cookie de correlación,
 intercambia el código por un token y consulta `/users/@me` con el scope `identify`.
 La sesión de la aplicación dura ocho horas y usa una cookie HttpOnly. Los tokens de
-Discord no se guardan ni se envían al frontend. No se crean usuarios en PostgreSQL.
+Discord no se guardan ni se envían al frontend. El callback crea o actualiza el usuario en PostgreSQL antes de emitir la cookie de sesión.
 
 ## Configuración
 
@@ -15,6 +15,7 @@ User Secrets o variables de entorno (no guardar secretos en archivos versionados
 $env:Discord__DISCORD_CLIENT_ID = 'TU_CLIENT_ID'
 $env:Discord__DISCORD_CLIENT_SECRET = 'TU_CLIENT_SECRET'
 $env:ASPNETCORE_ENVIRONMENT = 'Development'
+$env:Discord__DISCORD_CALLBACK_PATH = '/auth/discord/callback'
 dotnet run --launch-profile http
 ```
 
@@ -34,7 +35,7 @@ HTTPS para que ASP.NET Core reciba el esquema y host públicos correctos.
 1. Abrir `http://localhost:5107/auth/discord` en el navegador.
 2. Autorizar la aplicación. El callback termina en `/auth/me`, que devuelve
    `id`, `username`, `displayName` y el hash `avatar` de Discord.
-3. `/api/auth/me` devuelve HTTP 401 cuando no hay una sesión válida.
+3. `/auth/me` devuelve HTTP 401 cuando no hay una sesión válida.
 4. Un callback sin `state`, con `state` alterado, con código inválido o con una
    autorización cancelada devuelve HTTP 400 sin exponer tokens ni errores internos.
 
