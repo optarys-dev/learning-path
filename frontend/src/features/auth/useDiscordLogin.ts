@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { getCurrentSession, startDiscordLogin } from './session';
 
 export type DiscordLoginState =
   | { status: 'idle' | 'loading' | 'error' | 'cancelled' | 'unavailable' }
@@ -13,11 +14,22 @@ export function useDiscordLogin(adapter?: DiscordLoginAdapter) {
   const request = useRef<AbortController | null>(null);
 
   useEffect(() => () => request.current?.abort(), []);
+  useEffect(() => {
+    const controller = new AbortController();
+    void getCurrentSession(controller.signal)
+      .then(user => {
+        if (user && !controller.signal.aborted) setState({ status: 'authenticated', nextPath: '/my-path' });
+      })
+      .catch(() => {
+        // A failed session check must not block the sign-in screen.
+      });
+    return () => controller.abort();
+  }, []);
 
   async function login() {
     if (request.current) return;
     if (!adapter) {
-      setState({ status: 'unavailable' });
+      startDiscordLogin();
       return;
     }
     const controller = new AbortController();

@@ -3,6 +3,7 @@ import { AppLayout } from './components/layout/AppLayout';
 import { SectionPage } from './pages/SectionPage';
 import { WelcomePage } from './pages/WelcomePage';
 import { LoginPage } from './pages/LoginPage';
+import { LoginCallbackPage } from './pages/LoginCallbackPage';
 import { lazy } from 'react';
 
 const WelcomePreviewPage = import.meta.env.DEV
@@ -15,6 +16,7 @@ function App() {
       <Route element={<AppLayout variant="welcome" />}>
         <Route index element={<WelcomePage />} />
         <Route path="login" element={<LoginPage />} />
+        <Route path="login/callback" element={<LoginCallbackPage />} />
         {WelcomePreviewPage && <Route path="dev/welcome" element={<WelcomePreviewPage />} />}
       </Route>
       <Route element={<AppLayout />}>

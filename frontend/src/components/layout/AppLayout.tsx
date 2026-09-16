@@ -7,12 +7,14 @@ import { LanguageSelector } from '../LanguageSelector/LanguageSelector';
 import './AppLayout.css';
 import { ContentBoundary } from './ContentBoundary';
 import { PageState } from '../ui/PageState/PageState';
+import { useAuthSession } from '../../features/auth/useAuthSession';
 import '../../features/welcome/landing.css';
 
 export function AppLayout({ variant = 'application' }: { variant?: 'application' | 'welcome' }) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, isLoading: isSessionLoading } = useAuthSession();
   const menuButton = useRef<HTMLButtonElement>(null);
   const main = useRef<HTMLElement>(null);
   const previousPath = useRef(pathname);
@@ -24,6 +26,22 @@ export function AppLayout({ variant = 'application' }: { variant?: 'application'
       previousPath.current = pathname;
     }
   }, [pathname]);
+  const displayName = user?.displayName || user?.username;
+  const avatarUrl = user?.avatar
+    ? `https://cdn.discordapp.com/avatars/${encodeURIComponent(user.id)}/${encodeURIComponent(user.avatar)}.png?size=80`
+    : null;
+  const profileLink = user && displayName ? (
+    <NavLink className="session-identity" to="/my-path" aria-label={t('auth.signedInAs', { name: displayName })}>
+      <span className="session-identity__avatar" aria-hidden="true">
+        <span>{displayName.slice(0, 1).toUpperCase()}</span>
+        {avatarUrl && <img src={avatarUrl} alt="" onError={event => { event.currentTarget.hidden = true; }} />}
+      </span>
+      <span className="session-identity__name">{displayName}</span>
+    </NavLink>
+  ) : null;
+  const authenticationControl = isSessionLoading
+    ? <span className="session-identity session-identity--loading" aria-label={t('layout.loading')} />
+    : profileLink ?? <NavLink className="welcome-navigation__login" to="/login">{t('login.navigation')}</NavLink>;
 
   return (
     <div className={`app-shell app-shell--${variant}`}>
@@ -41,7 +59,7 @@ export function AppLayout({ variant = 'application' }: { variant?: 'application'
               <a href="/#questions">{t('landing.faqLink')}</a>
             </nav>
             <LanguageSelector />
-            <NavLink className="welcome-navigation__login" to="/login">{t('login.navigation')}</NavLink>
+            {authenticationControl}
           </div> : <>
           <Button ref={menuButton} variant="secondary" className="menu-toggle"
             aria-expanded={menuOpen} aria-controls="primary-navigation"
@@ -61,6 +79,7 @@ export function AppLayout({ variant = 'application' }: { variant?: 'application'
               <NavLink to="/my-path" onClick={() => setMenuOpen(false)}>{t('layout.myPath')}</NavLink>
             </nav>
             <LanguageSelector />
+            {profileLink}
           </div>
           </>}
         </div>

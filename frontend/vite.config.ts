@@ -13,5 +13,19 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    proxy: {
+      '/auth': {
+        target: 'http://localhost:5107',
+        changeOrigin: false,
+      },
+      '/users': {
+        target: 'http://localhost:5107',
+        changeOrigin: false,
+      },
+      '/health': {
+        target: 'http://localhost:5107',
+        changeOrigin: false,
+      },
+    },
   },
 });
