@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type TransitionEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type TransitionEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import deviLaptop from '../assets/assessment/04_aprendiendo_con_laptop.svg';
@@ -37,8 +37,8 @@ export function QuestionnairePage() {
   const [entryPhase, setEntryPhase] = useState<'idle' | 'preparing' | 'sliding'>('idle');
   const [started, setStarted] = useState(false);
   const entryFrame = useRef<number | null>(null);
-  const stackFinished = useRef(false);
   const flowResizeObserver = useRef<ResizeObserver | null>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const stackRef = useRef<HTMLDivElement>(null);
   const welcomeRef = useRef<HTMLElement>(null);
@@ -66,7 +66,7 @@ export function QuestionnairePage() {
     if (welcome) welcomeHeadingRef.current?.focus();
     else headingRef.current?.focus(started && currentStep === 0 && !hasNavigated ? { preventScroll: true } : undefined);
   }, [welcome, currentStep, result, started, hasNavigated]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!welcome && viewportRef.current) {
       viewportRef.current.style.height = '';
       stackRef.current?.style.removeProperty('--slide-distance');
@@ -90,13 +90,12 @@ export function QuestionnairePage() {
     const flow = flowRef.current;
     if (!viewport || !stack || !intro || !flow) return;
     const introHeight = intro.getBoundingClientRect().height;
-    const flowHeight = flow.getBoundingClientRect().height;
-    stackFinished.current = false;
     viewport.style.height = `${introHeight}px`;
     stack.style.setProperty('--slide-distance', `${introHeight}px`);
     setEntryPhase('preparing');
     entryFrame.current = requestAnimationFrame(() => {
-      viewport.style.height = `${flowHeight}px`;
+      // The prepared flow already has the questionnaire's final responsive width.
+      viewport.style.height = `${flow.getBoundingClientRect().height}px`;
       setEntryPhase('sliding');
       flowResizeObserver.current = new ResizeObserver(() => {
         viewport.style.height = `${flow.getBoundingClientRect().height}px`;
@@ -108,10 +107,23 @@ export function QuestionnairePage() {
 
   function finishEntry(event: TransitionEvent<HTMLDivElement>) {
     if (entryPhase !== 'sliding') return;
-    if (event.target === stackRef.current && event.propertyName === 'transform') stackFinished.current = true;
-    else if (event.target !== viewportRef.current || event.propertyName !== 'height') return;
-    if (!stackFinished.current || !viewportRef.current || !flowRef.current ||
-      Math.abs(viewportRef.current.getBoundingClientRect().height - flowRef.current.getBoundingClientRect().height) > 0.5) return;
+    const profile = profileRef.current;
+    const viewport = viewportRef.current;
+    const stack = stackRef.current;
+    const flow = flowRef.current;
+    if (!profile || !viewport || !stack || !flow ||
+      ![profile, viewport, stack].includes(event.target as HTMLDivElement)) return;
+    // Width/margin may finish before a resize-triggered height transition.
+    // Wait for every actual geometry transition, including unchanged-height cases.
+    if ([profile, viewport, stack].some(element => element.getAnimations().some(animation =>
+      animation instanceof CSSTransition && animation.playState !== 'finished'))) return;
+    const viewportBounds = viewport.getBoundingClientRect();
+    const flowBounds = flow.getBoundingClientRect();
+    if (Math.abs(viewportBounds.height - flowBounds.height) > 0.5 ||
+      Math.abs(viewportBounds.top - flowBounds.top) > 0.5 ||
+      Math.abs(viewportBounds.width - flowBounds.width) > 0.5 ||
+      Math.abs(viewportBounds.left - flowBounds.left) > 0.5 ||
+      Math.abs(parseFloat(getComputedStyle(profile).marginTop)) > 0.5) return;
     flowResizeObserver.current?.disconnect();
     flowResizeObserver.current = null;
     setStarted(true);
@@ -151,9 +163,9 @@ export function QuestionnairePage() {
   }
 
   return (
-    <div className={`learning-profile${welcome ? ' learning-profile--welcome' : ''}${entryPhase === 'sliding' ? ' learning-profile--sliding' : ''}${started ? ' learning-profile--started' : ''}`}>
-      <div className="learning-profile__reveal-viewport" ref={viewportRef} onTransitionEnd={finishEntry}>
-        <div className="learning-profile__reveal-stack" ref={stackRef} onTransitionEnd={finishEntry}>
+    <div ref={profileRef} onTransitionEnd={finishEntry} className={`learning-profile${welcome ? ' learning-profile--welcome' : ''}${entryPhase !== 'idle' ? ' learning-profile--entering' : ''}${entryPhase === 'sliding' ? ' learning-profile--sliding' : ''}${started ? ' learning-profile--started' : ''}`}>
+      <div className="learning-profile__reveal-viewport" ref={viewportRef}>
+        <div className="learning-profile__reveal-stack" ref={stackRef}>
       {welcome && (
         <section className="learning-profile__welcome" aria-labelledby="welcome-title" ref={welcomeRef}>
           <img className="learning-profile__mascot learning-profile__mascot--welcome" src={deviProgress} alt="" />

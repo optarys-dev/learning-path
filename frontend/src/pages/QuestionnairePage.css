@@ -25,11 +25,17 @@
 .learning-profile__summary dd { margin: 0; font-weight: 700; text-align: right; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
+/* Reserve the page scrollbar before the taller questionnaire is revealed. */
+html:has(.learning-profile) { scrollbar-gutter: stable; }
+
 .learning-profile {
   position: relative;
   isolation: isolate;
-  width: min(100%, 68rem);
+  width: 100%;
+  max-width: 68rem;
+  margin-top: 0;
   margin-inline: auto;
+  --profile-flow-padding: calc(var(--cq-space-2) * 2);
   padding-inline: var(--cq-space-2);
 }
 .learning-profile::before {
@@ -140,7 +146,7 @@
 .learning-profile__summary dd { min-width: 0; overflow-wrap: anywhere; }
 @keyframes profile-enter { from { opacity: 0; transform: translateY(.5rem); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 38rem) {
-  .learning-profile { padding-inline: 0; }
+  .learning-profile { padding-inline: 0; --profile-flow-padding: 0px; }
   .learning-profile__options--areas { grid-template-columns: 1fr; }
   .learning-profile__area-card { min-height: 4.75rem; }
   .learning-profile__actions { flex-wrap: wrap; }
@@ -160,7 +166,6 @@
   box-shadow: none;
 }
 
-.learning-profile::before { animation: profile-glow-enter 420ms 90ms ease-out both; }
 .learning-profile__question-content { animation: none; }
 .learning-profile__question-content--animated { animation: profile-enter 160ms ease-out both; }
 
@@ -208,7 +213,6 @@
   from { opacity: 0; transform: translateY(.75rem); }
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes profile-glow-enter { from { opacity: 0; } to { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
   .learning-profile,
@@ -218,11 +222,20 @@
   .learning-profile__milestones span { transition: none; }
 }
 
-/* The longer reveal belongs only to a new visit's welcome screen. */
-.learning-profile--welcome { animation: onboarding-shell 230ms ease-out both; }
+/* Overlapping welcome groups; the action completes the sequence at 760ms. */
+.learning-profile--welcome { animation: welcome-composition 560ms cubic-bezier(.22, 1, .36, 1) both; }
 .learning-profile:not(.learning-profile--welcome) { animation: profile-shell-enter 180ms ease-out both; }
-.learning-profile:not(.learning-profile--welcome)::before { animation: none; }
-.learning-profile__welcome { animation: welcome-surface 240ms ease-out both; }
+.learning-profile__welcome { animation: none; }
+.learning-profile__mascot--welcome { animation: welcome-content 500ms 60ms cubic-bezier(.22, 1, .36, 1) backwards; }
+.learning-profile--welcome:not(.learning-profile--entering) .learning-profile__welcome-content > * {
+  animation: welcome-content 440ms var(--welcome-delay, 0ms) cubic-bezier(.22, 1, .36, 1) backwards;
+}
+.learning-profile__welcome-content > .learning-profile__eyebrow,
+.learning-profile__welcome-content > h1 { --welcome-delay: 140ms; }
+.learning-profile__welcome-content > p { --welcome-delay: 230ms; }
+.learning-profile__welcome-content > .cq-button { --welcome-delay: 320ms; }
+
+/* A single decorative sweep behind the mascot and copy; no layout footprint. */
 .learning-profile__welcome::before {
   content: '';
   position: absolute;
@@ -231,49 +244,35 @@
   left: 0;
   width: 55%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--cq-color-brand-primary), transparent);
+  background: linear-gradient(90deg, transparent, var(--cq-color-brand-primary), var(--cq-color-focus), transparent);
+  box-shadow: 0 0 8px rgb(126 112 249 / 35%);
   opacity: 0;
-  transform: translateX(-110%);
   pointer-events: none;
-  animation: onboarding-line 480ms 150ms ease-out both;
 }
-.learning-profile__welcome::after { animation: onboarding-shape 360ms 100ms ease-out both; }
-.learning-profile__welcome > .learning-profile__eyebrow { animation: onboarding-item 160ms 160ms ease-out both; }
-.learning-profile__welcome > h1 { animation: onboarding-item 170ms 280ms ease-out both; }
-.learning-profile__welcome > .learning-profile__welcome-lead { animation: onboarding-item 170ms 400ms ease-out both; }
-.learning-profile__welcome > p:not(.learning-profile__welcome-lead) { animation: onboarding-item 170ms 520ms ease-out both; }
-.learning-profile__welcome > .cq-button { animation: onboarding-item 170ms 640ms ease-out both; }
+.learning-profile--welcome:not(.learning-profile--entering) .learning-profile__welcome::before {
+  animation: welcome-light-sweep 500ms 150ms cubic-bezier(.22, 1, .36, 1) both;
+}
 
-@keyframes onboarding-shell {
-  from { opacity: 0; transform: translateY(.625rem) scale(.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes welcome-surface { from { opacity: 0; } to { opacity: 1; } }
-@keyframes onboarding-item {
-  from { opacity: 0; transform: translateY(.625rem); }
+@keyframes welcome-composition {
+  from { opacity: .88; transform: translateY(.375rem); }
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes onboarding-shape {
-  from { opacity: 0; transform: scale(.97); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes welcome-content {
+  from { opacity: 0; transform: translateY(.375rem); }
+  to { opacity: 1; transform: translateY(0); }
 }
-@keyframes onboarding-line {
+@keyframes welcome-light-sweep {
   0% { opacity: 0; transform: translateX(-110%); }
-  25% { opacity: .5; }
-  75% { opacity: .25; }
-  100% { opacity: 0; transform: translateX(170%); }
+  25% { opacity: .55; }
+  70% { opacity: .3; }
+  100% { opacity: 0; transform: translateX(185%); }
 }
 @media (prefers-reduced-motion: reduce) {
   .learning-profile--welcome,
   .learning-profile:not(.learning-profile--welcome),
-  .learning-profile__welcome,
-  .learning-profile__welcome::before,
-  .learning-profile__welcome::after,
-  .learning-profile__welcome > .learning-profile__eyebrow,
-  .learning-profile__welcome > h1,
-  .learning-profile__welcome > .learning-profile__welcome-lead,
-  .learning-profile__welcome > p:not(.learning-profile__welcome-lead),
-  .learning-profile__welcome > .cq-button { animation: none; }
+  .learning-profile__welcome-content,
+  .learning-profile__mascot--welcome,
+  .learning-profile--welcome:not(.learning-profile--entering) .learning-profile__welcome-content > * { animation: none; }
   .learning-profile__welcome::before { display: none; }
 }
 
@@ -287,16 +286,29 @@
   position: relative;
   transition: transform 460ms cubic-bezier(.22, 1, .36, 1);
 }
-.learning-profile__flow { min-width: 0; }
+/* flow-root prevents intro margins from changing absolute-to-normal geometry. */
+.learning-profile__flow { display: flow-root; min-width: 0; }
+.learning-profile--welcome .learning-profile__flow {
+  width: min(100%, calc(68rem - var(--profile-flow-padding)));
+  margin-inline: auto;
+}
+.learning-profile--entering {
+  transition: max-width 460ms cubic-bezier(.22, 1, .36, 1), margin-top 460ms cubic-bezier(.22, 1, .36, 1);
+  animation: none;
+}
 .learning-profile--welcome .learning-profile__flow {
   position: absolute;
-  top: 100%;
+  top: var(--slide-distance, 100%);
   left: 0;
   right: 0;
 }
 .learning-profile--welcome .learning-profile__step,
 .learning-profile--welcome .learning-profile__question-content { animation: none; }
-.learning-profile--sliding { animation: none; }
+.learning-profile.learning-profile--sliding { max-width: 68rem; margin-top: 0; }
+/* Finish the welcome entrance before measuring/sliding, even on an early click. */
+.learning-profile--entering .learning-profile__welcome-content,
+.learning-profile--entering .learning-profile__mascot--welcome,
+.learning-profile--entering .learning-profile__welcome-content > .cq-button { animation: none; }
 .learning-profile--sliding .learning-profile__reveal-stack {
   transform: translateY(calc(0px - var(--slide-distance)));
 }
@@ -393,14 +405,14 @@
 .learning-profile__welcome-content > h1 { margin-top: var(--cq-space-4); }
 .learning-profile__welcome-content > p:not(.learning-profile__welcome-lead) { margin-bottom: var(--cq-space-6); }
 .learning-profile--welcome {
-  width: min(100%, 78rem);
+  max-width: 78rem;
   margin-top: clamp(var(--cq-space-8), 9vh, 7rem);
 }
 
 @media (max-width: 38rem) {
   .learning-profile__welcome { grid-template-columns: 1fr; min-height: auto; gap: var(--cq-space-4); padding: var(--cq-space-6); }
   .learning-profile__mascot--welcome { order: -1; width: 9rem; max-height: 9rem; }
-  .learning-profile--welcome { width: min(100%, 68rem); margin-top: var(--cq-space-6); }
+  .learning-profile--welcome { max-width: 68rem; margin-top: var(--cq-space-6); }
   .learning-profile__welcome-content { text-align: center; }
   .learning-profile__welcome-content > p:not(.learning-profile__welcome-lead) { margin-inline: auto; }
 }
