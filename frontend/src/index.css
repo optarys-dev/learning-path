@@ -1,15 +1,2 @@
-:root {
-  font-family: Arial, sans-serif;
-  color: #171027;
-  background: #f7f6fb;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
+@import './styles/tokens.css';
+@import './styles/global.css';

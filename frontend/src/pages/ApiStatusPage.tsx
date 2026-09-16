@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { LanguageSelector } from '../components/LanguageSelector/LanguageSelector';
 import { apiUrl } from '../config/api';
 import '../App.css';
 
@@ -15,24 +17,9 @@ const initialHealthState: HealthState = {
   database: 'checking',
 };
 
-function getStatusMessage({ api, database }: HealthState) {
-  if (api === 'checking' || database === 'checking') {
-    return 'Comprobando conexión con la API y PostgreSQL…';
-  }
-
-  if (api === 'unhealthy') {
-    return '🔴 No se pudo conectar con la API';
-  }
-
-  if (database === 'unhealthy') {
-    return '🟡 API conectada, pero PostgreSQL no responde';
-  }
-
-  return '🟢 API y PostgreSQL conectados correctamente';
-}
-
 export function ApiStatusPage() {
   const [health, setHealth] = useState<HealthState>(initialHealthState);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -68,12 +55,23 @@ export function ApiStatusPage() {
     return () => abortController.abort();
   }, []);
 
+  let statusMessage: string = t('status.apiAndDatabaseConnected');
+
+  if (health.api === 'checking' || health.database === 'checking') {
+    statusMessage = t('status.checking');
+  } else if (health.api === 'unhealthy') {
+    statusMessage = t('status.apiUnavailable');
+  } else if (health.database === 'unhealthy') {
+    statusMessage = t('status.databaseUnavailable');
+  }
+
   return (
     <main className="api-status">
-      <p className="api-status__eyebrow">CODE QUEST 2026</p>
-      <h1>Base técnica lista para integrar</h1>
-      <p aria-live="polite">{getStatusMessage(health)}</p>
-      <small>API: {apiUrl}</small>
+      <LanguageSelector />
+      <p className="api-status__eyebrow">{t('app.name')}</p>
+      <h1>{t('status.pageTitle')}</h1>
+      <p aria-live="polite">{statusMessage}</p>
+      <small>{t('status.apiLabel', { url: apiUrl })}</small>
     </main>
   );
 }
