@@ -50,6 +50,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseDiscordHttpsCallback(builder.Configuration, app.Environment.IsDevelopment());
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

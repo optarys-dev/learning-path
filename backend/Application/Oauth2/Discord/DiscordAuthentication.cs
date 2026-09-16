@@ -17,7 +17,10 @@ public static class DiscordAuthentication
     {
         var clientId = GetDiscordSetting(configuration, "DISCORD_CLIENT_ID");
         var clientSecret = GetDiscordSetting(configuration, "DISCORD_CLIENT_SECRET");
-        var callbackPath = GetDiscordSetting(configuration, "DISCORD_CALLBACK_PATH");
+        var callbackPath = GetDiscordSetting(
+            configuration,
+            "DISCORD_CALLBACK_PATH",
+            "/auth/discord/callback");
 
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
@@ -89,6 +92,39 @@ public static class DiscordAuthentication
             });
         services.AddAuthorization();
         return services;
+    }
+
+    public static IApplicationBuilder UseDiscordHttpsCallback(
+        this IApplicationBuilder app,
+        IConfiguration configuration,
+        bool isDevelopment)
+    {
+        var configuredValue = GetDiscordSetting(configuration, "DISCORD_FORCE_HTTPS_CALLBACK");
+        var forceHttps = string.IsNullOrWhiteSpace(configuredValue)
+            ? !isDevelopment
+            : bool.TryParse(configuredValue, out var parsedValue)
+                ? parsedValue
+                : throw new InvalidOperationException(
+                    "Discord:DISCORD_FORCE_HTTPS_CALLBACK must be true or false.");
+
+        if (!forceHttps)
+            return app;
+
+        var callbackPath = new PathString(GetDiscordSetting(
+            configuration,
+            "DISCORD_CALLBACK_PATH",
+            "/auth/discord/callback"));
+
+        return app.Use(async (context, next) =>
+        {
+            var isDiscordChallenge = context.Request.Path.Equals("/auth/discord");
+            var isDiscordCallback = context.Request.Path.Equals(callbackPath);
+
+            if (isDiscordChallenge || isDiscordCallback)
+                context.Request.Scheme = Uri.UriSchemeHttps;
+
+            await next(context);
+        });
     }
 
     private static string GetDiscordSetting(

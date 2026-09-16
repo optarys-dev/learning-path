@@ -22,6 +22,7 @@ $env:Discord__DISCORD_CLIENT_ID = 'TU_CLIENT_ID'
 $env:Discord__DISCORD_CLIENT_SECRET = 'TU_CLIENT_SECRET'
 $env:ASPNETCORE_ENVIRONMENT = 'Development'
 $env:Discord__DISCORD_CALLBACK_PATH = '/auth/discord/callback'
+$env:Discord__DISCORD_FORCE_HTTPS_CALLBACK = 'true'
 dotnet run --launch-profile http
 ```
 
@@ -31,10 +32,18 @@ Variables directas equivalentes:
 $env:DISCORD_CLIENT_ID = 'TU_CLIENT_ID'
 $env:DISCORD_CLIENT_SECRET = 'TU_CLIENT_SECRET'
 $env:DISCORD_CALLBACK_PATH = '/auth/discord/callback'
+$env:DISCORD_FORCE_HTTPS_CALLBACK = 'true'
 ```
 
 Si no se configura el callback se usa `/auth/discord/callback`. Una clave no vacía
 dentro de `Discord` tiene prioridad sobre su equivalente directo.
+
+`DISCORD_FORCE_HTTPS_CALLBACK` hace que únicamente `/auth/discord` y el callback
+OAuth se procesen con esquema `https` al construir el `redirect_uri`. Su valor por
+defecto es `true` en Production y `false` en Development. El servidor puede seguir
+escuchando por HTTP dentro del contenedor; la URL pública debe disponer de TLS
+(por ejemplo, mediante el proxy HTTPS de la plataforma), ya que esta opción no
+instala un certificado ni convierte Kestrel en un servidor HTTPS.
 
 En Discord Developer Portal → aplicación → OAuth2 → Redirects, registrar exactamente:
 

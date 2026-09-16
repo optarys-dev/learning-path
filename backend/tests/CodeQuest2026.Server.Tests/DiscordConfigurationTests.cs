@@ -1,5 +1,7 @@
 using CodeQuest2026.Server.Application.Oauth2.Discord;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -55,6 +57,38 @@ public sealed class DiscordConfigurationTests
         });
 
         Assert.Equal("/auth/discord/callback", options.CallbackPath.Value);
+    }
+
+    [Theory]
+    [InlineData("/auth/discord", "https")]
+    [InlineData("/auth/discord/callback", "https")]
+    [InlineData("/users/me", "http")]
+    public async Task ForcesHttpsOnlyForDiscordOAuthRoutes(string path, string expectedScheme)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Discord:DISCORD_CALLBACK_PATH"] = "/auth/discord/callback",
+                ["Discord:DISCORD_FORCE_HTTPS_CALLBACK"] = "true"
+            })
+            .Build();
+        var services = new ServiceCollection().BuildServiceProvider();
+        var appBuilder = new ApplicationBuilder(services);
+        string? observedScheme = null;
+
+        appBuilder.UseDiscordHttpsCallback(configuration, isDevelopment: true);
+        appBuilder.Run(context =>
+        {
+            observedScheme = context.Request.Scheme;
+            return Task.CompletedTask;
+        });
+
+        var context = new DefaultHttpContext { RequestServices = services };
+        context.Request.Scheme = "http";
+        context.Request.Path = path;
+        await appBuilder.Build()(context);
+
+        Assert.Equal(expectedScheme, observedScheme);
     }
 
     private static OAuthOptions CreateOptions(Dictionary<string, string?> values)

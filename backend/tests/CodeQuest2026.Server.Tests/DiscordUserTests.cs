@@ -4,6 +4,7 @@ using CodeQuest2026.Server.Application.Users.Queries;
 using CodeQuest2026.Server.Controllers;
 using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using CodeQuest2026.Server.Infrastructure.DataSource.Configurations;
+using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -122,7 +123,13 @@ public sealed class DiscordUserTests : IAsyncLifetime
     private sealed class UserTestDbContext(DbContextOptions<AppDbContext> options)
         : AppDbContext(options)
     {
-        protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Ignore<Course>();
+            modelBuilder.Ignore<Category>();
+            modelBuilder.Ignore<Tag>();
+            modelBuilder.Ignore<CourseEmbedding>();
             new UserConfiguration().Configure(modelBuilder.Entity<CodeQuest2026.Server.Infrastructure.DataSource.Entities.User>());
+        }
     }
 }
