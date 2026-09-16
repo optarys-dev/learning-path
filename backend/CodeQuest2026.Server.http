@@ -38,6 +38,11 @@ GET {{CodeQuest2026.Server_HostAddress}}/auth/discord?returnUrl=/users/me
 GET {{CodeQuest2026.Server_HostAddress}}/auth/me
 Accept: application/json
 
+### Cerrar sesión local (204, incluso si ya expiró)
+# Enviar desde el mismo navegador que inició sesión para eliminar CodeQuest.Session.
+POST {{CodeQuest2026.Server_HostAddress}}/auth/logout
+Accept: application/json
+
 ### Consultar perfil persistido (401 sin cookie de sesión)
 GET {{CodeQuest2026.Server_HostAddress}}/users/me
 Accept: application/json

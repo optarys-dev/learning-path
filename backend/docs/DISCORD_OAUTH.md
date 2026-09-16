@@ -62,6 +62,9 @@ HTTPS para que ASP.NET Core reciba el esquema y host públicos correctos.
 2. Autorizar la aplicación. El callback termina en `/auth/me`, que devuelve
    `id`, `username`, `displayName` y el hash `avatar` de Discord.
 3. `/auth/me` devuelve HTTP 401 cuando no hay una sesión válida.
+   Para cerrar sesión, llamar `POST /auth/logout` desde el navegador que tiene la
+   cookie. Devuelve HTTP 204 y después `/auth/me` responde HTTP 401.
+   Esto cierra la sesión de la aplicación; la sesión del usuario en Discord sigue activa.
 4. Un callback sin `state`, con `state` alterado, con código inválido o con una
    autorización cancelada devuelve HTTP 400 sin exponer tokens ni errores internos.
 
@@ -74,6 +77,11 @@ Para consultar la sesión desde el frontend local en otro puerto:
 
 ```javascript
 const response = await fetch(`${apiBaseUrl}/auth/me`, {
+  credentials: 'include',
+});
+
+await fetch(`${apiBaseUrl}/auth/logout`, {
+  method: 'POST',
   credentials: 'include',
 });
 ```

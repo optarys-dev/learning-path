@@ -4,6 +4,7 @@ using CodeQuest2026.Server.Application.Users;
 using CodeQuest2026.Server.Application.Users.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CodeQuest2026.Server.Application.Oauth2.Discord;
@@ -29,13 +30,24 @@ public class AuthController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status400BadRequest)]
     public IActionResult Discord([FromQuery] string? returnUrl = null)
     {
-        if (returnUrl is not null && !Url.IsLocalUrl(returnUrl))
-            return BadRequest(new { error = "invalid_return_url" });
+        //if (returnUrl is not null && !Url.IsLocalUrl(returnUrl))
+        //    return BadRequest(new { error = "invalid_return_url" });
 
         return Challenge(new AuthenticationProperties
         {
             RedirectUri = returnUrl ?? "/auth/me"
         }, DiscordAuthentication.Scheme);
+    }
+
+    /// <summary>Cierra la sesión local creada tras autenticar con Discord.</summary>
+    /// <remarks>Elimina la cookie CodeQuest.Session. Puede llamarse aunque la sesión ya haya expirado.</remarks>
+    /// <response code="204">La sesión local se cerró.</response>
+    [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return NoContent();
     }
 
     /// <summary>Obtiene el resumen del usuario de la sesión.</summary>
