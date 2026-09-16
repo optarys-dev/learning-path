@@ -7,6 +7,7 @@ import { LanguageSelector } from '../LanguageSelector/LanguageSelector';
 import './AppLayout.css';
 import { ContentBoundary } from './ContentBoundary';
 import { PageState } from '../ui/PageState/PageState';
+import { ThemeToggle } from '../ui/ThemeToggle/ThemeToggle';
 
 export function AppLayout() {
   const { t } = useTranslation();
@@ -50,6 +51,7 @@ export function AppLayout() {
               <NavLink to="/catalog" onClick={() => setMenuOpen(false)}>{t('layout.catalog')}</NavLink>
               <NavLink to="/my-path" onClick={() => setMenuOpen(false)}>{t('layout.myPath')}</NavLink>
             </nav>
+            <ThemeToggle />
             <LanguageSelector />
           </div>
         </div>
