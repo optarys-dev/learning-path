@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { LearningJourney } from './LearningJourney';
 import { JourneyExplainer } from './JourneyExplainer';
 import { LandingDetails } from './LandingDetails';
+import { LandingIntro } from './LandingIntro';
 import { ArrowRight, Target, BookOpenCheck, Route, type LucideIcon } from 'lucide-react';
 import { useAuthSession } from '../auth/useAuthSession';
 import './welcome.css';
@@ -15,6 +16,7 @@ export function WelcomeView() {
 
   return (
     <div className="landing">
+    <LandingIntro />
     <section className="welcome welcome--landing" aria-labelledby="welcome-title">
       <div className="welcome__content">
         <p className="welcome__eyebrow">
