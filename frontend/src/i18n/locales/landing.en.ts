@@ -4,8 +4,9 @@ type Translate<T> = { [K in keyof T]: T[K] extends string ? string : Translate<T
 
 export const landingEn = {
   navigation: 'Explore CODE QUEST', howLink: 'How it works', insideLink: 'Your experience', faqLink: 'Questions',
-  heroDescription: 'Turn what you want to learn into <strong>a path with direction</strong>. Your experience and interests help us organize <strong>real DevTalles courses</strong> around your next goal.',
-  discover: 'Discover how it works', heroDetail: 'A path based on what you know and what you want to achieve.',
+  heroDescription: 'A clear path to learn at your own pace.',
+  heroMission: 'MISSION 01',
+  discover: 'Discover how it works', heroDetail: 'Your starting point, your next step.',
   createRoute: 'Create my path',
   promiseTitle: 'Learning is a journey. <accent>Choose your direction.</accent>',
   promises: {
@@ -19,6 +20,7 @@ export const landingEn = {
     label: 'Explore the stages of your journey', preview: 'How it works · Conceptual preview', resultLabel: 'What you get',
     personalize: { tab: 'Your starting point', title: 'First, we get to know you.', description: 'Tell us your goal, your experience and what you already know. We can then find a starting point that makes sense for you.', itemOne: 'Your learning goal', itemTwo: 'Your experience and existing skills', itemThree: 'Your areas and technologies of interest', outcome: 'A foundation for better recommendations' },
     discover: { tab: 'Your path', title: 'Then, we connect the steps.', description: 'Get a sequence of courses from the catalog, with the foundations you need to move toward your goal.', itemOne: 'Real DevTalles courses', itemTwo: 'A logical learning order', itemThree: 'Prerequisites to help you move forward', outcome: 'Clarity on what to learn next' },
+    route: { tab: 'Your journey', title: 'We build a path that makes sense.', description: 'We arrange the courses and foundations so every step brings you closer to the goal you chose.', itemOne: 'A sequence tailored to your goal', itemTwo: 'Courses connected by prerequisites', itemThree: 'Clear reasons for every recommendation', outcome: 'A path you can follow with confidence' },
     progress: { tab: 'Your progress', title: 'Keep going at your own pace.', description: 'Save your path, explore each course and mark your progress. Your paths stay within reach whenever you want to return.', itemOne: 'Your saved path', itemTwo: 'Progress that you record yourself', itemThree: 'Your next steps within reach', outcome: 'A journey you can return to' },
   },
   experience: {

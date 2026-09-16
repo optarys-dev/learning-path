@@ -25,11 +25,19 @@
   font-size: var(--cq-font-size-label);
 }
 
-.welcome__eyebrow span {
+.welcome__status-dot {
   width: .5rem;
   height: .5rem;
   border-radius: var(--cq-radius-pill);
   background: var(--cq-color-success);
+}
+
+.welcome__eyebrow b {
+  margin-left: var(--cq-space-2);
+  color: color-mix(in srgb, var(--cq-color-text-secondary) 70%, transparent);
+  font-size: .6875rem;
+  font-weight: 700;
+  letter-spacing: .12em;
 }
 
 .welcome h1 {
@@ -45,14 +53,14 @@
 .welcome h1 span { color: var(--cq-color-text-secondary); }
 
 .welcome__description {
-  max-width: 44ch;
-  margin: var(--cq-space-6) 0;
+  max-width: 37ch;
+  margin: var(--cq-space-5) 0;
   color: var(--cq-color-text-secondary);
   line-height: 1.7;
 }
 
-.welcome__action { max-width: 27rem; }
-.welcome__cta { width: 100%; min-height: 3.5rem; font-size: var(--cq-font-size-body); }
+.welcome__action { max-width: 30rem; margin-top: var(--cq-space-3); }
+.welcome__cta { width: 100%; min-height: 3.75rem; font-size: var(--cq-font-size-body); }
 .welcome__cta-mark { font-size: var(--cq-font-size-h2); line-height: 1; }
 .welcome__cta[aria-busy='true'] { cursor: progress; opacity: .8; }
 
@@ -82,16 +90,6 @@
   justify-self: center;
   isolation: isolate;
   background: radial-gradient(ellipse at center, color-mix(in srgb, var(--cq-color-brand-primary) 16%, transparent), transparent 70%);
-}
-
-.journey__caption {
-  position: absolute;
-  top: 0;
-  left: var(--cq-space-4);
-  color: var(--cq-color-text-secondary);
-  font-size: var(--cq-font-size-caption);
-  text-transform: uppercase;
-  letter-spacing: .12em;
 }
 
 .journey__orbit {
@@ -126,13 +124,11 @@
 
 .journey__station--start { left: 4%; bottom: 17%; }
 .journey__station--foundations { right: 0; top: 52%; }
-.journey__station--specialize { left: 5%; top: 26%; }
 .journey__station--goal { right: 5%; top: 10%; border-color: var(--cq-color-brand-primary); }
-.journey__devi { position: absolute; width: 40%; height: auto; left: 28%; top: 36%; }
-.journey__note { position: absolute; bottom: 0; width: 100%; text-align: center; color: var(--cq-color-text-secondary); font-size: var(--cq-font-size-label); }
+.journey__devi { position: absolute; width: 54%; height: auto; left: 23%; top: 27%; }
 
-@media (min-width: 60rem) {
-  .welcome { grid-template-columns: 1.1fr .9fr; align-items: center; gap: var(--cq-space-12); }
+@media (min-width: 68rem) {
+  .welcome { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; gap: clamp(var(--cq-space-12), 7vw, 7rem); }
   .welcome__description { font-size: 1.125rem; }
 }
 
@@ -142,6 +138,7 @@
   .app-shell--welcome .app-header__inner { padding-block: var(--cq-space-4); }
   .welcome__eyebrow { margin-bottom: var(--cq-space-4); }
   .welcome__description { margin-block: var(--cq-space-4); }
+  .journey__station--foundations { display: none; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -151,8 +148,7 @@
   .journey { animation: journey-enter 400ms 100ms both; }
   .journey__station { animation: welcome-enter 300ms 180ms both; }
   .journey__station--foundations { animation-delay: 230ms; }
-  .journey__station--specialize { animation-delay: 280ms; }
-  .journey__station--goal { animation-delay: 330ms; }
+  .journey__station--goal { animation-delay: 280ms; }
 }
 
 @keyframes welcome-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }

@@ -1,9 +1,9 @@
 import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { BookOpenCheck, Compass, Route, type LucideIcon } from 'lucide-react';
+import { BookOpenCheck, Compass, Map, Route, type LucideIcon } from 'lucide-react';
 
-const steps = ['personalize', 'discover', 'progress'] as const;
-const stepIcons: LucideIcon[] = [Compass, Route, BookOpenCheck];
+const steps = ['personalize', 'discover', 'route', 'progress'] as const;
+const stepIcons: LucideIcon[] = [Compass, Map, Route, BookOpenCheck];
 
 export function JourneyExplainer() {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ export function JourneyExplainer() {
   return (
     <section id="how-it-works" className="landing-section" aria-labelledby={`${id}-title`}>
       <div className="landing-section__heading">
-        <p className="landing-eyebrow">{t('landing.how.eyebrow')}</p>
+        <p className="landing-eyebrow"><span aria-hidden="true">01</span>{t('landing.how.eyebrow')}</p>
         <h2 id={`${id}-title`}><Trans i18nKey="landing.how.title" components={{ accent: <span className="text-accent" /> }} /></h2>
         <p>{t('landing.how.description')}</p>
       </div>
@@ -50,7 +50,7 @@ export function JourneyExplainer() {
           aria-labelledby={`${id}-tab-${index}`} hidden={active !== index}>
           {active === index && <div className="journey-panel">
             <div className="journey-panel__copy">
-              <span className="journey-panel__number" aria-hidden="true">0{index + 1}<span> / 03</span></span>
+              <span className="journey-panel__number" aria-hidden="true">0{index + 1}<span> / 04</span></span>
               <h3>{t(`landing.how.${step}.title`)}</h3>
               <p>{t(`landing.how.${step}.description`)}</p>
             </div>

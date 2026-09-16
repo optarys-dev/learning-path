@@ -3,9 +3,10 @@ export const landingEs = {
   howLink: 'Cómo funciona',
   insideLink: 'Tu experiencia',
   faqLink: 'Preguntas',
-  heroDescription: 'Transformá lo que querés aprender en <strong>una ruta con dirección</strong>. Partimos de tu nivel y tus intereses para ordenar <strong>cursos reales de DevTalles</strong> alrededor de tu próxima meta.',
+  heroDescription: 'Una ruta clara para aprender a tu ritmo.',
+  heroMission: 'MISIÓN 01',
   discover: 'Descubrí cómo funciona',
-  heroDetail: 'Una ruta según lo que ya sabés y lo que querés lograr.',
+  heroDetail: 'Tu punto de partida, tu siguiente paso.',
   createRoute: 'Crear mi ruta',
   promiseTitle: 'Aprender es un viaje. <accent>Elegí tu dirección.</accent>',
   promises: {
@@ -31,6 +32,12 @@ export const landingEs = {
       description: 'Recibís una secuencia de cursos del catálogo, con los fundamentos que necesitás para avanzar hacia tu objetivo.',
       itemOne: 'Cursos reales de DevTalles', itemTwo: 'Un orden de aprendizaje con sentido', itemThree: 'Prerrequisitos que te ayudan a avanzar',
       outcome: 'Claridad sobre qué aprender después',
+    },
+    route: {
+      tab: 'Tu recorrido', title: 'Construimos una ruta con sentido.',
+      description: 'Ordenamos los cursos y los fundamentos para que cada paso te acerque a la meta que elegiste.',
+      itemOne: 'Una secuencia adaptada a tu objetivo', itemTwo: 'Cursos conectados por prerrequisitos', itemThree: 'Motivos claros para cada recomendación',
+      outcome: 'Una ruta que podés seguir con confianza',
     },
     progress: {
       tab: 'Tu progreso', title: 'Y seguís a tu ritmo.',

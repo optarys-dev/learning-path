@@ -36,6 +36,10 @@ export const en = {
   app: {
     name: 'CODE QUEST 2026',
   },
+  auth: {
+    profile: 'My profile',
+    signedInAs: 'Signed in as {{name}}',
+  },
   language: {
     label: 'Language',
     english: 'English',
