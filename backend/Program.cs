@@ -3,16 +3,27 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.ConfigureService(builder.Configuration);
 
+const string frontendCorsPolicy = "Frontend";
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(frontendCorsPolicy, policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -25,17 +36,12 @@ else if (File.Exists(Path.Combine(app.Environment.WebRootPath
     app.MapFallbackToFile("/index.html");
 }
 
-app.UseCors(opt => {
-    opt.AllowAnyOrigin();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
-    if (app.Environment.IsDevelopment())
-    {
-        opt.WithOrigins("*");
-    }
-});
-
-app.UseHttpsRedirection();
-
+app.UseCors(frontendCorsPolicy);
 app.UseAuthorization();
 
 app.MapControllers();
@@ -51,4 +57,3 @@ app.MapHealthChecks("/health/db", new HealthCheckOptions
 });
 
 app.Run();
-

@@ -24,9 +24,13 @@ El repositorio se encuentra en fase de preparación. Las primeras tareas son def
 
 ## Configuración local
 
-1. Copia `.env.example` como `.env` para los valores del entorno que use el frontend.
-2. El backend utilizará `appsettings.Development.json` o User Secrets para sus valores locales.
-3. Nunca subas claves, tokens, secretos de Discord ni cadenas de conexión reales al repositorio.
+1. En `frontend/`, copia `.env.example` como `.env` y conserva `VITE_API_BASE_URL=http://localhost:5107`.
+2. Ejecuta la API con `dotnet run --project backend/CodeQuest2026.Server.csproj`.
+3. En otra terminal, entra a `frontend/`, ejecuta `npm install` y después `npm run dev`.
+4. Abre `http://localhost:5173`. La pantalla inicial debe indicar que la API está conectada.
+5. Nunca subas claves, tokens, secretos de Discord ni cadenas de conexión reales al repositorio.
+
+La API permite solicitudes únicamente desde `http://localhost:5173` durante desarrollo. La lista de orígenes se configura en `backend/appsettings.json`, bajo `Cors:AllowedOrigins`.
 
 ## Documentación
 
