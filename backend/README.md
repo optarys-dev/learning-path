@@ -4,6 +4,9 @@ Backend ASP.NET Core de CodeQuest2026, un proyecto para recomendar cursos y cons
 
 ## Estado actual
 
+Autenticación con Discord disponible mediante `/api/auth/discord`, callback OAuth
+y consulta de sesión en `/api/auth/me`. Ver [configuración y pruebas](docs/DISCORD_OAUTH.md).
+
 - Catálogo inicial de 72 cursos de DevTalles.
 - 9 categorías y 96 tags relacionados muchos a muchos con cursos.
 - Metadatos inferidos para pruebas: descripción, temario sugerido, objetivos, habilidades, prerrequisitos y público.
@@ -11,7 +14,7 @@ Backend ASP.NET Core de CodeQuest2026, un proyecto para recomendar cursos y cons
 - Almacenamiento de embeddings mediante pgvector.
 - Health checks y documento OpenAPI en desarrollo.
 
-La generación de embeddings, los endpoints de recomendaciones, el cuestionario, la autenticación y el seguimiento de progreso todavía no están implementados en este backend.
+La generación de embeddings, los endpoints de recomendaciones, el cuestionario y el seguimiento de progreso todavía no están implementados en este backend.
 
 ## Tecnologías
 
