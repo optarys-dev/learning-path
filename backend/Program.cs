@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.ConfigureService(builder.Configuration);
+builder.Services.AddDiscordAuthentication(builder.Configuration, builder.Environment.IsDevelopment());
 
 const string frontendCorsPolicy = "Frontend";
 var allowedOrigins = builder.Configuration
@@ -18,7 +19,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -42,6 +44,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseCors(frontendCorsPolicy);
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
