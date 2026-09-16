@@ -1,4 +1,5 @@
 @CodeQuest2026.Server_HostAddress = http://localhost:5107
+@DiscordCallbackPath = /auth/discord/callback
 
 ### Estado general (API y base de datos)
 GET {{CodeQuest2026.Server_HostAddress}}/health
@@ -14,4 +15,40 @@ Accept: text/plain
 
 ### Documento OpenAPI (solo en Development)
 GET {{CodeQuest2026.Server_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+### Documento Swagger/OpenAPI (solo en Development)
+GET {{CodeQuest2026.Server_HostAddress}}/swagger/v1/swagger.json
+Accept: application/json
+
+### Panel interactivo Swagger (abrir en el navegador)
+GET {{CodeQuest2026.Server_HostAddress}}/swagger
+Accept: text/html
+
+### Iniciar sesión con Discord (302 hacia Discord)
+# Para completar OAuth, abrir esta URL en el navegador y continuar en ese mismo navegador.
+# Usar el host y esquema registrados en Discord Developer Portal.
+GET {{CodeQuest2026.Server_HostAddress}}/auth/discord
+
+### Iniciar sesión y consultar el usuario al terminar
+GET {{CodeQuest2026.Server_HostAddress}}/auth/discord?returnUrl=/users/me
+
+### Consultar sesión (401 sin cookie de sesión)
+# El cliente HTTP no comparte automáticamente las cookies del navegador.
+GET {{CodeQuest2026.Server_HostAddress}}/auth/me
+Accept: application/json
+
+### Consultar perfil persistido (401 sin cookie de sesión)
+GET {{CodeQuest2026.Server_HostAddress}}/users/me
+Accept: application/json
+
+### Rechazar redirección externa (400)
+GET {{CodeQuest2026.Server_HostAddress}}/auth/discord?returnUrl=https://example.com
+Accept: application/json
+
+### Callback sin state (prueba negativa: 400 con CallbackPath configurado)
+# Ajustar DiscordCallbackPath al valor de Discord:DISCORD_CALLBACK_PATH.
+# El callback exitoso lo invoca Discord con code, state y la cookie de correlación.
+# No ejecutar manualmente para iniciar sesión ni reutilizar códigos de autorización.
+GET {{CodeQuest2026.Server_HostAddress}}{{DiscordCallbackPath}}
 Accept: application/json
