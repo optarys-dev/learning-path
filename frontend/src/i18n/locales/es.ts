@@ -1,4 +1,24 @@
+import { landingEs } from './landing.es';
+import { loginEs } from './login.es';
+
 export const es = {
+  landing: landingEs,
+  login: loginEs,
+  welcome: {
+    pageTitle: 'Tu próxima ruta',
+    eyebrow: 'Tu próxima misión de aprendizaje',
+    title: 'Tu próxima ruta', titleAccent: 'empieza acá.',
+    description: 'Contanos qué querés aprender y te ayudaremos a construir una ruta usando cursos reales de DevTalles.',
+    continue: 'Continuar con Discord', connecting: 'Conectando con Discord…', retry: 'Reintentar con Discord',
+    purpose: 'Usamos Discord para identificar tu cuenta y guardar tus rutas y progreso.',
+    error: 'No pudimos iniciar sesión con Discord. Podés intentarlo nuevamente.',
+    cancelled: 'No se completó el inicio de sesión. Podés intentarlo cuando quieras.',
+    unavailable: 'El inicio de sesión con Discord estará disponible pronto.',
+    session: 'Tu sesión está activa. Preparando tu siguiente paso…',
+    signature: 'Cursos reales. Un camino a tu medida.',
+    journeyCaption: 'Cada paso cuenta', start: 'Inicio', foundations: 'Fundamentos', specialize: 'Especialización', goal: 'Tu meta',
+    deviNote: 'Un buen punto de partida cambia todo.',
+  },
   layout: {
     skip: 'Saltar al contenido', navigation: 'Navegación principal',
     openMenu: 'Menú', closeMenu: 'Cerrar menú', home: 'Inicio', catalog: 'Catálogo', myPath: 'Mi ruta',

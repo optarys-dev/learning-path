@@ -7,8 +7,9 @@ import { LanguageSelector } from '../LanguageSelector/LanguageSelector';
 import './AppLayout.css';
 import { ContentBoundary } from './ContentBoundary';
 import { PageState } from '../ui/PageState/PageState';
+import '../../features/welcome/landing.css';
 
-export function AppLayout() {
+export function AppLayout({ variant = 'application' }: { variant?: 'application' | 'welcome' }) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -25,7 +26,7 @@ export function AppLayout() {
   }, [pathname]);
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell app-shell--${variant}`}>
       <a className="skip-link" href="#main-content">{t('layout.skip')}</a>
       <header className="app-header">
         <div className="app-header__inner">
@@ -33,6 +34,15 @@ export function AppLayout() {
             <BrandLogo className="app-brand__logo" />
             <span>{t('app.name')}</span>
           </Link>
+          {variant === 'welcome' ? <div className="welcome-navigation">
+            <nav aria-label={t('landing.navigation')}>
+              <a href="/#how-it-works">{t('landing.howLink')}</a>
+              <a href="/#your-experience">{t('landing.insideLink')}</a>
+              <a href="/#questions">{t('landing.faqLink')}</a>
+            </nav>
+            <LanguageSelector />
+            <NavLink className="welcome-navigation__login" to="/login">{t('login.navigation')}</NavLink>
+          </div> : <>
           <Button ref={menuButton} variant="secondary" className="menu-toggle"
             aria-expanded={menuOpen} aria-controls="primary-navigation"
             onClick={() => setMenuOpen(!menuOpen)}>
@@ -52,6 +62,7 @@ export function AppLayout() {
             </nav>
             <LanguageSelector />
           </div>
+          </>}
         </div>
       </header>
       <main id="main-content" className="app-main" ref={main} tabIndex={-1}>

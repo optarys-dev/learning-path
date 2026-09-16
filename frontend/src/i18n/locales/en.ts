@@ -1,6 +1,25 @@
 import type { TranslationSchema } from './es';
+import { landingEn } from './landing.en';
+import { loginEn } from './login.en';
 
 export const en = {
+  landing: landingEn,
+  login: loginEn,
+  welcome: {
+    pageTitle: 'Your next learning path',
+    eyebrow: 'Your next learning mission',
+    title: 'Your next path', titleAccent: 'starts here.',
+    description: 'Tell us what you want to learn and we will help you build a path using real DevTalles courses.',
+    continue: 'Continue with Discord', connecting: 'Connecting to Discord…', retry: 'Retry with Discord',
+    purpose: 'We use Discord to identify your account and save your learning paths and progress.',
+    error: 'We could not sign you in with Discord. Please try again.',
+    cancelled: 'Sign-in was not completed. You can try again whenever you are ready.',
+    unavailable: 'Discord sign-in will be available soon.',
+    session: 'You are signed in. Preparing your next step…',
+    signature: 'Real courses. A path made for you.',
+    journeyCaption: 'Every step matters', start: 'Start', foundations: 'Foundations', specialize: 'Specialization', goal: 'Your goal',
+    deviNote: 'A good starting point changes everything.',
+  },
   layout: {
     skip: 'Skip to content', navigation: 'Main navigation',
     openMenu: 'Menu', closeMenu: 'Close menu', home: 'Home', catalog: 'Catalog', myPath: 'My path',

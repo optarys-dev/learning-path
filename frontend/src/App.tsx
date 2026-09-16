@@ -1,12 +1,23 @@
 import { Route, Routes } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { SectionPage } from './pages/SectionPage';
+import { WelcomePage } from './pages/WelcomePage';
+import { LoginPage } from './pages/LoginPage';
+import { lazy } from 'react';
+
+const WelcomePreviewPage = import.meta.env.DEV
+  ? lazy(() => import('./pages/WelcomePreviewPage'))
+  : null;
 
 function App() {
   return (
     <Routes>
+      <Route element={<AppLayout variant="welcome" />}>
+        <Route index element={<WelcomePage />} />
+        <Route path="login" element={<LoginPage />} />
+        {WelcomePreviewPage && <Route path="dev/welcome" element={<WelcomePreviewPage />} />}
+      </Route>
       <Route element={<AppLayout />}>
-        <Route index element={<SectionPage section="home" />} />
         <Route path="catalog" element={<SectionPage section="catalog" />} />
         <Route path="my-path" element={<SectionPage section="myPath" />} />
         <Route path="*" element={<SectionPage section="notFound" />} />
