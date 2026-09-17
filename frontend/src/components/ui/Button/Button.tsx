@@ -6,6 +6,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 export interface ButtonProps extends ComponentPropsWithRef<'button'> {
   isLoading?: boolean;
+  loadingLabel?: string;
   variant?: ButtonVariant;
 }
 
@@ -14,6 +15,7 @@ export function Button({
   className,
   disabled,
   isLoading = false,
+  loadingLabel,
   type,
   variant = 'primary',
   ...buttonProps
@@ -31,7 +33,7 @@ export function Button({
       disabled={disabled || isLoading}
       type={type ?? 'button'}
     >
-      {isLoading ? t('layout.loading') : children}
+      {isLoading ? (loadingLabel ?? t('layout.loading')) : children}
     </button>
   );
 }

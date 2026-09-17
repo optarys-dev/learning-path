@@ -1,0 +1,34 @@
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+
+  width: 2.5rem;
+  height: 2.5rem;
+
+  padding: 0;
+
+  border: 1px solid var(--cq-color-border-default);
+  border-radius: var(--cq-radius-pill);
+
+  background: var(--cq-color-bg-surface);
+  color: var(--cq-color-text-secondary);
+
+  cursor: pointer;
+
+  transition:
+    color var(--cq-transition-base),
+    border-color var(--cq-transition-base),
+    background var(--cq-transition-base),
+    transform var(--cq-transition-base);
+}
+
+.theme-toggle:hover {
+  color: var(--cq-color-text-primary);
+  border-color: var(--cq-color-brand-primary);
+  transform: translateY(-1px);
+}
+
+.theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--cq-focus-ring);
+}
