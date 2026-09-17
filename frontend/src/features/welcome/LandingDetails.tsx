@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useAuthSession } from '../auth/useAuthSession';
 import { Trans, useTranslation } from 'react-i18next';
-import { ArrowRight, BookOpen, CheckCircle2, Compass, ExternalLink, Layers, Route, Target, type LucideIcon } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, Compass, ExternalLink, Layers, Route, Target, type LucideIcon } from 'lucide-react';
 import { DeviIllustration } from './DeviIllustration';
-import deviRoute from '../../assets/portal/10_continuar_aprendiendo.png';
+import deviRoute from '../../assets/portal/11_recomendado_para_ti.png';
 import deviGoal from '../../assets/portal/17_meta_alcanzada.png';
+import deviExperience from '../../assets/portal/08_curso_completado.png';
 
 const pathPreview = ['foundations', 'javascript', 'react', 'specialization'] as const;
 const experienceIcons: LucideIcon[] = [Compass, Route, Layers];
@@ -16,7 +17,7 @@ export function LandingDetails() {
     <>
       <section id="your-experience" className="landing-section experience" aria-labelledby="experience-title">
         <div className="landing-section__heading">
-          <p className="landing-eyebrow"><span aria-hidden="true">02</span>{t('landing.experience.eyebrow')}</p>
+          <p className="landing-eyebrow">{t('landing.experience.eyebrow')}</p>
           <h2 id="experience-title"><Trans i18nKey="landing.experience.title" components={{ accent: <span className="text-accent" /> }} /></h2>
           <p>{t('landing.experience.description')}</p>
         </div>
@@ -24,16 +25,21 @@ export function LandingDetails() {
           {(['direction', 'context', 'continuity'] as const).map((item, index) => {
             const Icon = experienceIcons[index];
             return <article key={item} className="experience__item">
-              <span className="experience__icon" aria-hidden="true"><Icon size={23} /></span>
-              <h3>{t(`landing.experience.${item}.title`)}</h3>
-              <p>{t(`landing.experience.${item}.text`)}</p>
+              {index === 0 && <div className="experience__art" aria-hidden="true">
+                <DeviIllustration variant="route" src={deviExperience} alt="" width="248" height="277" />
+              </div>}
+              <div className="experience__content">
+                <span className="experience__icon" aria-hidden="true"><Icon size={23} /></span>
+                <h3>{t(`landing.experience.${item}.title`)}</h3>
+                <p>{t(`landing.experience.${item}.text`)}</p>
+              </div>
             </article>;
           })}
         </div>
       </section>
       <section id="route-preview" className="landing-section route-preview" aria-labelledby="route-preview-title">
         <div className="landing-section__heading">
-          <p className="landing-eyebrow"><span aria-hidden="true">03</span>{t('landing.preview.eyebrow')}</p>
+          <p className="landing-eyebrow">{t('landing.preview.eyebrow')}</p>
           <h2 id="route-preview-title"><Trans i18nKey="landing.preview.title" components={{ accent: <span className="text-accent" /> }} /></h2>
           <p>{t('landing.preview.description')}</p>
         </div>
@@ -55,7 +61,7 @@ export function LandingDetails() {
             </li>)}
           </ol>
           <div className="route-preview__outcome">
-            <span className="route-preview__outcome-icon" aria-hidden="true"><CheckCircle2 size={22} /></span>
+            <span className="route-preview__outcome-icon" aria-hidden="true"><Check size={22} strokeWidth={2.75} /></span>
             <div>
               <strong>{t('landing.preview.outcomeTitle')}</strong>
               <span>{t('landing.preview.outcomeText')}</span>
@@ -81,13 +87,12 @@ export function LandingDetails() {
       </section>
       <section className="landing-closing" aria-labelledby="closing-title">
         <div>
-          <p className="landing-eyebrow"><span aria-hidden="true">04</span>{t('landing.closing.eyebrow')}</p>
+          <p className="landing-eyebrow">{t('landing.closing.eyebrow')}</p>
           <h2 id="closing-title"><Trans i18nKey="landing.closing.title" components={{ accent: <span className="text-accent" /> }} /></h2>
           <p>{t('landing.closing.note')}</p>
           <Link to={user ? '/my-path' : '/login'} className="cq-button cq-button--primary">{t('landing.createRoute')} <ArrowRight size={18} aria-hidden="true" /></Link>
         </div>
         <div className="landing-closing__scene" aria-hidden="true">
-          <span className="landing-closing__tag">GOAL</span>
           <span className="landing-closing__node landing-closing__node--start" />
           <span className="landing-closing__node landing-closing__node--end" />
           <DeviIllustration variant="closing" src={deviGoal} alt="" width="248" height="277" />

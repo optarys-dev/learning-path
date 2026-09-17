@@ -105,6 +105,7 @@
 .journey__line path { stroke: var(--cq-color-brand-primary); stroke-width: 2; stroke-dasharray: 5 7; opacity: .6; }
 .journey__station {
   position: absolute;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: var(--cq-space-2);
@@ -123,9 +124,53 @@
 }
 
 .journey__station--start { left: 4%; bottom: 17%; }
-.journey__station--foundations { right: 0; top: 52%; }
+.journey__station--foundations { right: -3%; top: 54%; }
 .journey__station--goal { right: 5%; top: 10%; border-color: var(--cq-color-brand-primary); }
 .journey__devi { position: absolute; width: 54%; height: auto; left: 23%; top: 27%; }
+
+.welcome--landing {
+  position: relative;
+  isolation: isolate;
+}
+
+.welcome--landing::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: clamp(14rem, 34vw, 28rem);
+  aspect-ratio: 1;
+  right: clamp(-5rem, -4vw, -2rem);
+  top: 6%;
+  border-radius: 58% 42% 47% 53%;
+  background: linear-gradient(145deg, rgb(126 112 249 / 20%), rgb(199 181 255 / 4%));
+  transform: rotate(-12deg);
+}
+
+.welcome__content { position: relative; z-index: 2; }
+.welcome__eyebrow { color: var(--cq-color-brand-lavender); }
+.welcome__status-dot { background: var(--cq-color-brand-lime); box-shadow: 0 0 0 .25rem rgb(200 240 0 / 8%); }
+.journey { overflow: visible; aspect-ratio: 1 / 1; background: none; }
+.journey::before {
+  content: '';
+  position: absolute;
+  inset: 11% 8% 10%;
+  z-index: -2;
+  border-radius: 46% 54% 58% 42%;
+  background: radial-gradient(circle at 40% 38%, rgb(199 181 255 / 19%), rgb(126 112 249 / 5%) 58%, transparent 70%);
+  transform: rotate(8deg);
+}
+.journey::after {
+  content: '✦';
+  position: absolute;
+  right: 9%;
+  bottom: 17%;
+  color: var(--cq-color-brand-lavender);
+  font-size: 1.4rem;
+}
+.journey__orbit { inset: 10% 4% 7%; border-color: var(--cq-color-brand-lavender); opacity: .22; }
+.journey__line path { stroke-width: 2.5; opacity: .72; }
+.journey__devi { width: 68%; left: 15%; top: 20%; }
+.journey__station { backdrop-filter: blur(12px); background: rgb(28 24 41 / 76%); }
 
 @media (min-width: 68rem) {
   .welcome { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; gap: clamp(var(--cq-space-12), 7vw, 7rem); }

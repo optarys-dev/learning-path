@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { CircleDot, Flag, MapPin } from 'lucide-react';
 import { DeviIllustration } from './DeviIllustration';
-import devi from '../../assets/portal/11_recomendado_para_ti.png';
+import devi from '../../assets/portal/10_continuar_aprendiendo.png';
 
 export function LearningJourney() {
   const { t } = useTranslation();
