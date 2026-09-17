@@ -58,12 +58,8 @@ actuales y añadir embeddings sin rediseñar el almacenamiento de rutas.
 
 ## Recuperación semántica local
 
-<<<<<<< HEAD
-El worker Python indexa los cursos con Ollama y genera vectores de preferencias.
-=======
 El worker Python indexa los cursos con `Qwen/Qwen3-Embedding-0.6B` de Hugging Face
 y genera vectores de preferencias.
->>>>>>> develop
 La API .NET consulta cursos activos del mismo modelo y dimensión en pgvector con
 `GET /routes/recommendation/semantic`. Esta vista previa requiere el worker en
 ejecución y no guarda una ruta; `POST /routes/generate` sigue usando `static-v1`.
