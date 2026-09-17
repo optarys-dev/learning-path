@@ -7,19 +7,12 @@ type Theme = 'light' | 'dark';
 const themeStorageKey = 'codequest.theme';
 
 function getInitialTheme(): Theme {
-  if (typeof window === 'undefined') {
+  if (typeof document === 'undefined') {
     return 'dark';
   }
 
-  const storedTheme = window.localStorage.getItem(themeStorageKey);
-
-  if (storedTheme === 'light' || storedTheme === 'dark') {
-    return storedTheme;
-  }
-
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
+  // index.html already resolved storage/system preference before the first paint.
+  return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 }
 
 export function ThemeToggle() {
