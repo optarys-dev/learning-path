@@ -10,11 +10,59 @@ y consulta de sesión en `/auth/me`. Ver [configuración y pruebas](docs/DISCORD
 - Catálogo inicial de 72 cursos de DevTalles.
 - 9 categorías y 96 tags relacionados muchos a muchos con cursos.
 - Metadatos inferidos para pruebas: descripción, temario sugerido, objetivos, habilidades, prerrequisitos y público.
+- Extracción de metadatos públicos de las 72 páginas de cursos, con fuente y fecha; importación SQL revisable.
 - Índices de filtrado por estado/nivel, título, categoría y tag.
 - Almacenamiento de embeddings mediante pgvector.
 - Health checks, documento OpenAPI y panel interactivo Swagger en desarrollo.
 
-La generación de embeddings, los endpoints de recomendaciones, el cuestionario y el seguimiento de progreso todavía no están implementados en este backend.
+El cuestionario y el seguimiento de progreso todavía no están implementados en este backend.
+
+Las preferencias se pueden guardar con `PUT /users/me/preferences` y consultar con
+`GET /users/me/preferences`. `isNewUser` en `/auth/me` y `/users/me` es verdadero
+hasta que se guardan las preferencias. Las rutas ya analizadas se guardan con
+`POST /routes` y se consultan con `GET /routes` o `GET /routes/{routeId}`.
+El motor estático ofrece una vista previa con `GET /routes/recommendation` y genera
+y guarda la ruta con `POST /routes/generate`.
+La búsqueda con embeddings se consulta con `GET /routes/recommendation/semantic`;
+devuelve una propuesta sin guardarla. `POST /routes/generate` usa `static-v1`,
+no la recomendación semántica. Para guardar una propuesta semántica, enviar sus
+cursos a `POST /routes` con `recommendationMethod`, `explanation` y `courses`.
+Estos endpoints requieren la sesión de Discord. Aplicar la migración
+`AddUserPreferencesAndLearningRoutes` antes de usarlos. Véase
+[propuesta de recomendaciones](docs/RECOMMENDATIONS.md).
+
+### Crear una ruta desde las preferencias
+
+1. Guardar las preferencias con `PUT /users/me/preferences`.
+2. Consultar `GET /routes/recommendation` para previsualizar la selección estática.
+3. Enviar `POST /routes/generate` sin cuerpo. La respuesta `201 Created` incluye
+   la ruta y el encabezado `Location` apunta a `GET /routes/{routeId}`.
+
+Si se desea usar Hugging Face, ejecutar antes `embedding-worker/worker.py index`
+y mantener `embedding-worker/worker.py serve` disponible. Consultar
+`GET /routes/recommendation/semantic` y guardar la propuesta con `POST /routes`.
+Este último acepta de 1 a 30 cursos activos y usa el orden del arreglo `courses`.
+
+```mermaid
+flowchart TD
+    A["Iniciar sesión con Discord"] --> B["PUT /users/me/preferences"]
+    B --> C{"Método de recomendación"}
+    C -->|Estático| D["GET /routes/recommendation<br/>Vista previa opcional"]
+    D --> E["POST /routes/generate<br/>Sin cuerpo JSON"]
+    C -->|Estático directo| E
+    C -->|Semántico| F["Indexar cursos<br/>worker.py index"]
+    F --> G["Iniciar servicio<br/>worker.py serve"]
+    G --> H["GET /routes/recommendation/semantic<br/>Vista previa con embeddings"]
+    H --> I["POST /routes<br/>Enviar método, explicación y cursos"]
+    E --> J["201 Created<br/>Ruta guardada"]
+    I --> J
+    J --> K["GET /routes/{routeId}"]
+```
+
+Swagger documenta los cuerpos, la cookie requerida y las respuestas de preferencias
+y rutas. Los errores de la API usan `{ "error": "código", "message": "descripción" }`;
+los errores inesperados devuelven HTTP 500 con `error = internal_error` y se registran
+en el servidor sin exponer detalles internos al cliente.
 
 ## Tecnologías
 
@@ -157,11 +205,11 @@ Course tiene categorías y tags mediante course_categories y course_tags. Track 
 Los registros con MetadataOrigin = inferred-seed-v1 son propuestas para pruebas, no temarios o prerrequisitos confirmados por DevTalles. Idioma, duración y verificación quedan pendientes cuando se desconocen. El seed conserva los metadatos previamente completados.
 
 Los embeddings requieren seleccionar un modelo y generar vectores reales. Comparar únicamente vectores del mismo modelo y dimensiones. Se plantea búsqueda exacta para el catálogo actual; no hay índice HNSW.
-El worker Python `embedding-worker/worker.py index` genera los vectores con Ollama.
+El worker Python `embedding-worker/worker.py index` genera los vectores localmente
+con `Qwen/Qwen3-Embedding-0.6B` de Hugging Face.
 `embedding-worker/worker.py serve` genera el vector de cada consulta; .NET busca
 los cursos en pgvector mediante `GET /routes/recommendation/semantic`. Véase
 [la guía de embeddings](Infrastructure/DataSource/CourseEmbeddings.md).
->>>>>>> Stashed changes
 
 ## Documentación
 
@@ -173,5 +221,5 @@ los cursos en pgvector mediante `GET /routes/recommendation/semantic`. Véase
 
 ## Validación
 
-Se comprobaron compilación, correspondencia entre modelo y snapshot, generación de SQL y traducción de consultas por coseno. La ejecución contra PostgreSQL debe validarse en una base de desarrollo. No hay una suite persistente de pruebas automatizadas en este backend.
+Se comprobaron compilación, correspondencia entre modelo y snapshot, generación de SQL y traducción de consultas por coseno. Hay pruebas automatizadas en `tests/CodeQuest2026.Server.Tests` y `embedding-worker/test_worker.py`. La ejecución contra PostgreSQL, el modelo descargado y el servicio HTTP requieren validación en el entorno de destino.
 

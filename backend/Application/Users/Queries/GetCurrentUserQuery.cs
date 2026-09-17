@@ -13,6 +13,7 @@ public sealed class GetCurrentUserQueryHandler(AppDbContext db)
         db.Users.AsNoTracking()
             .Where(user => user.DiscordId == request.DiscordId)
             .Select(user => new UserDto(user.UserId, user.DiscordId, user.Username,
-                user.DisplayName, user.Avatar, user.CreatedAt, user.LastLoginAt))
+                user.DisplayName, user.Avatar, user.CreatedAt, user.LastLoginAt,
+                user.Preferences == null))
             .SingleOrDefaultAsync(cancellationToken);
 }

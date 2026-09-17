@@ -78,6 +78,8 @@ def embed(text, is_query=False):
     return values
 
 
+<<<<<<< HEAD
+=======
 def get_database_connection_string():
     connection_string = os.getenv("DATABASE_URL")
     if not connection_string or not connection_string.strip():
@@ -88,10 +90,17 @@ def get_database_connection_string():
     return connection_string.strip()
 
 
+>>>>>>> develop
 def index_courses():
     import psycopg
     from psycopg.rows import dict_row
 
+<<<<<<< HEAD
+    connection_string = os.getenv("DATABASE_URL")
+    if not connection_string:
+        raise ValueError("Set DATABASE_URL as a PostgreSQL URI or libpq connection string")
+    with psycopg.connect(connection_string, row_factory=dict_row) as conn:
+=======
     connection_string = get_database_connection_string()
     try:
         conn = psycopg.connect(connection_string, row_factory=dict_row)
@@ -102,6 +111,7 @@ def index_courses():
         ) from exc
 
     with conn:
+>>>>>>> develop
         with conn.cursor() as cursor:
             cursor.execute("""
                 SELECT c.course_id, c.title, c.level, c.metadata_origin,

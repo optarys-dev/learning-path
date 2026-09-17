@@ -1,4 +1,10 @@
 import unittest
+<<<<<<< HEAD
+
+from worker import course_text, preference_text
+
+
+=======
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -33,6 +39,7 @@ class HuggingFaceModelTests(unittest.TestCase):
                 worker.get_database_connection_string()
 
 
+>>>>>>> develop
 class TextBuilderTests(unittest.TestCase):
     def test_public_metadata_and_stable_labels(self):
         course = {
