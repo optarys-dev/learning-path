@@ -4,14 +4,17 @@ Backend ASP.NET Core de CodeQuest2026, un proyecto para recomendar cursos y cons
 
 ## Estado actual
 
+Autenticación con Discord disponible mediante `/auth/discord`, callback OAuth
+y consulta de sesión en `/auth/me`. Ver [configuración y pruebas](docs/DISCORD_OAUTH.md).
+
 - Catálogo inicial de 72 cursos de DevTalles.
 - 9 categorías y 96 tags relacionados muchos a muchos con cursos.
 - Metadatos inferidos para pruebas: descripción, temario sugerido, objetivos, habilidades, prerrequisitos y público.
 - Índices de filtrado por estado/nivel, título, categoría y tag.
 - Almacenamiento de embeddings mediante pgvector.
-- Health checks y documento OpenAPI en desarrollo.
+- Health checks, documento OpenAPI y panel interactivo Swagger en desarrollo.
 
-La generación de embeddings, los endpoints de recomendaciones, el cuestionario, la autenticación y el seguimiento de progreso todavía no están implementados en este backend.
+La generación de embeddings, los endpoints de recomendaciones, el cuestionario y el seguimiento de progreso todavía no están implementados en este backend.
 
 ## Tecnologías
 
@@ -116,6 +119,13 @@ anfitrión en Docker Desktop; para PostgreSQL remoto, usar su hostname.
 | /health/db | Conectividad con PostgreSQL. |
 | /health | Todos los health checks registrados. |
 | /openapi/v1.json | Documento OpenAPI, solo en Development. |
+| /swagger | Panel Swagger para consultar la documentación y probar endpoints, solo en Development. |
+| /swagger/v1/swagger.json | Documento OpenAPI generado por Swagger, solo en Development. |
+
+Para probar rutas autenticadas desde Swagger, abrir primero `/auth/discord` en el
+mismo navegador y completar el inicio de sesión. Después, volver a `/swagger` y
+ejecutar `/auth/me` o `/users/me` con **Try it out**. La cookie HttpOnly se envía
+automáticamente; no es necesario copiar tokens ni introducir la cookie en el panel.
 
 Para la ejecución HTTP sin perfil:
 
@@ -147,6 +157,11 @@ Course tiene categorías y tags mediante course_categories y course_tags. Track 
 Los registros con MetadataOrigin = inferred-seed-v1 son propuestas para pruebas, no temarios o prerrequisitos confirmados por DevTalles. Idioma, duración y verificación quedan pendientes cuando se desconocen. El seed conserva los metadatos previamente completados.
 
 Los embeddings requieren seleccionar un modelo y generar vectores reales. Comparar únicamente vectores del mismo modelo y dimensiones. Se plantea búsqueda exacta para el catálogo actual; no hay índice HNSW.
+El worker Python `embedding-worker/worker.py index` genera los vectores con Ollama.
+`embedding-worker/worker.py serve` genera el vector de cada consulta; .NET busca
+los cursos en pgvector mediante `GET /routes/recommendation/semantic`. Véase
+[la guía de embeddings](Infrastructure/DataSource/CourseEmbeddings.md).
+>>>>>>> Stashed changes
 
 ## Documentación
 

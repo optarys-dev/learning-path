@@ -18,6 +18,12 @@ backend/obj/
 backend/.vs/
 backend/appsettings.Development.json
 backend/appsettings.Local.json
+*_pycache_*
+
+# Tests
+*bin/
+*obj/
+*.vs/
 
 # Build outputs in nested .NET projects, including test projects
 **/bin/

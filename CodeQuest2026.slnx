@@ -4,4 +4,5 @@
     <File Path="database/seeds/Seed Courses.sql" />
   </Folder>
   <Project Path="backend/CodeQuest2026.Server.csproj" />
+  <Project Path="backend/tests/CodeQuest2026.Server.Tests/CodeQuest2026.Server.Tests.csproj" />
 </Solution>

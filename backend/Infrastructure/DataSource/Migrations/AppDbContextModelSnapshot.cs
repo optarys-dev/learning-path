@@ -294,6 +294,53 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
                     b.ToTable("tags", (string)null);
                 });
 
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.User", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Avatar")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("avatar");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("DiscordId")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("discord_id");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("display_name");
+
+                    b.Property<DateTimeOffset>("LastLoginAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_login_at");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("username");
+
+                    b.HasKey("UserId")
+                        .HasName("users_pkey");
+
+                    b.HasIndex("DiscordId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_discord_id");
+
+                    b.ToTable("users", (string)null);
+                });
+
             modelBuilder.Entity("CourseCategory", b =>
                 {
                     b.Property<long>("course_id")
