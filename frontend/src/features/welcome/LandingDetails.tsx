@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useAuthSession } from '../auth/useAuthSession';
 import { Trans, useTranslation } from 'react-i18next';
-import { ArrowRight, BookOpen, Check, Compass, ExternalLink, Flag, Layers, Map, Route, Target, type LucideIcon } from 'lucide-react';
+import { ArrowRight, BookOpen, Compass, ExternalLink, Flag, Layers, Map, Route, Target, type LucideIcon } from 'lucide-react';
 import { DeviIllustration } from './DeviIllustration';
-import deviRoute from '../../assets/portal/11_recomendado_para_ti.png';
-import deviGoal from '../../assets/portal/17_meta_alcanzada.png';
-import deviExperience from '../../assets/portal/08_curso_completado.png';
+import deviRoute from '../../assets/codequest/characters/13_robot_guía_junto_al_letrero_next_stop.png';
+import deviGoal from '../../assets/codequest/characters/02_mascota_astronauta_cq_en_la_cima.png';
+import deviExperience from '../../assets/codequest/characters/03_mascota_astronauta_cq_en_movimiento.png';
 
 const pathPreview = ['foundations', 'javascript', 'react', 'specialization'] as const;
 const experienceIcons: LucideIcon[] = [Compass, Route, Layers];
@@ -65,7 +65,7 @@ export function LandingDetails() {
             })}
           </ol>
           <div className="route-preview__outcome">
-            <span className="route-preview__outcome-icon" aria-hidden="true"><Check size={22} strokeWidth={2.75} /></span>
+            <span className="route-preview__outcome-icon" aria-hidden="true"><Route size={20} strokeWidth={2.25} /></span>
             <div>
               <strong>{t('landing.preview.outcomeTitle')}</strong>
               <span>{t('landing.preview.outcomeText')}</span>

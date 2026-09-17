@@ -1,7 +1,11 @@
 :root {
   /* Typography */
+  --cq-font-display: "Sora", "Space Grotesk", "Segoe UI", sans-serif;
   --cq-font-heading: "Space Grotesk", "Segoe UI", sans-serif;
   --cq-font-body: "DM Sans", "Segoe UI", sans-serif;
+
+  --cq-font-weight-display: 800;
+  --cq-font-weight-heading: 700;
 
   --cq-font-size-caption: 0.75rem;
   --cq-font-size-label: 0.875rem;
@@ -17,7 +21,7 @@
   --cq-line-height-card-title: 1.4;
   --cq-line-height-h2: 1.333;
   --cq-line-height-h1: 1.25;
-  --cq-line-height-display: 1.167;
+  --cq-line-height-display: 1.04;
 
   /* Spacing */
   --cq-space-1: 0.25rem;

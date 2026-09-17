@@ -43,10 +43,11 @@
 .welcome h1 {
   max-width: 12ch;
   margin: 0;
-  font-family: var(--cq-font-heading);
-  font-size: clamp(2rem, 5.2vw, 4rem);
+  font-family: var(--cq-font-display);
+  font-size: clamp(2.75rem, 5.8vw, 4.8rem);
+  font-weight: var(--cq-font-weight-display);
   line-height: var(--cq-line-height-display);
-  letter-spacing: -.045em;
+  letter-spacing: -.06em;
   text-wrap: balance;
 }
 
@@ -54,7 +55,7 @@
 
 .welcome__description {
   max-width: 37ch;
-  margin: var(--cq-space-5) 0;
+  margin: var(--cq-space-6) 0;
   color: var(--cq-color-text-secondary);
   line-height: 1.7;
 }

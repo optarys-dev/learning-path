@@ -2,10 +2,10 @@ import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { BookOpenCheck, Compass, Map, Route, type LucideIcon } from 'lucide-react';
 import { DeviIllustration } from './DeviIllustration';
-import deviProfile from '../../assets/portal/18_perfil_incompleto.png';
-import deviLaptop from '../../assets/portal/01_cargando.png';
-import deviGuidance from '../../assets/portal/07_confirmacion_necesaria.png';
-import deviSaved from '../../assets/portal/20_guardado_correctamente.png';
+import deviProfile from '../../assets/codequest/scenes/12_tarjeta_tip_con_mascota_robótica_futurista.png';
+import deviLaptop from '../../assets/codequest/characters/06_mascota_astronauta_estudiando_con_portátil.png';
+import deviGuidance from '../../assets/codequest/characters/05_mascota_astronauta_presenta_el_roadmap.png';
+import deviSaved from '../../assets/codequest/characters/07_mascota_astronauta_celebrando_el_éxito.png';
 
 const steps = ['personalize', 'discover', 'route', 'progress'] as const;
 const stepIcons: LucideIcon[] = [Compass, Map, Route, BookOpenCheck];
