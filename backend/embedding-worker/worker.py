@@ -78,8 +78,6 @@ def embed(text, is_query=False):
     return values
 
 
-<<<<<<< HEAD
-=======
 def get_database_connection_string():
     connection_string = os.getenv("DATABASE_URL")
     if not connection_string or not connection_string.strip():
@@ -90,17 +88,10 @@ def get_database_connection_string():
     return connection_string.strip()
 
 
->>>>>>> develop
 def index_courses():
     import psycopg
     from psycopg.rows import dict_row
 
-<<<<<<< HEAD
-    connection_string = os.getenv("DATABASE_URL")
-    if not connection_string:
-        raise ValueError("Set DATABASE_URL as a PostgreSQL URI or libpq connection string")
-    with psycopg.connect(connection_string, row_factory=dict_row) as conn:
-=======
     connection_string = get_database_connection_string()
     try:
         conn = psycopg.connect(connection_string, row_factory=dict_row)
@@ -111,7 +102,6 @@ def index_courses():
         ) from exc
 
     with conn:
->>>>>>> develop
         with conn.cursor() as cursor:
             cursor.execute("""
                 SELECT c.course_id, c.title, c.level, c.metadata_origin,
@@ -167,13 +157,15 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(preference, dict) or not isinstance(preference.get("goal"), str) \
                     or not preference["goal"].strip():
                 return self.send_json(400, {"error": "invalid_request"})
-            values = embed(preference_text(preference), is_query=True)
-            self.send_json(200, {"model": MODEL_ID, "dimensions": len(values), "embedding": values})
         except (ValueError, KeyError, TypeError):
-            self.send_json(400, {"error": "invalid_request"})
-        except (EmbeddingUnavailable, RuntimeError, OSError, ImportError) as error:
+            return self.send_json(400, {"error": "invalid_request"})
+
+        try:
+            values = embed(preference_text(preference), is_query=True)
+        except (EmbeddingUnavailable, RuntimeError, OSError, ImportError, ValueError, TypeError) as error:
             print(f"Local embedding model unavailable: {error}", flush=True)
-            self.send_json(503, {"error": "embedding_provider_unavailable"})
+            return self.send_json(503, {"error": "embedding_provider_unavailable"})
+        self.send_json(200, {"model": MODEL_ID, "dimensions": len(values), "embedding": values})
 
     def send_json(self, status, data):
         body = json.dumps(data).encode("utf-8")

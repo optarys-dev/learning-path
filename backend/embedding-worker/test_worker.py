@@ -1,10 +1,5 @@
 import unittest
-<<<<<<< HEAD
-
-from worker import course_text, preference_text
-
-
-=======
+from io import BytesIO
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -39,7 +34,33 @@ class HuggingFaceModelTests(unittest.TestCase):
                 worker.get_database_connection_string()
 
 
->>>>>>> develop
+class HandlerTests(unittest.TestCase):
+    def test_model_value_error_returns_service_unavailable(self):
+        handler = object.__new__(worker.Handler)
+        handler.path = "/embed-preferences"
+        body = b'{"goal":"Aprender Python"}'
+        handler.headers = {"Content-Length": str(len(body))}
+        handler.rfile = BytesIO(body)
+        handler.send_json = Mock()
+
+        with patch.object(worker, "embed", side_effect=ValueError("model error")):
+            handler.do_POST()
+
+        handler.send_json.assert_called_once_with(503, {"error": "embedding_provider_unavailable"})
+
+    def test_invalid_payload_returns_bad_request(self):
+        handler = object.__new__(worker.Handler)
+        handler.path = "/embed-preferences"
+        body = b'{"goal":""}'
+        handler.headers = {"Content-Length": str(len(body))}
+        handler.rfile = BytesIO(body)
+        handler.send_json = Mock()
+
+        handler.do_POST()
+
+        handler.send_json.assert_called_once_with(400, {"error": "invalid_request"})
+
+
 class TextBuilderTests(unittest.TestCase):
     def test_public_metadata_and_stable_labels(self):
         course = {

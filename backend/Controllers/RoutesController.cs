@@ -41,11 +41,13 @@ public class RoutesController(ISender sender) : ControllerBase
     /// <response code="200">Cursos más similares, ordenados para estudio por nivel.</response>
     /// <response code="401">No hay una sesión válida.</response>
     /// <response code="409">Faltan preferencias o todavía no se indexaron cursos con ese modelo.</response>
+    /// <response code="502">El servicio local de embeddings rechazó la solicitud o devolvió un error HTTP.</response>
     /// <response code="503">El servicio local de embeddings no está disponible.</response>
     [HttpGet("recommendation/semantic")]
     [ProducesResponseType<StaticRecommendationDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status502BadGateway)]
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status503ServiceUnavailable)]
     public async Task<ActionResult<StaticRecommendationDto>> PreviewSemanticRecommendation(CancellationToken cancellationToken)
     {
@@ -56,6 +58,12 @@ public class RoutesController(ISender sender) : ControllerBase
         try
         {
             result = await sender.Send(new GetSemanticRecommendationQuery(discordId), cancellationToken);
+        }
+        catch (HttpRequestException exception) when (exception.StatusCode is not null
+            && exception.StatusCode != System.Net.HttpStatusCode.ServiceUnavailable)
+        {
+            return StatusCode(502, new ApiErrorDto("embedding_service_error",
+                $"El servicio de embeddings devolvió HTTP {(int)exception.StatusCode}."));
         }
         catch (HttpRequestException)
         {

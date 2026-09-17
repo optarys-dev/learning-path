@@ -1,4 +1,6 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
 
 namespace CodeQuest2026.Server.Infrastructure.Embeddings;
@@ -16,7 +18,11 @@ public sealed class PreferenceEmbeddingClient(HttpClient http)
             interests = preference.Interests,
             experienceLevel = preference.ExperienceLevel
         };
-        using var response = await http.PostAsJsonAsync("embed-preferences", payload, cancellationToken);
+        var json = JsonSerializer.SerializeToUtf8Bytes(payload);
+        using var content = new ByteArrayContent(json);
+        content.Headers.ContentLength = json.Length;
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        using var response = await http.PostAsync("embed-preferences", content, cancellationToken);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<PreferenceEmbedding>(cancellationToken);
         if (result is null || string.IsNullOrWhiteSpace(result.Model) || result.Model.Length > 200
