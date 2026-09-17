@@ -4,7 +4,7 @@ export const landingEs = {
   insideLink: 'Tu experiencia',
   faqLink: 'Preguntas',
   heroDescription: 'Una ruta clara para aprender a tu ritmo.',
-  heroMission: 'MISIÓN 01',
+  heroMission: 'Tu próximo paso de aprendizaje',
   discover: 'Descubrí cómo funciona',
   heroDetail: 'Tu punto de partida, tu siguiente paso.',
   createRoute: 'Crear mi ruta',

@@ -5,7 +5,7 @@ type Translate<T> = { [K in keyof T]: T[K] extends string ? string : Translate<T
 export const landingEn = {
   navigation: 'Explore CODE QUEST', howLink: 'How it works', insideLink: 'Your experience', faqLink: 'Questions',
   heroDescription: 'A clear path to learn at your own pace.',
-  heroMission: 'MISSION 01',
+  heroMission: 'Your next learning step',
   discover: 'Discover how it works', heroDetail: 'Your starting point, your next step.',
   createRoute: 'Create my path',
   promiseTitle: 'Learning is a journey. <accent>Choose your direction.</accent>',

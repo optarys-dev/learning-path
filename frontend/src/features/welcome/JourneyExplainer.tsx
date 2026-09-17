@@ -1,9 +1,15 @@
 import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { BookOpenCheck, Compass, Map, Route, type LucideIcon } from 'lucide-react';
+import { DeviIllustration } from './DeviIllustration';
+import deviProfile from '../../assets/codequest/scenes/12_tarjeta_tip_con_mascota_robótica_futurista.png';
+import deviLaptop from '../../assets/codequest/characters/06_mascota_astronauta_estudiando_con_portátil.png';
+import deviGuidance from '../../assets/codequest/characters/05_mascota_astronauta_presenta_el_roadmap.png';
+import deviSaved from '../../assets/codequest/characters/07_mascota_astronauta_celebrando_el_éxito.png';
 
 const steps = ['personalize', 'discover', 'route', 'progress'] as const;
 const stepIcons: LucideIcon[] = [Compass, Map, Route, BookOpenCheck];
+const stepIllustrations = [deviProfile, deviLaptop, deviGuidance, deviSaved];
 
 export function JourneyExplainer() {
   const { t } = useTranslation();
@@ -27,9 +33,9 @@ export function JourneyExplainer() {
   }
 
   return (
-    <section id="how-it-works" className="landing-section" aria-labelledby={`${id}-title`}>
-      <div className="landing-section__heading">
-        <p className="landing-eyebrow"><span aria-hidden="true">01</span>{t('landing.how.eyebrow')}</p>
+    <section id="how-it-works" className="landing-section journey-story" aria-labelledby={`${id}-title`}>
+      <div className="landing-section__heading journey-story__heading">
+        <p className="landing-eyebrow">{t('landing.how.eyebrow')}</p>
         <h2 id={`${id}-title`}><Trans i18nKey="landing.how.title" components={{ accent: <span className="text-accent" /> }} /></h2>
         <p>{t('landing.how.description')}</p>
       </div>
@@ -50,7 +56,10 @@ export function JourneyExplainer() {
           aria-labelledby={`${id}-tab-${index}`} hidden={active !== index}>
           {active === index && <div className="journey-panel">
             <div className="journey-panel__copy">
-              <span className="journey-panel__number" aria-hidden="true">0{index + 1}<span> / 04</span></span>
+              <div className="journey-panel__guide" aria-hidden="true">
+                <DeviIllustration variant="route" src={stepIllustrations[active]} alt="" width="248" height="277" />
+                <span className="journey-panel__guide-dot" />
+              </div>
               <h3>{t(`landing.how.${step}.title`)}</h3>
               <p>{t(`landing.how.${step}.description`)}</p>
             </div>

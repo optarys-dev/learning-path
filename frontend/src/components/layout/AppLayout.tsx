@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../ui/BrandLogo/BrandLogo';
 import { Button } from '../ui/Button/Button';
 import { LanguageSelector } from '../LanguageSelector/LanguageSelector';
+import { ThemeToggle } from '../ui/ThemeToggle/ThemeToggle';
 import './AppLayout.css';
 import { ContentBoundary } from './ContentBoundary';
 import { PageState } from '../ui/PageState/PageState';
@@ -58,6 +59,7 @@ export function AppLayout({ variant = 'application' }: { variant?: 'application'
               <a href="/#your-experience">{t('landing.insideLink')}</a>
               <a href="/#questions">{t('landing.faqLink')}</a>
             </nav>
+            <ThemeToggle />
             <LanguageSelector />
             {authenticationControl}
           </div> : <>
@@ -78,6 +80,7 @@ export function AppLayout({ variant = 'application' }: { variant?: 'application'
               <NavLink to="/catalog" onClick={() => setMenuOpen(false)}>{t('layout.catalog')}</NavLink>
               <NavLink to="/my-path" onClick={() => setMenuOpen(false)}>{t('layout.myPath')}</NavLink>
             </nav>
+            <ThemeToggle />
             <LanguageSelector />
             {profileLink}
           </div>

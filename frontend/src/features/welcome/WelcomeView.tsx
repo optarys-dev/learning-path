@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { LearningJourney } from './LearningJourney';
 import { JourneyExplainer } from './JourneyExplainer';
 import { LandingDetails } from './LandingDetails';
-import { ArrowRight, Target, BookOpenCheck, Route, type LucideIcon } from 'lucide-react';
+import { ArrowRight, BookOpen, Compass, Map, type LucideIcon } from 'lucide-react';
 import { useAuthSession } from '../auth/useAuthSession';
 import './welcome.css';
 import './landing.css';
@@ -11,7 +11,7 @@ import './landing.css';
 export function WelcomeView() {
   const { t } = useTranslation();
   const { user } = useAuthSession();
-  const promiseIcons: LucideIcon[] = [Target, BookOpenCheck, Route];
+  const promiseIcons: LucideIcon[] = [Compass, BookOpen, Map];
 
   return (
     <div className="landing">
