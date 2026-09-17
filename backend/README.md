@@ -157,6 +157,11 @@ Course tiene categorías y tags mediante course_categories y course_tags. Track 
 Los registros con MetadataOrigin = inferred-seed-v1 son propuestas para pruebas, no temarios o prerrequisitos confirmados por DevTalles. Idioma, duración y verificación quedan pendientes cuando se desconocen. El seed conserva los metadatos previamente completados.
 
 Los embeddings requieren seleccionar un modelo y generar vectores reales. Comparar únicamente vectores del mismo modelo y dimensiones. Se plantea búsqueda exacta para el catálogo actual; no hay índice HNSW.
+El worker Python `embedding-worker/worker.py index` genera los vectores con Ollama.
+`embedding-worker/worker.py serve` genera el vector de cada consulta; .NET busca
+los cursos en pgvector mediante `GET /routes/recommendation/semantic`. Véase
+[la guía de embeddings](Infrastructure/DataSource/CourseEmbeddings.md).
+>>>>>>> Stashed changes
 
 ## Documentación
 

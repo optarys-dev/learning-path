@@ -18,6 +18,7 @@ backend/obj/
 backend/.vs/
 backend/appsettings.Development.json
 backend/appsettings.Local.json
+*_pycache_*
 
 # Tests
 *bin/
