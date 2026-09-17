@@ -1,0 +1,21 @@
+.brand-logo {
+  display: block;
+}
+
+.brand-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.brand-logo__on-light {
+  display: none !important;
+}
+
+html[data-theme='light'] .brand-logo__on-dark {
+  display: none !important;
+}
+
+html[data-theme='light'] .brand-logo__on-light {
+  display: block !important;
+}

@@ -177,6 +177,10 @@ El worker Python `embedding-worker/worker.py index` genera los vectores con Olla
 `embedding-worker/worker.py serve` genera el vector de cada consulta; .NET busca
 los cursos en pgvector mediante `GET /routes/recommendation/semantic`. Véase
 [la guía de embeddings](Infrastructure/DataSource/CourseEmbeddings.md).
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> develop
 
 ## Documentación
 

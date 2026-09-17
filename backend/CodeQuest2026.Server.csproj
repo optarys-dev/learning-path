@@ -27,8 +27,12 @@
     <Folder Include="Infrastructure\DataSource\Migrations\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="embedding-worker\__pycache__\**" />
     <Compile Remove="tests/**/*.cs" />
+    <Content Remove="embedding-worker\__pycache__\**" />
     <Content Remove="tests/**" />
+    <EmbeddedResource Remove="embedding-worker\__pycache__\**" />
+    <None Remove="embedding-worker\__pycache__\**" />
     <None Remove="tests/**" />
   </ItemGroup>
 </Project>
