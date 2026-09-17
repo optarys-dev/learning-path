@@ -1,15 +1,21 @@
 import { Link } from 'react-router-dom';
 import { useAuthSession } from '../auth/useAuthSession';
 import { Trans, useTranslation } from 'react-i18next';
-import { ArrowRight, BookOpen, Compass, ExternalLink, Flag, Layers, Map, Route, Target, type LucideIcon } from 'lucide-react';
+import { ArrowRight, BookOpen, Compass, ExternalLink, Flag, Layers, Map, Route, type LucideIcon } from 'lucide-react';
 import { DeviIllustration } from './DeviIllustration';
-import deviRoute from '../../assets/codequest/characters/13_robot_guía_junto_al_letrero_next_stop.png';
+import deviRoute from '../../assets/codequest/characters/04_mascota_astronauta_con_mapa_del_tesoro.png';
 import deviGoal from '../../assets/codequest/characters/02_mascota_astronauta_cq_en_la_cima.png';
 import deviExperience from '../../assets/codequest/characters/03_mascota_astronauta_cq_en_movimiento.png';
 
 const pathPreview = ['foundations', 'javascript', 'react', 'specialization'] as const;
 const experienceIcons: LucideIcon[] = [Compass, Route, Layers];
 const routeMarkers: LucideIcon[] = [Compass, BookOpen, Map, Flag];
+const previewCourseUrls = {
+  foundations: 'https://cursos.devtalles.com/courses/programacion-para-principiantes',
+  javascript: 'https://cursos.devtalles.com/courses/javascript-moderno',
+  react: 'https://cursos.devtalles.com/courses/react-de-cero',
+  specialization: 'https://cursos.devtalles.com/courses/react-pro',
+} as const;
 
 export function LandingDetails() {
   const { t } = useTranslation();
@@ -44,33 +50,25 @@ export function LandingDetails() {
           <h2 id="route-preview-title"><Trans i18nKey="landing.preview.title" components={{ accent: <span className="text-accent" /> }} /></h2>
           <p>{t('landing.preview.description')}</p>
         </div>
-        <div className="route-preview__composition">
-          <div className="route-preview__guide">
+        <div className="route-preview__composition route-map">
+          <svg className="route-map__trail" viewBox="0 0 1200 520" fill="none" aria-hidden="true" preserveAspectRatio="none">
+            <path d="M104 315 C202 85 322 420 452 228 S691 71 795 314 S1015 414 1100 126" />
+          </svg>
+          <div className="route-preview__guide route-map__guide">
             <DeviIllustration variant="route" src={deviRoute} alt="" width="248" height="277" />
-            <p><Target size={17} aria-hidden="true" />{t('landing.preview.goal')}</p>
-            <span>{t('landing.preview.guide')}</span>
           </div>
-          <ol className="route-preview__list" aria-label={t('landing.preview.listLabel')}>
+          <ol className="route-preview__list route-map__stops" aria-label={t('landing.preview.listLabel')}>
             {pathPreview.map((item, index) => {
               const MarkerIcon = routeMarkers[index];
-              return <li key={item}>
-              <div className="route-preview__marker"><span aria-hidden="true"><MarkerIcon size={15} /></span>{index < pathPreview.length - 1 && <i aria-hidden="true" />}</div>
-              <article className={`route-course ${item === 'react' ? 'route-course--featured' : ''}`}>
-                <div className="route-course__top"><span className="route-course__example">{t('landing.preview.example')}</span><span className="route-course__level">{t(`landing.preview.${item}.level`)}</span></div>
+              return <li key={item} className={`route-map__stop route-map__stop--${item}`}>
+              <span className="route-map__marker" aria-hidden="true"><MarkerIcon size={16} /></span>
+              <a className={`route-course ${item === 'react' ? 'route-course--featured' : ''}`} href={previewCourseUrls[item]} target="_blank" rel="noreferrer" aria-label={`${t(`landing.preview.${item}.title`)} · ${t('landing.preview.openCourse')}`}>
                 <h3>{t(`landing.preview.${item}.title`)}</h3>
-                <p>{t(`landing.preview.${item}.reason`)}</p>
-                <div className="route-course__footer"><span><BookOpen size={16} aria-hidden="true" />{t(`landing.preview.${item}.state`)}</span><button type="button" disabled aria-label={t('landing.preview.linkUnavailable')}><ExternalLink size={16} aria-hidden="true" />{t('landing.preview.openCourse')}</button></div>
-              </article>
+                <ExternalLink size={15} aria-hidden="true" />
+              </a>
             </li>;
             })}
           </ol>
-          <div className="route-preview__outcome">
-            <span className="route-preview__outcome-icon" aria-hidden="true"><Route size={20} strokeWidth={2.25} /></span>
-            <div>
-              <strong>{t('landing.preview.outcomeTitle')}</strong>
-              <span>{t('landing.preview.outcomeText')}</span>
-            </div>
-          </div>
         </div>
       </section>
       <section id="questions" className="landing-section landing-faq" aria-labelledby="faq-title">

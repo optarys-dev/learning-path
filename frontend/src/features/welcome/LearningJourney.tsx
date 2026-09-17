@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { CircleDot, Compass, Flag, Map, MapPin } from 'lucide-react';
 import { DeviIllustration } from './DeviIllustration';
-import devi from '../../assets/codequest/characters/04_mascota_astronauta_con_mapa_del_tesoro.png';
+import devi from '../../assets/codequest/characters/03_mascota_astronauta_cq_en_movimiento.png';
 
 export function LearningJourney() {
   const { t } = useTranslation();
