@@ -10,11 +10,27 @@ y consulta de sesión en `/auth/me`. Ver [configuración y pruebas](docs/DISCORD
 - Catálogo inicial de 72 cursos de DevTalles.
 - 9 categorías y 96 tags relacionados muchos a muchos con cursos.
 - Metadatos inferidos para pruebas: descripción, temario sugerido, objetivos, habilidades, prerrequisitos y público.
+- Extracción de metadatos públicos de las 72 páginas de cursos, con fuente y fecha; importación SQL revisable.
 - Índices de filtrado por estado/nivel, título, categoría y tag.
 - Almacenamiento de embeddings mediante pgvector.
 - Health checks, documento OpenAPI y panel interactivo Swagger en desarrollo.
 
-La generación de embeddings, los endpoints de recomendaciones, el cuestionario y el seguimiento de progreso todavía no están implementados en este backend.
+El cuestionario y el seguimiento de progreso todavía no están implementados en este backend.
+
+Las preferencias se pueden guardar con `PUT /users/me/preferences` y consultar con
+`GET /users/me/preferences`. `isNewUser` en `/auth/me` y `/users/me` es verdadero
+hasta que se guardan las preferencias. Las rutas ya analizadas se guardan con
+`POST /routes` y se consultan con `GET /routes` o `GET /routes/{routeId}`.
+El motor estático ofrece una vista previa con `GET /routes/recommendation` y genera
+y guarda la ruta con `POST /routes/generate`.
+Estos endpoints requieren la sesión de Discord. Aplicar la migración
+`AddUserPreferencesAndLearningRoutes` antes de usarlos. Véase
+[propuesta de recomendaciones](docs/RECOMMENDATIONS.md).
+
+Swagger documenta los cuerpos, la cookie requerida y las respuestas de preferencias
+y rutas. Los errores de la API usan `{ "error": "código", "message": "descripción" }`;
+los errores inesperados devuelven HTTP 500 con `error = internal_error` y se registran
+en el servidor sin exponer detalles internos al cliente.
 
 ## Tecnologías
 
@@ -157,6 +173,10 @@ Course tiene categorías y tags mediante course_categories y course_tags. Track 
 Los registros con MetadataOrigin = inferred-seed-v1 son propuestas para pruebas, no temarios o prerrequisitos confirmados por DevTalles. Idioma, duración y verificación quedan pendientes cuando se desconocen. El seed conserva los metadatos previamente completados.
 
 Los embeddings requieren seleccionar un modelo y generar vectores reales. Comparar únicamente vectores del mismo modelo y dimensiones. Se plantea búsqueda exacta para el catálogo actual; no hay índice HNSW.
+El worker Python `embedding-worker/worker.py index` genera los vectores con Ollama.
+`embedding-worker/worker.py serve` genera el vector de cada consulta; .NET busca
+los cursos en pgvector mediante `GET /routes/recommendation/semantic`. Véase
+[la guía de embeddings](Infrastructure/DataSource/CourseEmbeddings.md).
 
 ## Documentación
 

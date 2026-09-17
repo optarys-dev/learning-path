@@ -1,6 +1,9 @@
 using CodeQuest2026.Server.Application.Oauth2.Discord;
 using CodeQuest2026.Server.Extensions;
 using CodeQuest2026.Server.Infrastructure.OpenApi;
+using CodeQuest2026.Server.Infrastructure;
+using CodeQuest2026.Server.Application.Common;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -8,6 +11,20 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var message = string.Join(" ", context.ModelState.Values
+            .SelectMany(value => value.Errors)
+            .Select(error => error.ErrorMessage)
+            .Where(error => !string.IsNullOrWhiteSpace(error)));
+        return new BadRequestObjectResult(new ApiErrorDto("validation_error",
+            string.IsNullOrWhiteSpace(message) ? "Los datos de la solicitud son inválidos." : message));
+    };
+});
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -49,6 +66,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 app.UseDiscordHttpsCallback(builder.Configuration, app.Environment.IsDevelopment());
 
