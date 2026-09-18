@@ -38,10 +38,15 @@ Estos endpoints requieren la sesión de Discord. Aplicar la migración
 3. Enviar `POST /routes/generate` sin cuerpo. La respuesta `201 Created` incluye
    la ruta y el encabezado `Location` apunta a `GET /routes/{routeId}`.
 
-Si se desea usar Hugging Face, ejecutar antes `embedding-worker/worker.py index`
-y mantener `embedding-worker/worker.py serve` disponible. Consultar
+Si se desea usar Hugging Face, ejecutar antes `embedding-worker/embedding_cli.py index`
+y mantener disponible la API FastAPI mediante `embedding-worker/embedding_cli.py serve`.
+Consultar
 `GET /routes/recommendation/semantic` y guardar la propuesta con `POST /routes`.
 Este último acepta de 1 a 30 cursos activos y usa el orden del arreglo `courses`.
+La API .NET y FastAPI son dos procesos: .NET atiende las rutas de usuarios y FastAPI
+escucha en `127.0.0.1:8765` para generar vectores. `embedding_cli.py serve` sustituye al
+servidor Python anterior; `embedding_cli.py index` es una tarea puntual. El endpoint de
+FastAPI delega la inferencia a `EmbeddingService`, compartido con la indexación.
 
 ```mermaid
 flowchart TD
@@ -50,8 +55,8 @@ flowchart TD
     C -->|Estático| D["GET /routes/recommendation<br/>Vista previa opcional"]
     D --> E["POST /routes/generate<br/>Sin cuerpo JSON"]
     C -->|Estático directo| E
-    C -->|Semántico| F["Indexar cursos<br/>worker.py index"]
-    F --> G["Iniciar servicio<br/>worker.py serve"]
+    C -->|Semántico| F["Indexar cursos<br/>embedding_cli.py index"]
+    F --> G["Iniciar servicio<br/>embedding_cli.py serve"]
     G --> H["GET /routes/recommendation/semantic<br/>Vista previa con embeddings"]
     H --> I["POST /routes<br/>Enviar método, explicación y cursos"]
     E --> J["201 Created<br/>Ruta guardada"]
@@ -205,9 +210,10 @@ Course tiene categorías y tags mediante course_categories y course_tags. Track 
 Los registros con MetadataOrigin = inferred-seed-v1 son propuestas para pruebas, no temarios o prerrequisitos confirmados por DevTalles. Idioma, duración y verificación quedan pendientes cuando se desconocen. El seed conserva los metadatos previamente completados.
 
 Los embeddings requieren seleccionar un modelo y generar vectores reales. Comparar únicamente vectores del mismo modelo y dimensiones. Se plantea búsqueda exacta para el catálogo actual; no hay índice HNSW.
-El worker Python `embedding-worker/worker.py index` genera los vectores localmente
+El indexador `embedding-worker/embedding_cli.py index` genera los vectores localmente
 con `Qwen/Qwen3-Embedding-0.6B` de Hugging Face.
-`embedding-worker/worker.py serve` genera el vector de cada consulta; .NET busca
+La API FastAPI iniciada con `embedding-worker/embedding_cli.py serve` genera el vector
+de cada consulta; .NET busca
 los cursos en pgvector mediante `GET /routes/recommendation/semantic`. Véase
 [la guía de embeddings](Infrastructure/DataSource/CourseEmbeddings.md).
 
@@ -221,5 +227,5 @@ los cursos en pgvector mediante `GET /routes/recommendation/semantic`. Véase
 
 ## Validación
 
-Se comprobaron compilación, correspondencia entre modelo y snapshot, generación de SQL y traducción de consultas por coseno. Hay pruebas automatizadas en `tests/CodeQuest2026.Server.Tests` y `embedding-worker/test_worker.py`. La ejecución contra PostgreSQL, el modelo descargado y el servicio HTTP requieren validación en el entorno de destino.
+Se comprobaron compilación, correspondencia entre modelo y snapshot, generación de SQL y traducción de consultas por coseno. Hay pruebas automatizadas en `tests/CodeQuest2026.Server.Tests` y `embedding-worker/test_embedding_service.py`. La ejecución contra PostgreSQL, el modelo descargado y el servicio HTTP requieren validación en el entorno de destino.
 

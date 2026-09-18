@@ -21,9 +21,14 @@ dotnet ef database update --context AppDbContext
 python -m venv embedding-worker/.venv
 embedding-worker/.venv/Scripts/python -m pip install -r embedding-worker/requirements.txt
 $env:DATABASE_URL = 'postgresql://USUARIO:CLAVE@localhost:5432/codequest2026'
-embedding-worker/.venv/Scripts/python embedding-worker/worker.py index
-embedding-worker/.venv/Scripts/python embedding-worker/worker.py serve
+embedding-worker/.venv/Scripts/python embedding-worker/embedding_cli.py index
+embedding-worker/.venv/Scripts/python embedding-worker/embedding_cli.py serve
 ```
+
+`serve` inicia la API FastAPI en Uvicorn. El endpoint compatible es
+`POST /embed-preferences`; `GET /health` indica si el modelo terminó de cargar y
+`GET /docs` expone la documentación interactiva. Desde `embedding-worker/` también
+se puede ejecutar `python -m uvicorn api:app --host 127.0.0.1 --port 8765`.
 
 La migración crea course_embeddings sin filas. No genera vectores sintéticos:
 se necesita seleccionar un modelo y ejecutar un proceso de embeddings real.

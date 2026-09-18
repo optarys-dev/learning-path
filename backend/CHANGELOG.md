@@ -24,6 +24,8 @@ Cambios del backend de CodeQuest2026. Estas entradas describen el código dispon
 
 ### Cambiado
 
+- El servidor HTTP de embeddings pasó de `ThreadingHTTPServer` a FastAPI/Uvicorn. Los comandos principales son `embedding_cli.py index` y `embedding_cli.py serve`; `worker.py` conserva compatibilidad. Se mantiene `POST /embed-preferences` y se agregan `/health` y `/docs`.
+- Se extrajo `EmbeddingService` para compartir la carga del modelo, la preparación de textos y la inferencia entre la API FastAPI y la indexación.
 - Track se reemplazó por categorías; se conserva la clasificación antes de eliminar la columna.
 - Se eliminaron el check y el índice de Track.
 - Los índices simples de tablas de relación se reemplazaron por índices compuestos que incluyen CourseId.
@@ -41,6 +43,6 @@ Cambios del backend de CodeQuest2026. Estas entradas describen el código dispon
 
 - ReplaceTrackWithCategories no admite reversión automática.
 - Los metadatos inferidos son datos de prueba, no temarios oficiales verificados.
-- La migración crea `course_embeddings` vacía; ejecutar `embedding-worker/worker.py index` para generar los vectores. La generación automática de rutas sigue usando `static-v1`.
+- La migración crea `course_embeddings` vacía; ejecutar `embedding-worker/embedding_cli.py index` para generar los vectores. La generación automática de rutas sigue usando `static-v1`.
 - No se incluye HNSW; la consulta documentada usa búsqueda exacta.
 - La aplicación de migraciones, la ejecución contra PostgreSQL y la inferencia real del modelo requieren validación en el entorno de destino.
