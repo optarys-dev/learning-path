@@ -115,7 +115,7 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__step-count { display: inline; margin: 0; font-weight: 700; }
 .learning-profile__step-name { display: inline; margin: 0 0 var(--cq-space-3); color: var(--cq-color-text-secondary); font-size: var(--cq-font-size-label); }
 .learning-profile__step-name::before { content: ' · '; }
-.learning-profile__progress { height: .375rem; }
+.learning-profile__progress { height: .4375rem; }
 .learning-profile__progress span { background: linear-gradient(90deg, var(--cq-color-action-start), var(--cq-color-brand-primary)); transition: width var(--cq-transition-base); }
 .learning-profile__milestones span {
   width: .55rem;
@@ -141,6 +141,18 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__area-card small { line-height: var(--cq-line-height-label); }
 .learning-profile__chip { min-height: 2.75rem; border-radius: var(--cq-radius-pill); }
 .learning-profile__options--compact { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
+.learning-profile__interests {
+  /* The header is in normal flow; leave responsive context above the legend. */
+  scroll-margin-top: clamp(var(--cq-space-8), 12vh, 7rem);
+  animation: profile-interests-enter 160ms ease-out both;
+}
+@keyframes profile-interests-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .learning-profile__interests { animation: none; }
+}
 .learning-profile__hint { margin: 0 0 var(--cq-space-2); }
 .learning-profile__error { margin-top: var(--cq-space-4); padding: var(--cq-space-3) var(--cq-space-4); border-left: 3px solid var(--cq-color-error); background: color-mix(in srgb, var(--cq-color-error) 9%, transparent); }
 .learning-profile__summary { gap: 0; border: 1px solid var(--cq-color-border-default); border-radius: var(--cq-radius-sm); overflow: hidden; }
@@ -175,7 +187,8 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 
 .learning-profile__progress-geometry {
   position: relative;
-  margin-inline: .275rem;
+  /* Half the milestone diameter plus its 3px current-state ring. */
+  margin-inline: calc(.375rem + 3px);
 }
 .learning-profile__progress { width: 100%; }
 .learning-profile__milestones {
@@ -188,8 +201,8 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__milestones span {
   position: absolute;
   top: 50%;
-  width: .55rem;
-  height: .55rem;
+  width: .75rem;
+  height: .75rem;
   transform: translate(-50%, -50%);
   border: 1px solid var(--cq-color-border-default);
   background: var(--cq-color-bg-surface);
@@ -410,7 +423,6 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__welcome-content > p:not(.learning-profile__welcome-lead) { margin-bottom: var(--cq-space-6); }
 .learning-profile--welcome {
   max-width: 78rem;
-  margin-top: clamp(var(--cq-space-8), 9vh, 7rem);
 }
 
 @media (max-width: 38rem) {

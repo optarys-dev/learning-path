@@ -48,6 +48,8 @@ export function QuestionnairePage() {
   const [hasNavigated, setHasNavigated] = useState(false);
   const [result, setResult] = useState<QuestionnaireAnswers | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const interestsRef = useRef<HTMLFieldSetElement>(null);
+  const manualAreaSelection = useRef(false);
   const { answers, currentStep } = state;
   const question = questions[currentStep];
   const stepMascot = {
@@ -59,6 +61,17 @@ export function QuestionnairePage() {
   }[question.id];
   const technologies = answers.goal === null ? [] : areas[answers.goal];
   const progressPercent = questions.length > 1 ? (currentStep / (questions.length - 1)) * 100 : 100;
+
+  useLayoutEffect(() => {
+    // Only the area radio handler requests this; restored answers never do.
+    if (!manualAreaSelection.current) return;
+    manualAreaSelection.current = false;
+    interestsRef.current?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+      block: 'start',
+      inline: 'nearest',
+    });
+  }, [answers.goal]);
 
   useEffect(() => { if (result === null) saveQuestionnaireDraft(state); }, [state, result]);
   useEffect(() => { document.title = `${t('questionnaire.title')} · CODE QUEST 2026`; }, [t]);
@@ -210,13 +223,16 @@ export function QuestionnairePage() {
                 {(Object.keys(areas) as AreaId[]).map(area => (
                   <label className="learning-profile__option learning-profile__area-card" key={area}>
                     <input type="radio" name="learning-area" checked={answers.goal === area}
-                      onChange={() => setAnswers(selectArea(answers, area))} />
+                      onChange={() => {
+                        manualAreaSelection.current = true;
+                        setAnswers(selectArea(answers, area));
+                      }} />
                     <span><strong>{t(`questionnaire.areas.${area}`)}</strong><small>{t(`questionnaire.areaDescriptions.${area}`)}</small></span>
                   </label>
                 ))}
               </fieldset>
               {answers.goal !== null && (
-                <fieldset className="learning-profile__options learning-profile__options--compact">
+                <fieldset ref={interestsRef} className="learning-profile__options learning-profile__options--compact learning-profile__interests">
                   <legend>{t('questionnaire.interestsPrompt')}</legend>
                   {technologies.map(item => (
                     <label className="learning-profile__option learning-profile__chip" key={item}>
