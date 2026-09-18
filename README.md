@@ -38,7 +38,11 @@ La API permite solicitudes únicamente desde `http://localhost:5173` durante des
 Desde la raíz, copia `.env.example` a `.env` y cambia `POSTGRES_PASSWORD`.
 El puerto público de la API es `8080` por defecto; PostgreSQL solo se publica en
 `127.0.0.1:5432` para las migraciones locales. FastAPI solo es accesible desde
-la red interna de Compose. El primer arranque descarga el modelo de Hugging Face.
+la red interna de Compose. `EMBEDDING_SERVICE_URL` en `.env` define la URL base que
+usa .NET para llamar a FastAPI. Incluye `/` final; agrega un prefijo de ruta
+solo si un proxy lo publica bajo ese prefijo.
+Dentro de Compose usa `http://embeddings:8765/`; `localhost` apuntaría al contenedor
+de la API. El primer arranque descarga el modelo de Hugging Face.
 
 Para preparar una base nueva en PowerShell:
 
@@ -61,8 +65,8 @@ Ajusta el puerto, usuario y base de la cadena local si cambiaste `POSTGRES_PORT`
 `POSTGRES_USER` o `POSTGRES_DB`. `index` es una tarea explícita: repítela cuando
 cambie el catálogo o el modelo. Comprueba `http://localhost:8080/health/api` y
 `http://localhost:8080/health/db`. El servicio Python responde en su
-`/health` interno. El contenedor .NET se ejecuta en modo `Development` para
-permitir OAuth local por HTTP; en este modo expone Swagger en `/swagger`.
+`/health` interno. El contenedor .NET se ejecuta en modo `Production`; sirve el frontend compilado
+y requiere HTTPS para las cookies de OAuth. Swagger solo se expone en `Development`.
 
 ## Documentación
 

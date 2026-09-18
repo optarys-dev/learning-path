@@ -49,7 +49,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 8080
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-codequest2026};Username=${POSTGRES_USER:-codequest};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
-      EmbeddingService__Url: http://embeddings:8765/
+      EmbeddingService__Url: ${EMBEDDING_SERVICE_URL:-http://embeddings:8765/}
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
       DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
     ports:
