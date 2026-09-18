@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(options =>
             options.RegisterServicesFromAssemblyContaining<SyncDiscordUserCommand>());
         services.AddSingleton<IStaticCourseRecommendationEngine, StaticCourseRecommendationEngine>();
+        services.AddSingleton<HybridSemanticRecommendationEngine>();
         var embeddingServiceUrl = configuration["EmbeddingService:Url"] ?? "http://127.0.0.1:8765/";
         services.AddHttpClient<PreferenceEmbeddingClient>(client =>
         {

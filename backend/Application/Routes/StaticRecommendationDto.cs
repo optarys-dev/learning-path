@@ -1,6 +1,6 @@
 namespace CodeQuest2026.Server.Application.Routes;
 
-/// <summary>Resultado reproducible del motor de recomendación estático.</summary>
+/// <summary>Resultado de una recomendación estática o semántica.</summary>
 /// <param name="Method">Versión del algoritmo utilizado.</param>
 /// <param name="Goal">Objetivo guardado del usuario.</param>
 /// <param name="Explanation">Cómo se eligieron y ordenaron los cursos.</param>

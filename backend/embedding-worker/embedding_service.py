@@ -44,6 +44,7 @@ def preference_text(preference):
     lines = []
     add(lines, "Objetivo", preference.get("goal"))
     add(lines, "Intereses", preference.get("interests") or [])
+    # Experience affects query similarity through this text; the graph scorer has no separate weight for it.
     add(lines, "Experiencia", preference.get("experienceLevel"))
     # Existing skills describe readiness, not topics the user wants to learn.
     return "\n".join(lines)

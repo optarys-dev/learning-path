@@ -37,8 +37,8 @@ public class RoutesController(ISender sender) : ControllerBase
     }
 
     /// <summary>Busca cursos con embeddings locales a partir de las preferencias guardadas.</summary>
-    /// <remarks>El servicio Python genera el vector de consulta. La API solo busca cursos activos en pgvector usando el mismo modelo y dimensión. No guarda una ruta.</remarks>
-    /// <response code="200">Cursos más similares, ordenados para estudio por nivel.</response>
+    /// <remarks>El servicio Python genera el vector de consulta. La API combina similitud en pgvector con títulos y asociaciones observadas entre categorías, tags y cursos. No guarda una ruta.</remarks>
+    /// <response code="200">Cursos relevantes con cobertura temática, ordenados para estudio por nivel y requisitos publicados.</response>
     /// <response code="401">No hay una sesión válida.</response>
     /// <response code="409">Faltan preferencias o todavía no se indexaron cursos con ese modelo.</response>
     /// <response code="502">El servicio local de embeddings rechazó la solicitud o devolvió un error HTTP.</response>

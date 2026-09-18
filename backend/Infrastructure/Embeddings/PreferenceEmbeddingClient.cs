@@ -7,7 +7,7 @@ namespace CodeQuest2026.Server.Infrastructure.Embeddings;
 
 public sealed record PreferenceEmbedding(string Model, int Dimensions, float[] Embedding);
 
-/// <summary>Consulta el servicio Python que genera vectores; no carga modelos en la API.</summary>
+/// <summary>Envía objetivo, intereses y nivel de experiencia al servicio Python de embeddings.</summary>
 public sealed class PreferenceEmbeddingClient(HttpClient http)
 {
     public async Task<PreferenceEmbedding> EmbedAsync(UserPreference preference, CancellationToken cancellationToken)

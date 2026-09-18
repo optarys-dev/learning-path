@@ -24,6 +24,7 @@ Cambios del backend de CodeQuest2026. Estas entradas describen el código dispon
 
 ### Cambiado
 
+- La vista previa semántica usa `semantic-graph-v6`: evalúa todos los embeddings elegibles, deriva asociaciones categoría–tag y reconoce títulos y equivalencias `web`/`js`. Cuando el objetivo nombra un tema, este prevalece sobre otros intereses para definir los cursos centrales; los requisitos no cuentan como temas enseñados y, si hay cursos centrales, se limita a un complemento. Se descartan requisitos opcionales o de instalación.
 - El servidor HTTP de embeddings pasó de `ThreadingHTTPServer` a FastAPI/Uvicorn. Los comandos principales son `embedding_cli.py index` y `embedding_cli.py serve`; `worker.py` conserva compatibilidad. Se mantiene `POST /embed-preferences` y se agregan `/health` y `/docs`.
 - Se extrajo `EmbeddingService` para compartir la carga del modelo, la preparación de textos y la inferencia entre la API FastAPI y la indexación.
 - Track se reemplazó por categorías; se conserva la clasificación antes de eliminar la columna.

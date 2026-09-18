@@ -57,7 +57,7 @@ flowchart TD
     C -->|Estático directo| E
     C -->|Semántico| F["Indexar cursos<br/>embedding_cli.py index"]
     F --> G["Iniciar servicio<br/>embedding_cli.py serve"]
-    G --> H["GET /routes/recommendation/semantic<br/>Vista previa con embeddings"]
+    G --> H["GET /routes/recommendation/semantic<br/>Embeddings + títulos + categorías/tags + requisitos verificados"]
     H --> I["POST /routes<br/>Enviar método, explicación y cursos"]
     E --> J["201 Created<br/>Ruta guardada"]
     I --> J
@@ -216,6 +216,14 @@ La API FastAPI iniciada con `embedding-worker/embedding_cli.py serve` genera el 
 de cada consulta; .NET busca
 los cursos en pgvector mediante `GET /routes/recommendation/semantic`. Véase
 [la guía de embeddings](Infrastructure/DataSource/CourseEmbeddings.md).
+La vista previa semántica usa `semantic-graph-v6`: combina la similitud de todos
+los cursos elegibles con términos concretos del título y asociaciones observadas
+entre categorías, tags y cursos. Reconoce `web` como Frontend/Backend y `js` como
+JavaScript. Cuando el objetivo nombra un tema y combina una categoría del catálogo,
+ese tema prevalece sobre otros intereses al definir los cursos centrales;
+prioriza cursos que cubren ambas facetas y una base del tema; limita los cursos
+complementarios y puede devolver menos de seis. Los requisitos publicados
+solo orientan el orden cuando el metadato está verificado; no bloquean cursos.
 
 ## Documentación
 
