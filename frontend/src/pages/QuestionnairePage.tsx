@@ -27,6 +27,8 @@ function toggle(items: TechnologyId[], item: TechnologyId): TechnologyId[] {
   return items.includes(item) ? items.filter(value => value !== item) : [...items, item];
 }
 
+const COMPLETE_TOP_GAP = 12;
+
 export function QuestionnairePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -37,6 +39,7 @@ export function QuestionnairePage() {
   const [entryPhase, setEntryPhase] = useState<'idle' | 'preparing' | 'sliding'>('idle');
   const [started, setStarted] = useState(false);
   const entryFrame = useRef<number | null>(null);
+  const startScrollFrame = useRef<number | null>(null);
   const flowResizeObserver = useRef<ResizeObserver | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -48,8 +51,11 @@ export function QuestionnairePage() {
   const [hasNavigated, setHasNavigated] = useState(false);
   const [result, setResult] = useState<QuestionnaireAnswers | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const interestsRef = useRef<HTMLFieldSetElement>(null);
+  const completeRef = useRef<HTMLElement>(null);
+  const areasRef = useRef<HTMLFieldSetElement>(null);
+  const technologySectionRef = useRef<HTMLDivElement>(null);
   const manualAreaSelection = useRef(false);
+  const pendingProfileScroll = useRef<'start' | 'step' | 'complete' | null>(null);
   const { answers, currentStep } = state;
   const question = questions[currentStep];
   const stepMascot = {
@@ -61,15 +67,34 @@ export function QuestionnairePage() {
   }[question.id];
   const technologies = answers.goal === null ? [] : areas[answers.goal];
   const progressPercent = questions.length > 1 ? (currentStep / (questions.length - 1)) * 100 : 100;
+  const interestsPrompt = t('questionnaire.interestsPrompt');
+  const interestsQuestionEnd = interestsPrompt.indexOf('?') + 1;
 
   useLayoutEffect(() => {
     // Only the area radio handler requests this; restored answers never do.
     if (!manualAreaSelection.current) return;
+    const profile = profileRef.current;
+    const areaOptions = areasRef.current?.querySelectorAll<HTMLElement>('.learning-profile__area-card');
+    const technologySection = technologySectionRef.current;
+    const header = profile?.closest('.app-shell')?.querySelector<HTMLElement>('.app-header');
+    if (!profile || !areaOptions?.length || !technologySection || !header) return;
+    const areaCards = [...areaOptions];
+    const lastAreaBounds = areaCards.at(-1)?.getBoundingClientRect();
+    if (!lastAreaBounds) return;
+    const hasTwoColumns = areaCards.length > 1 &&
+      Math.abs(areaCards[0].getBoundingClientRect().top - areaCards[1].getBoundingClientRect().top) < 1;
+    const contextArea = hasTwoColumns
+      ? [...areaCards].reverse().find(area => area.getBoundingClientRect().top < lastAreaBounds.top - 1) ?? areaCards.at(-1)
+      : areaCards.at(-1);
+    const contextBounds = contextArea?.getBoundingClientRect();
+    if (!contextBounds) return;
+    const sectionStyle = getComputedStyle(technologySection);
+    const visualGap = parseFloat(sectionStyle.paddingTop);
+    const topInset = header.getBoundingClientRect().height + visualGap;
     manualAreaSelection.current = false;
-    interestsRef.current?.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-      block: 'start',
-      inline: 'nearest',
+    window.scrollTo({
+      top: Math.max(0, window.scrollY + contextBounds.top - topInset),
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
     });
   }, [answers.goal]);
 
@@ -77,8 +102,71 @@ export function QuestionnairePage() {
   useEffect(() => { document.title = `${t('questionnaire.title')} · CODE QUEST 2026`; }, [t]);
   useEffect(() => {
     if (welcome) welcomeHeadingRef.current?.focus();
-    else headingRef.current?.focus(started && currentStep === 0 && !hasNavigated ? { preventScroll: true } : undefined);
-  }, [welcome, currentStep, result, started, hasNavigated]);
+    else headingRef.current?.focus({ preventScroll: true });
+  }, [welcome, currentStep, result]);
+  useEffect(() => {
+    if (pendingProfileScroll.current !== 'complete' || result === null) return;
+    const complete = completeRef.current;
+    if (!complete) return;
+    const mascot = complete.querySelector<HTMLImageElement>('.learning-profile__mascot--ready');
+    let cancelled = false;
+    const scrollToComplete = () => {
+      if (cancelled) return;
+      pendingProfileScroll.current = null;
+      const completeTop = complete.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: Math.max(0, completeTop - COMPLETE_TOP_GAP),
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
+    };
+    if (!mascot || mascot.complete) {
+      scrollToComplete();
+      return;
+    }
+    mascot.addEventListener('load', scrollToComplete, { once: true });
+    mascot.addEventListener('error', scrollToComplete, { once: true });
+    return () => {
+      cancelled = true;
+      mascot.removeEventListener('load', scrollToComplete);
+      mascot.removeEventListener('error', scrollToComplete);
+    };
+  }, [result]);
+  useLayoutEffect(() => {
+    const scrollIntent = pendingProfileScroll.current;
+    if (!scrollIntent) return;
+    if (scrollIntent === 'complete') return;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (scrollIntent === 'start' && !prefersReducedMotion) {
+      if (!welcome || entryPhase !== 'sliding') return;
+      const profile = profileRef.current;
+      if (!profile) return;
+      const finalProfileTop = profile.getBoundingClientRect().top + window.scrollY -
+        parseFloat(getComputedStyle(profile).marginTop);
+      pendingProfileScroll.current = null;
+      const scrollWhenReachable = () => {
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        const revealFinished = ![profile, viewportRef.current, stackRef.current].some(element =>
+          element?.getAnimations().some(animation => animation instanceof CSSTransition && animation.playState !== 'finished'));
+        if (maxScroll + 0.5 >= finalProfileTop || revealFinished) {
+          startScrollFrame.current = null;
+          window.scrollTo({ top: finalProfileTop, behavior: 'smooth' });
+          return;
+        }
+        startScrollFrame.current = requestAnimationFrame(scrollWhenReachable);
+      };
+      startScrollFrame.current = requestAnimationFrame(scrollWhenReachable);
+      return;
+    }
+    if (welcome || entryPhase !== 'idle') return;
+    const target = profileRef.current;
+    if (!target) return;
+    pendingProfileScroll.current = null;
+    const targetTop = target.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({
+      top: targetTop,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
+  }, [welcome, entryPhase, currentStep, result]);
   useLayoutEffect(() => {
     if (!welcome && viewportRef.current) {
       viewportRef.current.style.height = '';
@@ -87,12 +175,14 @@ export function QuestionnairePage() {
   }, [welcome]);
   useEffect(() => () => {
     if (entryFrame.current !== null) cancelAnimationFrame(entryFrame.current);
+    if (startScrollFrame.current !== null) cancelAnimationFrame(startScrollFrame.current);
     flowResizeObserver.current?.disconnect();
   }, []);
 
   function getStarted() {
     if (entryPhase !== 'idle') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      pendingProfileScroll.current = 'start';
       setStarted(true);
       setWelcome(false);
       return;
@@ -105,6 +195,7 @@ export function QuestionnairePage() {
     const introHeight = intro.getBoundingClientRect().height;
     viewport.style.height = `${introHeight}px`;
     stack.style.setProperty('--slide-distance', `${introHeight}px`);
+    pendingProfileScroll.current = 'start';
     setEntryPhase('preparing');
     entryFrame.current = requestAnimationFrame(() => {
       // The prepared flow already has the questionnaire's final responsive width.
@@ -152,6 +243,7 @@ export function QuestionnairePage() {
   function continueFlow() {
     if (!isStepComplete(currentStep, answers)) { setShowError(true); return; }
     if (currentStep < questions.length - 1) {
+      pendingProfileScroll.current = 'step';
       setHasNavigated(true);
       setState(previous => ({ ...previous, currentStep: previous.currentStep + 1 }));
       setShowError(false);
@@ -159,11 +251,13 @@ export function QuestionnairePage() {
     }
     const incomplete = questions.findIndex((_, index) => !isStepComplete(index, answers));
     if (incomplete >= 0) {
+      pendingProfileScroll.current = 'step';
       setHasNavigated(true);
       setState(previous => ({ ...previous, currentStep: incomplete }));
       setShowError(true);
       return;
     }
+    pendingProfileScroll.current = 'complete';
     setResult({ ...answers, interests: [...answers.interests], knownSkills: [...answers.knownSkills] });
     clearQuestionnaireDraft();
   }
@@ -197,7 +291,7 @@ export function QuestionnairePage() {
             <p>{t('questionnaire.description')}</p>
           </header>
           {result === null ? (
-        <section className="learning-profile__step" aria-labelledby="question-title">
+        <section className="learning-profile__step" data-question={question.id} aria-labelledby="question-title">
           <p className="learning-profile__step-count">{t('questionnaire.stepCount', { current: currentStep + 1, total: questions.length })}</p>
           <p className="learning-profile__step-name">{t(`questionnaire.stepNames.${question.id}`)}</p>
           <div className="learning-profile__progress-geometry">
@@ -218,7 +312,7 @@ export function QuestionnairePage() {
           <p className="learning-profile__question-hint"><span aria-hidden="true">✦</span>{t(`questionnaire.stepHints.${question.id}`)}</p>
           {question.id === 'learningGoal' && (
             <>
-              <fieldset className="learning-profile__options learning-profile__options--areas" aria-describedby={showError ? 'question-error' : undefined}>
+              <fieldset ref={areasRef} className="learning-profile__options learning-profile__options--areas" aria-describedby={showError ? 'question-error' : undefined}>
                 <legend className="sr-only">{t('questionnaire.questions.learningGoal')}</legend>
                 {(Object.keys(areas) as AreaId[]).map(area => (
                   <label className="learning-profile__option learning-profile__area-card" key={area}>
@@ -232,8 +326,12 @@ export function QuestionnairePage() {
                 ))}
               </fieldset>
               {answers.goal !== null && (
-                <fieldset ref={interestsRef} className="learning-profile__options learning-profile__options--compact learning-profile__interests">
-                  <legend>{t('questionnaire.interestsPrompt')}</legend>
+                <div className="learning-profile__technology-section" ref={technologySectionRef}>
+                <fieldset className="learning-profile__options learning-profile__options--compact learning-profile__interests">
+                  <legend>
+                    <span className="learning-profile__technology-title">{interestsQuestionEnd ? interestsPrompt.slice(0, interestsQuestionEnd) : interestsPrompt}</span>
+                    {interestsQuestionEnd > 0 && <span className="learning-profile__technology-hint">{interestsPrompt.slice(interestsQuestionEnd).trim()}</span>}
+                  </legend>
                   {technologies.map(item => (
                     <label className="learning-profile__option learning-profile__chip" key={item}>
                       <input type="checkbox" checked={answers.interests.includes(item)}
@@ -242,6 +340,7 @@ export function QuestionnairePage() {
                     </label>
                   ))}
                 </fieldset>
+                </div>
               )}
             </>
           )}
@@ -298,6 +397,7 @@ export function QuestionnairePage() {
           </div>
           <div className="learning-profile__actions">
             {currentStep > 0 && <Button variant="secondary" onClick={() => {
+              pendingProfileScroll.current = 'step';
               setHasNavigated(true);
               setState(previous => ({ ...previous, currentStep: previous.currentStep - 1 })); setShowError(false);
             }}>{t('questionnaire.back')}</Button>}
@@ -305,7 +405,7 @@ export function QuestionnairePage() {
           </div>
         </section>
       ) : (
-        <section className="learning-profile__step learning-profile__complete" role="status">
+        <section ref={completeRef} className="learning-profile__step learning-profile__complete" role="status">
           <header className="learning-profile__complete-hero">
             <img className="learning-profile__mascot learning-profile__mascot--ready" src={deviReady} alt="" />
             <div>
