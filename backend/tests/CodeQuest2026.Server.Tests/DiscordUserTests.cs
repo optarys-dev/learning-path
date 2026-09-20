@@ -34,6 +34,7 @@ public sealed class DiscordUserTests : IAsyncLifetime
                 user_id TEXT PRIMARY KEY, discord_id TEXT NOT NULL UNIQUE,
                 username TEXT NOT NULL, display_name TEXT NULL, avatar TEXT NULL,
                 created_at TEXT NOT NULL, last_login_at TEXT NOT NULL);
+            CREATE TABLE user_preferences (user_id TEXT PRIMARY KEY);
             """;
         await command.ExecuteNonQueryAsync();
         var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -53,6 +54,7 @@ public sealed class DiscordUserTests : IAsyncLifetime
         var first = await Sender.Send(new GetCurrentUserQuery("123456789012345678"));
         Assert.NotNull(first);
         Assert.True(Guid.TryParse(first.UserId, out _));
+        Assert.True(first.IsNewUser);
 
         await Sender.Send(new SyncDiscordUserCommand(first.DiscordId, "renamed", null, null));
         var updated = await Sender.Send(new GetCurrentUserQuery(first.DiscordId));
@@ -75,6 +77,22 @@ public sealed class DiscordUserTests : IAsyncLifetime
         await Assert.ThrowsAsync<ArgumentException>(() =>
             Sender.Send(new SyncDiscordUserCommand(id, username, null, null)));
         Assert.Equal(0, await scope.ServiceProvider.GetRequiredService<AppDbContext>().Users.CountAsync());
+    }
+
+    [Fact]
+    public async Task SavingPreferencesClearsNewUserFlag()
+    {
+        await Sender.Send(new SyncDiscordUserCommand("123", "alice", null, null));
+        var first = await Sender.Send(new GetCurrentUserQuery("123"));
+        Assert.NotNull(first);
+        Assert.True(first.IsNewUser);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "INSERT INTO user_preferences (user_id) VALUES ($userId)";
+        command.Parameters.AddWithValue("$userId", first.UserId);
+        await command.ExecuteNonQueryAsync();
+        var updated = await Sender.Send(new GetCurrentUserQuery("123"));
+        Assert.NotNull(updated);
+        Assert.False(updated.IsNewUser);
     }
 
     [Fact]
@@ -129,7 +147,24 @@ public sealed class DiscordUserTests : IAsyncLifetime
             modelBuilder.Ignore<Category>();
             modelBuilder.Ignore<Tag>();
             modelBuilder.Ignore<CourseEmbedding>();
+            modelBuilder.Ignore<LearningRoute>();
+            modelBuilder.Ignore<LearningRouteCourse>();
             new UserConfiguration().Configure(modelBuilder.Entity<CodeQuest2026.Server.Infrastructure.DataSource.Entities.User>());
+            modelBuilder.Entity<UserPreference>(builder =>
+            {
+                builder.ToTable("user_preferences");
+                builder.HasKey(x => x.UserId);
+                builder.Property(x => x.UserId).HasColumnName("user_id");
+                builder.Ignore(x => x.Goal);
+                builder.Ignore(x => x.ExperienceLevel);
+                builder.Ignore(x => x.Interests);
+                builder.Ignore(x => x.ExistingSkills);
+                builder.Ignore(x => x.PreferredLanguage);
+                builder.Ignore(x => x.MinutesPerWeek);
+                builder.Ignore(x => x.UpdatedAt);
+                builder.HasOne(x => x.User).WithOne(x => x.Preferences)
+                    .HasForeignKey<UserPreference>(x => x.UserId);
+            });
         }
     }
 }

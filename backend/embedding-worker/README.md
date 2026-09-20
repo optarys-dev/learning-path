@@ -1,11 +1,11 @@
-# Embedding Worker
+# API de embeddings
 
-Servicio local para generar embeddings de cursos y preferencias usando un modelo de Hugging Face y almacenarlos en PostgreSQL con soporte de pgvector.
+API local con FastAPI para generar embeddings de preferencias con un modelo de Hugging Face. La tarea `embedding_cli.py index` genera y guarda los embeddings de cursos en PostgreSQL con pgvector.
 
 Este worker es el componente responsable de:
 
 - indexar textos de cursos y guardar vectores en la base de datos
-- exponer un endpoint para generar embeddings de preferencias
+- exponer `POST /embed-preferences` mediante FastAPI
 - usar un modelo local de `sentence-transformers` sin depender de un servicio externo
 
 ## Requisitos
@@ -16,9 +16,13 @@ Este worker es el componente responsable de:
 
 ## Estructura
 
-- `worker.py`: lógica principal del worker
-- `test_worker.py`: pruebas unitarias del comportamiento esperado
+- `embedding_cli.py`: comandos de indexación y arranque de Uvicorn
+- `worker.py`: acceso compatible para los comandos anteriores
+- `api.py`: validación HTTP y endpoints FastAPI
+- `embedding_service.py`: carga del modelo, preparación del texto y generación de vectores
+- `test_embedding_service.py`: pruebas del servicio y la API
 - `requirements.txt`: dependencias del proyecto
+- `requirements-test.txt`: dependencias de pruebas HTTP
 
 ## Instalación
 
@@ -28,7 +32,7 @@ En Windows PowerShell:
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ## Variables de entorno
@@ -48,15 +52,18 @@ $env:EMBEDDING_PORT="8765"
 - `EMBEDDING_MODEL`: nombre del modelo de Hugging Face a usar.
 - `EMBEDDING_REVISION`: rama o revisión del modelo.
 - `EMBEDDING_DEVICE`: `cpu` o `cuda` según el hardware disponible.
-- `EMBEDDING_HOST`: IP de escucha del servicio HTTP.
-- `EMBEDDING_PORT`: puerto del servicio HTTP.
+- `EMBEDDING_HOST`: interfaz donde escucha Uvicorn; por defecto `127.0.0.1`, accesible solo desde este equipo.
+- `EMBEDDING_PORT`: puerto local de Uvicorn; por defecto `8765`. La URL configurada en .NET debe apuntar al mismo host y puerto.
+
+Estas dos variables son opcionales. `index` consulta PostgreSQL y no abre un puerto;
+solo `serve` inicia el servidor HTTP que .NET utiliza para solicitar vectores.
 
 ## Uso
 
 ### 1) Indexar cursos
 
 ```powershell
-python worker.py index
+python embedding_cli.py index
 ```
 
 Este comando:
@@ -67,17 +74,36 @@ Este comando:
 - guarda el vector en la tabla `course_embeddings`
 - actualiza solo si el contenido cambió
 
-### 2) Servir embeddings de preferencias
+### 2) Iniciar la API de embeddings
 
 ```powershell
-python worker.py serve
+python embedding_cli.py serve
 ```
 
-Esto levanta un servidor HTTP en `http://127.0.0.1:8765` y expone el endpoint:
+`worker.py index` y `worker.py serve` siguen funcionando como accesos compatibles.
+`serve` arranca Uvicorn con FastAPI. También se
+puede iniciar directamente desde `embedding-worker/`:
+
+```powershell
+python -m uvicorn api:app --host 127.0.0.1 --port 8765
+```
+
+El modelo se carga antes de aceptar peticiones. La API escucha solo en
+`http://127.0.0.1:8765` por defecto y expone:
 
 ```http
 POST /embed-preferences
+GET /health
+GET /docs
 ```
+
+FastAPI es un proceso independiente de la API .NET. `embedding_cli.py serve` inicia
+únicamente este servicio de embeddings; `embedding_cli.py index` se ejecuta y termina.
+
+`/health` devuelve 200 cuando terminó la carga del modelo. `/docs` muestra la
+documentación interactiva de FastAPI. El servicio no tiene autenticación; mantener
+el host en loopback o detrás de una red privada. La API .NET conserva su URL
+predeterminada `http://127.0.0.1:8765/`.
 
 ### Payload esperado
 
@@ -102,7 +128,8 @@ POST /embed-preferences
 ## Pruebas
 
 ```powershell
-python -m unittest test_worker.py
+python -m pip install -r requirements-test.txt
+python -m unittest test_embedding_service.py
 ```
 
 ## Observaciones importantes
@@ -111,6 +138,9 @@ python -m unittest test_worker.py
 - La consulta de preferencias agrega una instrucción especial para mejorar la relevancia semántica.
 - Si el modelo no está disponible o falla al generar el embedding, el servicio responde con `503`.
 - Si la solicitud del cliente es inválida, responde con `400`.
+- El JSON de `POST /embed-preferences` conserva `model`, `dimensions` y `embedding`.
+- `embedding_cli.py index` sigue siendo una tarea explícita; la API no modifica el catálogo.
+- `POST /embed-preferences` delega la inferencia a `EmbeddingService`; la API .NET realiza la búsqueda en pgvector.
 
 ## Flujo típico
 

@@ -54,22 +54,24 @@ public class AuthController(ISender sender) : ControllerBase
     /// <remarks>Requiere la cookie CodeQuest.Session creada por /auth/discord.</remarks>
     /// <response code="200">La sesión existe y su usuario está registrado.</response>
     /// <response code="401">Falta la sesión o el usuario ya no existe.</response>
+    /// <response code="500">Error inesperado; error = internal_error.</response>
     [Authorize]
     [HttpGet("me")]
     [ProducesResponseType<AuthUserDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<AuthUserDto>> Me(CancellationToken cancellationToken)
     {
         var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(discordId))
-            return Unauthorized();
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
 
         var user = await sender.Send(new GetCurrentUserQuery(discordId), cancellationToken);
         if (user is null)
-            return Unauthorized(new { error = "user_not_registered", message = "Inicia sesión nuevamente con Discord." });
+            return Unauthorized(new ApiErrorDto("user_not_registered", "Inicia sesión nuevamente con Discord."));
 
         // Preserve the existing session response: id remains the Discord ID.
         return Ok(new AuthUserDto(user.DiscordId, user.UserId, user.Username,
-            user.DisplayName, user.Avatar));
+            user.DisplayName, user.Avatar, user.IsNewUser));
     }
 }

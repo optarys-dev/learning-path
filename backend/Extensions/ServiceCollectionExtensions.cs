@@ -1,5 +1,7 @@
 using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using CodeQuest2026.Server.Application.Users.Commands;
+using CodeQuest2026.Server.Application.Routes;
+using CodeQuest2026.Server.Infrastructure.Embeddings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -11,6 +13,14 @@ public static class ServiceCollectionExtensions
     {
         services.AddMediatR(options =>
             options.RegisterServicesFromAssemblyContaining<SyncDiscordUserCommand>());
+        services.AddSingleton<IStaticCourseRecommendationEngine, StaticCourseRecommendationEngine>();
+        services.AddSingleton<HybridSemanticRecommendationEngine>();
+        var embeddingServiceUrl = configuration["EmbeddingService:Url"] ?? "http://127.0.0.1:8765/";
+        services.AddHttpClient<PreferenceEmbeddingClient>(client =>
+        {
+            client.BaseAddress = new Uri(embeddingServiceUrl);
+            client.Timeout = TimeSpan.FromSeconds(130);
+        });
         string? connectionString =
             configuration.GetConnectionString("DefaultConnection") ??
             Environment.GetEnvironmentVariable("DefaultConnection");

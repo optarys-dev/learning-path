@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
+using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Users.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
@@ -32,15 +33,17 @@ public static class DiscordAuthentication
                     ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
                 options.ExpireTimeSpan = TimeSpan.FromHours(8);
                 options.SlidingExpiration = false;
-                options.Events.OnRedirectToLogin = context =>
+                options.Events.OnRedirectToLogin = async context =>
                 {
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    return Task.CompletedTask;
+                    await context.Response.WriteAsJsonAsync(
+                        new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
                 };
-                options.Events.OnRedirectToAccessDenied = context =>
+                options.Events.OnRedirectToAccessDenied = async context =>
                 {
                     context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                    return Task.CompletedTask;
+                    await context.Response.WriteAsJsonAsync(
+                        new ApiErrorDto("forbidden", "No tienes acceso a este recurso."));
                 };
             })
             .AddOAuth(Scheme, options =>
@@ -83,11 +86,9 @@ public static class DiscordAuthentication
                 {
                     context.HandleResponse();
                     context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await context.Response.WriteAsJsonAsync(new
-                    {
-                        error = "discord_authentication_failed",
-                        message = "No se pudo completar el inicio de sesión. Inténtalo de nuevo desde /auth/discord."
-                    });
+                    await context.Response.WriteAsJsonAsync(new ApiErrorDto(
+                        "discord_authentication_failed",
+                        "No se pudo completar el inicio de sesión. Inténtalo de nuevo desde /auth/discord."));
                 };
             });
         services.AddAuthorization();

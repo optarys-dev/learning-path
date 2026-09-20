@@ -1,6 +1,8 @@
 .env
 .env.*
 !.env.example
+embedding-worker/.venv/
+embedding-worker/__pycache__/
 
 # Tests
 tests/bin/
