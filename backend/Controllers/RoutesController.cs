@@ -137,6 +137,76 @@ public class RoutesController(ISender sender) : ControllerBase
         };
     }
 
+    /// <summary>Reemplaza el objetivo, explicación y cursos de una ruta propia.</summary>
+    /// <remarks>
+    /// PUT reemplaza todos los campos editables. Courses contiene de 1 a 30 cursos activos
+    /// sin duplicados; su orden define las posiciones. Conserva fecha, método original y
+    /// copia histórica de preferencias. No ejecuta recomendaciones ni requiere preferencias actuales.
+    /// </remarks>
+    /// <response code="200">Ruta actualizada.</response>
+    /// <response code="400">Datos inválidos o curso no disponible.</response>
+    /// <response code="401">No hay una sesión válida.</response>
+    /// <response code="404">La ruta no existe o pertenece a otro usuario.</response>
+    [HttpPut("{routeId:guid}")]
+    [ProducesResponseType<LearningRouteDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<LearningRouteDto>> Update(
+        Guid routeId,
+        UpdateLearningRouteRequest request,
+        CancellationToken cancellationToken)
+    {
+        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrWhiteSpace(discordId))
+        {
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
+        }
+
+        var result = await sender.Send(
+            new UpdateLearningRouteCommand(discordId, routeId, request),
+            cancellationToken);
+
+        return result.Status switch
+        {
+            UpdateRouteStatus.NotFound => NotFound(new ApiErrorDto(
+                "route_not_found", "No se encontró la ruta solicitada.")),
+            UpdateRouteStatus.InvalidRoute => BadRequest(new ApiErrorDto(
+                "invalid_route", "Indica un objetivo válido y de 1 a 30 cursos sin repetir.")),
+            UpdateRouteStatus.CourseUnavailable => BadRequest(new ApiErrorDto(
+                "course_unavailable", "Uno o más cursos no están disponibles.")),
+            _ => Ok(result.Route)
+        };
+    }
+
+    /// <summary>Elimina una ruta propia y sus asociaciones con cursos.</summary>
+    /// <remarks>Elimina permanentemente la ruta. Los cursos del catálogo se conservan.</remarks>
+    /// <response code="204">Ruta eliminada.</response>
+    /// <response code="401">No hay una sesión válida.</response>
+    /// <response code="404">La ruta no existe o pertenece a otro usuario.</response>
+    [HttpDelete("{routeId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(Guid routeId, CancellationToken cancellationToken)
+    {
+        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrWhiteSpace(discordId))
+        {
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
+        }
+
+        var deleted = await sender.Send(
+            new DeleteLearningRouteCommand(discordId, routeId),
+            cancellationToken);
+
+        return deleted
+            ? NoContent()
+            : NotFound(new ApiErrorDto("route_not_found", "No se encontró la ruta solicitada."));
+    }
+
     /// <summary>Lista las rutas guardadas del usuario autenticado, de la más reciente a la más antigua.</summary>
     /// <response code="200">Lista de rutas; vacía si todavía no hay ninguna.</response>
     /// <response code="401">No hay una sesión válida.</response>
