@@ -3,7 +3,7 @@ import type { AreaId, QuestionnaireAnswers, QuestionnaireState, TechnologyId } f
 import { initialQuestionnaireState } from './state';
 
 export const DRAFT_KEY = 'codequest-questionnaire-draft';
-const DRAFT_VERSION = 1;
+const DRAFT_VERSION = 2;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -39,8 +39,8 @@ function parseAnswers(value: unknown): QuestionnaireAnswers | null {
 
 function canResumeAt(step: number, answers: QuestionnaireAnswers): boolean {
   return (step < 1 || answers.goal !== null) &&
-    (step < 2 || answers.level !== null) &&
-    (step < 4 || answers.desiredOutcome !== null);
+    (step < 3 || answers.level !== null) &&
+    (step < 5 || answers.desiredOutcome !== null);
 }
 
 export function loadQuestionnaireDraft(): QuestionnaireState {

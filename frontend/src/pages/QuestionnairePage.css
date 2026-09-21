@@ -8,18 +8,6 @@
 .learning-profile__step h2 { margin-block: var(--cq-space-8); font-family: var(--cq-font-heading); font-size: var(--cq-font-size-h2); }
 .learning-profile__options { display: grid; grid-template-columns: 1fr; gap: var(--cq-space-3); margin: 0; padding: 0; border: 0; }
 .learning-profile__options + .learning-profile__options { margin-top: var(--cq-space-8); }
-.learning-profile__technology-section {
-  margin-top: var(--cq-space-6);
-  padding-top: var(--cq-space-4);
-  border-top: 1px solid var(--cq-color-border-default);
-}
-.learning-profile__technology-title, .learning-profile__technology-hint { display: block; }
-.learning-profile__technology-hint {
-  margin-top: var(--cq-space-1);
-  color: var(--cq-color-text-secondary);
-  font-size: var(--cq-font-size-label);
-  font-weight: 400;
-}
 .learning-profile__options legend { margin-bottom: var(--cq-space-3); font-weight: 700; }
 .learning-profile__option { display: flex; align-items: center; gap: var(--cq-space-3); min-height: 3.25rem; padding: var(--cq-space-3) var(--cq-space-4); border: 1px solid var(--cq-color-border-default); border-radius: var(--cq-radius-sm); cursor: pointer; }
 .learning-profile__option:has(input:checked) { border-color: var(--cq-color-brand-primary); background: var(--cq-color-surface-tint); }
@@ -154,18 +142,6 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__area-card strong { font-family: var(--cq-font-heading); font-size: var(--cq-font-size-body); }
 .learning-profile__area-card small { line-height: var(--cq-line-height-label); }
 .learning-profile__chip { min-height: 2.875rem; padding-block: var(--cq-space-2); border-radius: var(--cq-radius-pill); }
-.learning-profile__interests {
-  /* The header is in normal flow; leave responsive context above the legend. */
-  scroll-margin-top: clamp(var(--cq-space-8), 12vh, 7rem);
-  animation: profile-interests-enter 160ms ease-out both;
-}
-@keyframes profile-interests-enter {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .learning-profile__interests { animation: none; }
-}
 .learning-profile__hint { margin: 0 0 var(--cq-space-2); }
 .learning-profile__error { margin-top: var(--cq-space-4); padding: var(--cq-space-3) var(--cq-space-4); border-left: 3px solid var(--cq-color-error); background: color-mix(in srgb, var(--cq-color-error) 9%, transparent); }
 .learning-profile__summary { gap: 0; border: 1px solid var(--cq-color-border-default); border-radius: var(--cq-radius-sm); overflow: hidden; }
