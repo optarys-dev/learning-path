@@ -71,26 +71,16 @@ app.UseExceptionHandler();
 
 app.UseDiscordHttpsCallback(builder.Configuration, app.Environment.IsDevelopment());
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "CodeQuest2026 API v1");
-        options.RoutePrefix = "swagger";
-        options.DocumentTitle = "CodeQuest2026 API";
-        options.DocExpansion(DocExpansion.List);
-        options.DisplayRequestDuration();
-        options.EnableTryItOutByDefault();
-    });
+    UseSwaggerAndOpenApi();
 }
-else if (File.Exists(Path.Combine(app.Environment.WebRootPath
-    ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot"), "index.html")))
+
+if (app.Environment.IsStaging() ||
+    File.Exists(Path.Combine(app.Environment.WebRootPath
+        ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot"), "index.html")))
 {
-    app.UseDefaultFiles();
-    app.MapStaticAssets();
-    app.MapFallbackToFile("/index.html");
+    UseStaticFiles();
 }
 
 if (!app.Environment.IsDevelopment())
@@ -115,3 +105,25 @@ app.MapHealthChecks("/health/db", new HealthCheckOptions
 });
 
 app.Run();
+
+void UseSwaggerAndOpenApi()
+{
+    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "CodeQuest2026 API v1");
+        options.RoutePrefix = "swagger";
+        options.DocumentTitle = "CodeQuest2026 API";
+        options.DocExpansion(DocExpansion.List);
+        options.DisplayRequestDuration();
+        options.EnableTryItOutByDefault();
+    });
+}
+
+void UseStaticFiles()
+{
+    app.UseDefaultFiles();
+    app.MapStaticAssets();
+    app.MapFallbackToFile("/index.html");
+}

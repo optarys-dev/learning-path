@@ -45,11 +45,11 @@ Accept: text/plain
 GET {{CodeQuest2026.Server_HostAddress}}/health/db
 Accept: text/plain
 
-### Documento OpenAPI (solo en Development)
+### Documento OpenAPI (Development y Staging)
 GET {{CodeQuest2026.Server_HostAddress}}/openapi/v1.json
 Accept: application/json
 
-### Documento Swagger/OpenAPI (solo en Development)
+### Documento Swagger/OpenAPI (Development y Staging)
 GET {{CodeQuest2026.Server_HostAddress}}/swagger/v1/swagger.json
 Accept: application/json
 
