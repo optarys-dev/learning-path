@@ -7,7 +7,15 @@ namespace CodeQuest2026.Server.Application.Routes;
 /// <param name="Position">Posición de aprendizaje, comenzando en 1.</param>
 /// <param name="Title">Título actual del curso.</param>
 /// <param name="Reason">Motivo por el que se recomendó el curso.</param>
-public sealed record RouteCourseDto(long CourseId, int Position, string Title, string? Reason);
+/// <param name="ImageUrl">Enlace a la miniatura actual del curso.</param>
+/// <param name="CourseUrl">Enlace a la página web del curso.</param>
+public sealed record RouteCourseDto(
+    long CourseId,
+    int Position,
+    string Title,
+    string? Reason,
+    string ImageUrl,
+    string CourseUrl);
 /// <summary>Ruta de aprendizaje guardada para el usuario.</summary>
 /// <param name="RouteId">Identificador de la ruta.</param>
 /// <param name="Goal">Objetivo del usuario al crear la ruta.</param>

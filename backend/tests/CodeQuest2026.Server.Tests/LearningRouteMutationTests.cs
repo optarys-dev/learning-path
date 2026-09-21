@@ -12,6 +12,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using CodeQuest2026.Server.Application.Courses;
 
 namespace CodeQuest2026.Server.Tests;
 
@@ -36,8 +37,22 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
 
         Db.Users.Add(new User { UserId = "owner", DiscordId = "123", Username = "owner" });
         Db.Courses.AddRange(
-            new Course { CourseId = 1, Title = "Python" },
-            new Course { CourseId = 2, Title = "Backend" },
+            new Course
+            {
+                CourseId = 1,
+                Title = "Python",
+                Slug = "python",
+                ImageUrl = "https://example.test/python.png",
+                ImageAlt = "Python",
+                CourseUrl = "https://example.test/python"
+            },
+            new Course
+            {
+                CourseId = 2,
+                Title = "Backend",
+                ImageUrl = "https://example.test/backend.png",
+                CourseUrl = "https://example.test/backend"
+            },
             new Course { CourseId = 3, Title = "SQL" },
             new Course { CourseId = 4, Title = "Inactive", IsActive = false });
         Db.LearningRoutes.Add(new LearningRoute
@@ -69,6 +84,8 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.Equal("Updated explanation", route.Explanation);
         Assert.Equal("Updated reason", route.Courses[0].Reason);
         Assert.Equal("semantic-groq-v2", route.RecommendationMethod);
+        Assert.Equal("https://example.test/backend.png", route.Courses[0].ImageUrl);
+        Assert.Equal("https://example.test/backend", route.Courses[0].CourseUrl);
 
         var stored = await Db.LearningRoutes.AsNoTracking().Include(route => route.Courses).SingleAsync();
         Assert.Equal("{\"goal\":\"Original\"}", stored.PreferencesSnapshot);
@@ -175,6 +192,79 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.Equal(new long[] { 1, 2 }, route.Courses.OrderBy(course => course.Position).Select(course => course.CourseId));
     }
 
+    [Fact]
+    public async Task CatalogListsOnlyActiveCoursesInTitleOrderWithoutMetadata()
+    {
+        var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
+        var response = await controller.List(default);
+        var courses = Assert.IsAssignableFrom<IReadOnlyList<CourseDto>>(
+            Assert.IsType<OkObjectResult>(response.Result).Value);
+
+        Assert.Equal(new long[] { 2, 1, 3 }, courses.Select(course => course.CourseId));
+        Assert.Equal("python", courses[1].Slug);
+        Assert.Equal("https://example.test/python.png", courses[1].ImageUrl);
+        Assert.Equal("https://example.test/python", courses[1].CourseUrl);
+
+        var json = System.Text.Json.JsonSerializer.SerializeToElement(courses[1]);
+        Assert.Equal(
+            new[] { "CourseId", "Slug", "Title", "Level", "ImageUrl", "ImageAlt", "CourseUrl" },
+            json.EnumerateObject().Select(property => property.Name));
+    }
+
+    [Theory]
+    [InlineData(4)]
+    [InlineData(999)]
+    public async Task CatalogDetailHidesInactiveAndUnknownCourses(long id)
+    {
+        var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
+        Assert.IsType<NotFoundObjectResult>((await controller.GetById(id, default)).Result);
+    }
+
+    [Fact]
+    public async Task CatalogDetailReturnsBasicCourse()
+    {
+        var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
+        var response = await controller.GetById(1, default);
+        var course = Assert.IsType<CourseDto>(Assert.IsType<OkObjectResult>(response.Result).Value);
+
+        Assert.Equal("Python", course.Title);
+        Assert.Equal("https://example.test/python", course.CourseUrl);
+    }
+
+    [Fact]
+    public async Task CatalogReturnsEmptyListWhenNoCoursesAreActive()
+    {
+        await Db.Courses.ExecuteUpdateAsync(setters => setters.SetProperty(course => course.IsActive, false));
+        var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
+        var response = await controller.List(default);
+        var courses = Assert.IsAssignableFrom<IReadOnlyList<CourseDto>>(
+            Assert.IsType<OkObjectResult>(response.Result).Value);
+
+        Assert.Empty(courses);
+    }
+
+    [Fact]
+    public async Task RouteDetailAndListIncludeLinksEvenForPreviouslySavedInactiveCourses()
+    {
+        await Db.Courses.Where(course => course.CourseId == 1)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(course => course.IsActive, false));
+
+        var controller = Controller("123");
+        var detail = Assert.IsType<LearningRouteDto>(
+            Assert.IsType<OkObjectResult>((await controller.GetById(routeId, default)).Result).Value);
+        var routes = Assert.IsAssignableFrom<IReadOnlyList<LearningRouteDto>>(
+            Assert.IsType<OkObjectResult>((await controller.List(default)).Result).Value);
+
+        foreach (var route in new[] { detail, Assert.Single(routes) })
+        {
+            Assert.Equal(new long[] { 1, 2 }, route.Courses.Select(course => course.CourseId));
+            Assert.Equal("https://example.test/python.png", route.Courses[0].ImageUrl);
+            Assert.Equal("https://example.test/python", route.Courses[0].CourseUrl);
+        }
+
+        Assert.IsType<NotFoundObjectResult>((await Controller("456").GetById(routeId, default)).Result);
+    }
+
     private static UpdateLearningRouteRequest Request(params long[] ids) => new()
     {
         Goal = " Updated ",
@@ -215,12 +305,17 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
             new UserConfiguration().Configure(modelBuilder.Entity<User>());
             modelBuilder.Entity<User>().Ignore(user => user.Preferences);
             new LearningRouteConfiguration().Configure(modelBuilder.Entity<LearningRoute>());
+            modelBuilder.Entity<LearningRoute>().Property(route => route.CreatedAt)
+                .HasConversion(value => value.UtcTicks, value => new DateTimeOffset(value, TimeSpan.Zero));
             new LearningRouteCourseConfiguration().Configure(modelBuilder.Entity<LearningRouteCourse>());
 
             var course = modelBuilder.Entity<Course>();
             foreach (var property in typeof(Course).GetProperties())
             {
-                if (property.Name is not (nameof(Course.CourseId) or nameof(Course.Title) or nameof(Course.IsActive)))
+                if (property.Name is not (
+                    nameof(Course.CourseId) or nameof(Course.Title) or nameof(Course.IsActive)
+                    or nameof(Course.Slug) or nameof(Course.Level) or nameof(Course.ImageUrl)
+                    or nameof(Course.ImageAlt) or nameof(Course.CourseUrl)))
                 {
                     course.Ignore(property.Name);
                 }

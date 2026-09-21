@@ -2,6 +2,7 @@ using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using CodeQuest2026.Server.Application.Courses;
 
 namespace CodeQuest2026.Server.Application.Routes.Commands;
 
@@ -54,12 +55,13 @@ public sealed class UpdateLearningRouteCommandHandler(AppDbContext db)
             }
 
             var ids = request.Courses.Select(course => course.CourseId).ToArray();
-            var courseTitles = await db.Courses
+            var courseDetails = await db.Courses
                 .AsNoTracking()
                 .Where(course => ids.Contains(course.CourseId) && course.IsActive)
-                .ToDictionaryAsync(course => course.CourseId, course => course.Title, cancellationToken);
+                .Select(CourseMapping.Projection)
+                .ToDictionaryAsync(course => course.CourseId, cancellationToken);
 
-            if (courseTitles.Count != ids.Length)
+            if (courseDetails.Count != ids.Length)
             {
                 return new UpdateRouteResult(UpdateRouteStatus.CourseUnavailable);
             }
@@ -110,7 +112,7 @@ public sealed class UpdateLearningRouteCommandHandler(AppDbContext db)
             route.Explanation = explanation;
             route.Courses = courses;
 
-            return new UpdateRouteResult(UpdateRouteStatus.Updated, LearningRouteMapping.ToDto(route, courseTitles));
+            return new UpdateRouteResult(UpdateRouteStatus.Updated, LearningRouteMapping.ToDto(route, courseDetails));
         });
     }
 }
