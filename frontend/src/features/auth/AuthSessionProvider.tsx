@@ -20,6 +20,11 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
     void Promise.resolve().then(refresh);
   }, [refresh]);
 
-  const value = useMemo(() => ({ user, isLoading, refresh }), [user, isLoading, refresh]);
+  const markPreferencesSaved = useCallback(() => {
+    // The successful preferences PUT confirms this change on the server.
+    setUser(current => current ? { ...current, isNewUser: false } : current);
+  }, []);
+
+  const value = useMemo(() => ({ user, isLoading, refresh, markPreferencesSaved }), [user, isLoading, refresh, markPreferencesSaved]);
   return <AuthSessionContext.Provider value={value}>{children}</AuthSessionContext.Provider>;
 }
