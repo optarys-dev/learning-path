@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Courses;
 using CodeQuest2026.Server.Application.Courses.Queries;
@@ -8,24 +9,27 @@ using Microsoft.AspNetCore.Mvc;
 namespace CodeQuest2026.Server.Controllers;
 
 [ApiController]
-[Authorize]
+[AllowAnonymous]
 [Route("courses")]
-[ProducesResponseType<ApiErrorDto>(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType<ApiErrorDto>(StatusCodes.Status500InternalServerError)]
 public sealed class CoursesController(ISender sender) : ControllerBase
 {
-    /// <summary>Lista todos los cursos activos con sus datos básicos, ordenados por título e ID.</summary>
-    /// <remarks>No incluye descripción, temario, habilidades, requisitos ni embeddings. Sin paginación.</remarks>
+    /// <summary>Lista públicamente los cursos activos paginados, ordenados por título e ID.</summary>
+    /// <remarks>No incluye descripción, temario, habilidades, requisitos ni embeddings.</remarks>
     [HttpGet]
-    [ProducesResponseType<CourseDto[]>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<CourseDto>>> List(CancellationToken cancellationToken)
+    [ProducesResponseType<PagedResultDto<CourseDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PagedResultDto<CourseDto>>> List(
+        [FromQuery, Range(1, int.MaxValue)] int page = GetCoursesQuery.DefaultPage,
+        [FromQuery, Range(1, GetCoursesQuery.MaxPageSize)] int pageSize = GetCoursesQuery.DefaultPageSize,
+        CancellationToken cancellationToken = default)
     {
-        var courses = await sender.Send(new GetCoursesQuery(), cancellationToken);
+        var courses = await sender.Send(new GetCoursesQuery(page, pageSize), cancellationToken);
 
         return Ok(courses);
     }
 
-    /// <summary>Consulta los datos básicos de un curso activo.</summary>
+    /// <summary>Consulta públicamente los datos básicos de un curso activo.</summary>
     /// <response code="404">El curso no existe o está inactivo.</response>
     [HttpGet("{courseId:long}")]
     [ProducesResponseType<CourseDto>(StatusCodes.Status200OK)]

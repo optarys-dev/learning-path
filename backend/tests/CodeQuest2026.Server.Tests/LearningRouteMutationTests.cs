@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Routes;
 using CodeQuest2026.Server.Application.Routes.Commands;
 using CodeQuest2026.Server.Controllers;
@@ -6,6 +7,7 @@ using CodeQuest2026.Server.Infrastructure.DataSource.Configurations;
 using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
@@ -193,14 +195,19 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task CatalogListsOnlyActiveCoursesInTitleOrderWithoutMetadata()
+    public async Task CatalogPaginatesOnlyActiveCoursesInTitleOrderWithoutMetadata()
     {
         var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
-        var response = await controller.List(default);
-        var courses = Assert.IsAssignableFrom<IReadOnlyList<CourseDto>>(
+        var response = await controller.List(1, 2, default);
+        var page = Assert.IsType<PagedResultDto<CourseDto>>(
             Assert.IsType<OkObjectResult>(response.Result).Value);
+        var courses = page.Items;
 
-        Assert.Equal(new long[] { 2, 1, 3 }, courses.Select(course => course.CourseId));
+        Assert.Equal(new long[] { 2, 1 }, courses.Select(course => course.CourseId));
+        Assert.Equal(3, page.TotalCount);
+        Assert.Equal(2, page.TotalPages);
+        Assert.False(page.HasPreviousPage);
+        Assert.True(page.HasNextPage);
         Assert.Equal("python", courses[1].Slug);
         Assert.Equal("https://example.test/python.png", courses[1].ImageUrl);
         Assert.Equal("https://example.test/python", courses[1].CourseUrl);
@@ -209,6 +216,28 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.Equal(
             new[] { "CourseId", "Slug", "Title", "Level", "ImageUrl", "ImageAlt", "CourseUrl" },
             json.EnumerateObject().Select(property => property.Name));
+    }
+
+    [Fact]
+    public async Task CatalogReturnsRequestedPage()
+    {
+        var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
+        var response = await controller.List(2, 2, default);
+        var page = Assert.IsType<PagedResultDto<CourseDto>>(
+            Assert.IsType<OkObjectResult>(response.Result).Value);
+
+        Assert.Equal(new long[] { 3 }, page.Items.Select(course => course.CourseId));
+        Assert.True(page.HasPreviousPage);
+        Assert.False(page.HasNextPage);
+    }
+
+    [Fact]
+    public void CatalogAllowsAnonymousAccess()
+    {
+        var attributes = typeof(CoursesController).GetCustomAttributes(false);
+
+        Assert.Contains(attributes, attribute => attribute is AllowAnonymousAttribute);
+        Assert.DoesNotContain(attributes, attribute => attribute is AuthorizeAttribute);
     }
 
     [Theory]
@@ -236,11 +265,16 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     {
         await Db.Courses.ExecuteUpdateAsync(setters => setters.SetProperty(course => course.IsActive, false));
         var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
-        var response = await controller.List(default);
-        var courses = Assert.IsAssignableFrom<IReadOnlyList<CourseDto>>(
+        var response = await controller.List(cancellationToken: default);
+        var page = Assert.IsType<PagedResultDto<CourseDto>>(
             Assert.IsType<OkObjectResult>(response.Result).Value);
+        var courses = page.Items;
 
         Assert.Empty(courses);
+        Assert.Equal(0, page.TotalCount);
+        Assert.Equal(0, page.TotalPages);
+        Assert.False(page.HasPreviousPage);
+        Assert.False(page.HasNextPage);
     }
 
     [Fact]
