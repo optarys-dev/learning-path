@@ -1,4 +1,37 @@
 @CodeQuest2026.Server_HostAddress = http://localhost:5107
+@DiscordCallbackPath = /auth/discord/callback
+@RouteId = 00000000-0000-0000-0000-000000000000
+
+### Listar cursos activos sin metadatos (requiere cookie de sesión)
+GET {{CodeQuest2026.Server_HostAddress}}/courses
+Accept: application/json
+
+### Consultar los datos básicos de un curso activo (requiere cookie de sesión)
+GET {{CodeQuest2026.Server_HostAddress}}/courses/1
+Accept: application/json
+
+### Editar una ruta propia (requiere cookie de sesión)
+# Sustituir RouteId y los IDs de cursos por valores existentes.
+PUT {{CodeQuest2026.Server_HostAddress}}/routes/{{RouteId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "goal": "Aprender backend con Python",
+  "explanation": "Ruta ajustada a mis prioridades",
+  "courses": [
+    { "courseId": 2, "reason": "Empezar con este curso" },
+    { "courseId": 1, "reason": "Continuar con este curso" }
+  ]
+}
+
+### Eliminar permanentemente una ruta propia (requiere cookie de sesión)
+DELETE {{CodeQuest2026.Server_HostAddress}}/routes/{{RouteId}}
+
+### Recomendación semántica V2 con IA (requiere cookie de sesión y preferencias)
+# Configurar Groq__ApiKey en el backend. Ver docs/SEMANTIC_V2.md.
+GET {{CodeQuest2026.Server_HostAddress}}/routes/recommendation/semantic/v2
+Accept: application/json
 
 ### Estado general (API y base de datos)
 GET {{CodeQuest2026.Server_HostAddress}}/health
@@ -14,4 +47,45 @@ Accept: text/plain
 
 ### Documento OpenAPI (solo en Development)
 GET {{CodeQuest2026.Server_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+### Documento Swagger/OpenAPI (solo en Development)
+GET {{CodeQuest2026.Server_HostAddress}}/swagger/v1/swagger.json
+Accept: application/json
+
+### Panel interactivo Swagger (abrir en el navegador)
+GET {{CodeQuest2026.Server_HostAddress}}/swagger
+Accept: text/html
+
+### Iniciar sesión con Discord (302 hacia Discord)
+# Para completar OAuth, abrir esta URL en el navegador y continuar en ese mismo navegador.
+# Usar el host y esquema registrados en Discord Developer Portal.
+GET {{CodeQuest2026.Server_HostAddress}}/auth/discord
+
+### Iniciar sesión y consultar el usuario al terminar
+GET {{CodeQuest2026.Server_HostAddress}}/auth/discord?returnUrl=/users/me
+
+### Consultar sesión (401 sin cookie de sesión)
+# El cliente HTTP no comparte automáticamente las cookies del navegador.
+GET {{CodeQuest2026.Server_HostAddress}}/auth/me
+Accept: application/json
+
+### Cerrar sesión local (204, incluso si ya expiró)
+# Enviar desde el mismo navegador que inició sesión para eliminar CodeQuest.Session.
+POST {{CodeQuest2026.Server_HostAddress}}/auth/logout
+Accept: application/json
+
+### Consultar perfil persistido (401 sin cookie de sesión)
+GET {{CodeQuest2026.Server_HostAddress}}/users/me
+Accept: application/json
+
+### Rechazar redirección externa (400)
+GET {{CodeQuest2026.Server_HostAddress}}/auth/discord?returnUrl=https://example.com
+Accept: application/json
+
+### Callback sin state (prueba negativa: 400 con CallbackPath configurado)
+# Ajustar DiscordCallbackPath al valor de Discord:DISCORD_CALLBACK_PATH.
+# El callback exitoso lo invoca Discord con code, state y la cookie de correlación.
+# No ejecutar manualmente para iniciar sesión ni reutilizar códigos de autorización.
+GET {{CodeQuest2026.Server_HostAddress}}{{DiscordCallbackPath}}
 Accept: application/json

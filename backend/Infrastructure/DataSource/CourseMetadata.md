@@ -26,7 +26,7 @@ SourceVerifiedAt, que corresponde a la verificación del catálogo original.
 Para futuros embeddings, combinar título, descripción, temario, objetivos,
 habilidades, prerrequisitos, público, nivel, categorías y tags con etiquetas de
 campo y un orden estable. Excluir URLs, fechas, imágenes e identificadores.
-Los embeddings y su generación se incorporarán en una etapa posterior.
+La generación de embeddings está documentada en `CourseEmbeddings.md`.
 
 SkillsTaught y Prerequisites son descripciones por ahora: todavía no representan
 relaciones verificadas entre cursos ni un grafo de prerrequisitos.
@@ -51,3 +51,38 @@ MetadataOrigin se elimina al revertir esta migración.
 Estos datos permiten probar filtros, serialización y recomendaciones con ejemplos
 variados. No sirven como referencia validada para medir la calidad pedagógica de
 una ruta: eso requiere verificar temarios y prerrequisitos reales.
+
+## Recopilación de páginas públicas
+
+`CourseMetadata.Public.json` contiene una extracción de las 72 URLs del catálogo
+inicial de DevTalles. Cada registro guarda URL, fecha UTC de consulta, título de la
+página, descripción breve publicada, encabezados de secciones, requisitos explícitos,
+resultados explícitos cuando existen y minutos de video publicados. El extractor
+respeta `robots.txt` y espera entre solicitudes. No descarga lecciones ni contenido
+que requiera autenticación.
+
+En la captura del 17 de septiembre de 2026 respondieron las 72 páginas: 72 con
+descripción, secciones y duración; 71 con requisitos y 29 con una lista explícita
+de resultados. Un campo vacío significa que el extractor no encontró una lista
+explícita, no que el curso carezca de ese elemento. Algunas páginas tienen una sola
+sección publicada. No se infieren habilidades, audiencia o idioma.
+
+Para actualizar el archivo desde `backend/`:
+
+```powershell
+./scripts/Collect-CourseMetadata.ps1
+```
+
+Para generar SQL de importación revisable:
+
+```powershell
+./scripts/Build-CourseMetadataSql.ps1
+```
+
+El SQL queda en `artifacts/ImportCourseMetadata.sql`. Solo actualiza filas que aún
+tienen el seed inferido y una descripción original sin editar. Reemplaza los campos
+inferidos por datos extraídos, deja vacías las habilidades y audiencia que la página
+no declara, conserva nivel/categorías/tags y elimina embeddings de cursos actualizados
+para exigir su regeneración. Usa `metadata_origin = public-page-scrape-v1` y deja
+`metadata_verified_at` en null: la extracción automática no equivale a una revisión
+humana de cada campo. Revisar el SQL y el JSON antes de aplicarlo a PostgreSQL.
