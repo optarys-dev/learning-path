@@ -54,11 +54,12 @@ export const en = {
     getStarted: 'Get started',
     stepCount: 'Step {{current}} of {{total}}', progressLabel: 'Learning profile progress',
     stepNames: {
-      learningGoal: 'Your interests', currentExperience: 'Your experience', knownSkills: 'What you know',
+      learningGoal: 'Your interests', technologyInterests: 'Your technologies', currentExperience: 'Your experience', knownSkills: 'What you know',
       desiredOutcome: 'Your goal', practicalExperience: 'Your practice',
     },
     stepHints: {
-      learningGoal: 'Choose the area that excites you the most. You can then pick technologies that interest you.',
+      learningGoal: 'Choose the area that excites you the most.',
+      technologyInterests: 'Choose several or none.',
       currentExperience: 'There are no right answers; we will use this to adapt your starting point.',
       knownSkills: 'Only select the ones you already know. You can continue without selecting any.',
       desiredOutcome: 'Choose the outcome you would most like to achieve first.',
@@ -89,6 +90,7 @@ export const en = {
     summaryInterests: 'Interests', summarySkills: 'Known skills', noneSelected: 'None selected',
     questions: {
       learningGoal: 'What would you like to learn or build?',
+      technologyInterests: 'Which technologies interest you?',
       currentExperience: 'What experience do you currently have?',
       knownSkills: 'Which technologies or skills do you already know?',
       desiredOutcome: 'What would you like to achieve?',
