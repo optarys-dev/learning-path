@@ -6,7 +6,7 @@ Cambios del backend de CodeQuest2026. Estas entradas describen el código dispon
 
 ### Agregado
 
-- Catálogo básico autenticado mediante `GET /courses` y `GET /courses/{courseId}`, limitado a cursos activos y sin metadatos de aprendizaje.
+- Catálogo básico público mediante `GET /courses` y `GET /courses/{courseId}`, limitado a cursos activos y sin metadatos de aprendizaje; el listado incluye paginación y metadatos de navegación.
 - `imageUrl` y `courseUrl` en los cursos de rutas guardadas, incluidas respuestas de consulta, creación y edición.
 
 - Edición de rutas propias mediante `PUT /routes/{routeId}`: objetivo, explicación y cursos ordenados, con actualización transaccional.

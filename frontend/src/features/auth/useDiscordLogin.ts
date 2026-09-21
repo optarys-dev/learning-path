@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { getCurrentSession, startDiscordLogin } from './session';
+import { startDiscordLogin } from './session';
+import { useAuthSession } from './useAuthSession';
 
 export type DiscordLoginState =
   | { status: 'idle' | 'loading' | 'error' | 'cancelled' | 'unavailable' }
@@ -10,21 +11,11 @@ export type DiscordLoginAdapter = (signal: AbortSignal) => Promise<
 >;
 
 export function useDiscordLogin(adapter?: DiscordLoginAdapter) {
+  const { user, isLoading } = useAuthSession();
   const [state, setState] = useState<DiscordLoginState>({ status: 'idle' });
   const request = useRef<AbortController | null>(null);
 
   useEffect(() => () => request.current?.abort(), []);
-  useEffect(() => {
-    const controller = new AbortController();
-    void getCurrentSession(controller.signal)
-      .then(user => {
-        if (user && !controller.signal.aborted) setState({ status: 'authenticated', nextPath: '/my-path' });
-      })
-      .catch(() => {
-        // A failed session check must not block the sign-in screen.
-      });
-    return () => controller.abort();
-  }, []);
 
   async function login() {
     if (request.current) return;
@@ -45,5 +36,8 @@ export function useDiscordLogin(adapter?: DiscordLoginAdapter) {
     }
   }
 
-  return { state, login };
+  const sessionState: DiscordLoginState = !isLoading && user
+    ? { status: 'authenticated', nextPath: user.isNewUser === true ? '/learning-profile' : '/my-path' }
+    : state;
+  return { state: sessionState, login };
 }

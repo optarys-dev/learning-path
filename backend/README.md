@@ -150,8 +150,8 @@ El frontend se ejecuta por separado desde `frontend/` con `npm install` y
 | --- | --- | --- |
 | GET | `/auth/discord` | Iniciar sesión con Discord. |
 | GET | `/auth/me` | Consultar la sesión. |
-| GET | `/courses` | Listar cursos activos con datos básicos, ordenados por título e ID. |
-| GET | `/courses/{courseId}` | Consultar un curso activo, sin metadatos de aprendizaje. |
+| GET | `/courses?page=1&pageSize=20` | Listar públicamente cursos activos paginados, ordenados por título e ID. |
+| GET | `/courses/{courseId}` | Consultar públicamente un curso activo, sin metadatos de aprendizaje. |
 | GET / PUT | `/users/me/preferences` | Consultar o guardar preferencias. |
 | GET | `/routes/recommendation/semantic` | Obtener una propuesta semántica. |
 | GET | `/routes/recommendation/semantic/v2` | Refinar el orden y las razones con IA. |
@@ -167,10 +167,12 @@ son **vistas previas**: para persistir una, enviar su `method` como
 `POST /routes`. Se acepta de 1 a 30 cursos activos, sin duplicados, en el orden
 solicitado. La respuesta es `201 Created` con un encabezado `Location`.
 
-El catálogo requiere sesión y devuelve `courseId`, `slug`, `title`, `level`,
-`imageUrl`, `imageAlt` y `courseUrl`. `GET /courses` devuelve un arreglo sin
-paginación; el detalle devuelve `404 course_not_found` si el curso no existe o
-está inactivo. No incluye descripción, temario, requisitos ni embeddings.
+El catálogo es público y devuelve `courseId`, `slug`, `title`, `level`,
+`imageUrl`, `imageAlt` y `courseUrl`. `GET /courses` acepta `page` (predeterminado
+1) y `pageSize` (predeterminado 20, máximo 100), y responde con `items`, `page`,
+`pageSize`, `totalCount`, `totalPages`, `hasPreviousPage` y `hasNextPage`. El
+detalle devuelve `404 course_not_found` si el curso no existe o está inactivo.
+No incluye descripción, temario, requisitos ni embeddings.
 
 Los cursos de las rutas guardadas incluyen `imageUrl` (miniatura) y `courseUrl`
 (página web), además de ID, posición, título y razón. Estos campos aparecen en

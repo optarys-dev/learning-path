@@ -25,6 +25,10 @@ backend/appsettings.Local.json
 *obj/
 *.vs/
 
+# Build outputs in nested .NET projects, including test projects
+**/bin/
+**/obj/
+
 # Environment and secrets
 .env
 .env.*

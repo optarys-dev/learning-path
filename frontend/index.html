@@ -2,6 +2,23 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Resolve the initial theme before styles and React can paint.
+      (() => {
+        let storedTheme;
+        try {
+          storedTheme = window.localStorage.getItem('codequest.theme');
+        } catch {
+          // Use the system preference when storage is unavailable.
+        }
+        const theme = storedTheme === 'light' || storedTheme === 'dark'
+          ? storedTheme
+          : window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CODE QUEST 2026</title>

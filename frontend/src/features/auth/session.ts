@@ -6,6 +6,7 @@ export interface AuthenticatedUser {
   username: string;
   displayName: string;
   avatar: string | null;
+  isNewUser: boolean;
 }
 
 export async function getCurrentSession(signal?: AbortSignal): Promise<AuthenticatedUser | null> {
