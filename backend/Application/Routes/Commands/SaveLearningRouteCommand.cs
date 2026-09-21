@@ -3,6 +3,7 @@ using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using CodeQuest2026.Server.Application.Courses;
 
 namespace CodeQuest2026.Server.Application.Routes.Commands;
 
@@ -29,10 +30,11 @@ public sealed class SaveLearningRouteCommandHandler(AppDbContext db)
         if (preference is null) return new(SaveRouteStatus.PreferencesRequired);
 
         var ids = request.Courses.Select(x => x.CourseId).ToArray();
-        var courseTitles = await db.Courses.AsNoTracking()
+        var courseDetails = await db.Courses.AsNoTracking()
             .Where(x => ids.Contains(x.CourseId) && x.IsActive)
-            .ToDictionaryAsync(x => x.CourseId, x => x.Title, cancellationToken);
-        if (courseTitles.Count != ids.Length) return new(SaveRouteStatus.CourseUnavailable);
+            .Select(CourseMapping.Projection)
+            .ToDictionaryAsync(course => course.CourseId, cancellationToken);
+        if (courseDetails.Count != ids.Length) return new(SaveRouteStatus.CourseUnavailable);
 
         var route = new LearningRoute
         {
@@ -61,6 +63,6 @@ public sealed class SaveLearningRouteCommandHandler(AppDbContext db)
         };
         db.LearningRoutes.Add(route);
         await db.SaveChangesAsync(cancellationToken);
-        return new(SaveRouteStatus.Created, LearningRouteMapping.ToDto(route, courseTitles));
+        return new(SaveRouteStatus.Created, LearningRouteMapping.ToDto(route, courseDetails));
     }
 }
