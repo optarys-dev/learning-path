@@ -150,6 +150,8 @@ El frontend se ejecuta por separado desde `frontend/` con `npm install` y
 | --- | --- | --- |
 | GET | `/auth/discord` | Iniciar sesión con Discord. |
 | GET | `/auth/me` | Consultar la sesión. |
+| GET | `/courses` | Listar cursos activos con datos básicos, ordenados por título e ID. |
+| GET | `/courses/{courseId}` | Consultar un curso activo, sin metadatos de aprendizaje. |
 | GET / PUT | `/users/me/preferences` | Consultar o guardar preferencias. |
 | GET | `/routes/recommendation/semantic` | Obtener una propuesta semántica. |
 | GET | `/routes/recommendation/semantic/v2` | Refinar el orden y las razones con IA. |
@@ -164,6 +166,16 @@ son **vistas previas**: para persistir una, enviar su `method` como
 `recommendationMethod`, junto con `explanation` y `courses` (IDs y razones) a
 `POST /routes`. Se acepta de 1 a 30 cursos activos, sin duplicados, en el orden
 solicitado. La respuesta es `201 Created` con un encabezado `Location`.
+
+El catálogo requiere sesión y devuelve `courseId`, `slug`, `title`, `level`,
+`imageUrl`, `imageAlt` y `courseUrl`. `GET /courses` devuelve un arreglo sin
+paginación; el detalle devuelve `404 course_not_found` si el curso no existe o
+está inactivo. No incluye descripción, temario, requisitos ni embeddings.
+
+Los cursos de las rutas guardadas incluyen `imageUrl` (miniatura) y `courseUrl`
+(página web), además de ID, posición, título y razón. Estos campos aparecen en
+las consultas de rutas y en las respuestas de creación y edición; se obtienen
+del catálogo actual. Las rutas conservan sus cursos aunque después se desactiven.
 
 <details>
 <summary>Editar y eliminar una ruta</summary>

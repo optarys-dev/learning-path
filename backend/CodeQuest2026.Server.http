@@ -2,6 +2,14 @@
 @DiscordCallbackPath = /auth/discord/callback
 @RouteId = 00000000-0000-0000-0000-000000000000
 
+### Listar cursos activos sin metadatos (requiere cookie de sesión)
+GET {{CodeQuest2026.Server_HostAddress}}/courses
+Accept: application/json
+
+### Consultar los datos básicos de un curso activo (requiere cookie de sesión)
+GET {{CodeQuest2026.Server_HostAddress}}/courses/1
+Accept: application/json
+
 ### Editar una ruta propia (requiere cookie de sesión)
 # Sustituir RouteId y los IDs de cursos por valores existentes.
 PUT {{CodeQuest2026.Server_HostAddress}}/routes/{{RouteId}}
