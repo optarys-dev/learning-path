@@ -1,5 +1,24 @@
 @CodeQuest2026.Server_HostAddress = http://localhost:5107
 @DiscordCallbackPath = /auth/discord/callback
+@RouteId = 00000000-0000-0000-0000-000000000000
+
+### Editar una ruta propia (requiere cookie de sesión)
+# Sustituir RouteId y los IDs de cursos por valores existentes.
+PUT {{CodeQuest2026.Server_HostAddress}}/routes/{{RouteId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "goal": "Aprender backend con Python",
+  "explanation": "Ruta ajustada a mis prioridades",
+  "courses": [
+    { "courseId": 2, "reason": "Empezar con este curso" },
+    { "courseId": 1, "reason": "Continuar con este curso" }
+  ]
+}
+
+### Eliminar permanentemente una ruta propia (requiere cookie de sesión)
+DELETE {{CodeQuest2026.Server_HostAddress}}/routes/{{RouteId}}
 
 ### Recomendación semántica V2 con IA (requiere cookie de sesión y preferencias)
 # Configurar Groq__ApiKey en el backend. Ver docs/SEMANTIC_V2.md.

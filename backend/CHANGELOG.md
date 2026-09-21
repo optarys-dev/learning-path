@@ -6,6 +6,9 @@ Cambios del backend de CodeQuest2026. Estas entradas describen el código dispon
 
 ### Agregado
 
+- Edición de rutas propias mediante `PUT /routes/{routeId}`: objetivo, explicación y cursos ordenados, con actualización transaccional.
+- Eliminación de rutas propias mediante `DELETE /routes/{routeId}`, conservando los cursos del catálogo.
+
 - AppDbContext con PostgreSQL/Npgsql y configuraciones separadas por entidad.
 - InitialCreate con 72 cursos de DevTalles, restricciones y valores predeterminados.
 - Category y Tag con relaciones muchos a muchos: 9 categorías, 96 tags, 90 relaciones de categorías y 187 relaciones de tags.

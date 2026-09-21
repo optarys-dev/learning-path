@@ -156,12 +156,47 @@ El frontend se ejecuta por separado desde `frontend/` con `npm install` y
 | POST | `/routes` | Guardar la propuesta elegida. |
 | GET | `/routes` | Listar las rutas guardadas. |
 | GET | `/routes/{routeId}` | Consultar una ruta propia. |
+| PUT | `/routes/{routeId}` | Reemplazar objetivo, explicación y cursos de una ruta propia. |
+| DELETE | `/routes/{routeId}` | Eliminar una ruta propia. |
 
 Las preferencias y rutas requieren sesión de Discord. Las dos recomendaciones
 son **vistas previas**: para persistir una, enviar su `method` como
 `recommendationMethod`, junto con `explanation` y `courses` (IDs y razones) a
 `POST /routes`. Se acepta de 1 a 30 cursos activos, sin duplicados, en el orden
 solicitado. La respuesta es `201 Created` con un encabezado `Location`.
+
+<details>
+<summary>Editar y eliminar una ruta</summary>
+
+`PUT /routes/{routeId}` reemplaza todos los campos editables y devuelve la ruta
+actualizada con `200 OK`. El arreglo `courses` permite agregar, quitar y reordenar
+cursos; debe contener de 1 a 30 cursos activos, sin duplicados.
+
+```json
+{
+  "goal": "Aprender desarrollo backend con Python",
+  "explanation": "Ruta ajustada a mis prioridades",
+  "courses": [
+    { "courseId": 2, "reason": "Primero reforzar estos conocimientos" },
+    { "courseId": 1, "reason": "Continuar con este curso" }
+  ]
+}
+```
+
+Los IDs del ejemplo deben sustituirse por cursos activos del catálogo.
+`goal` es obligatorio (hasta 1000 caracteres), `explanation` admite `null` y hasta
+4000 caracteres, y cada `reason` admite `null` y hasta 1000 caracteres.
+Se conservan la fecha de creación, el método de recomendación original y la copia
+histórica de preferencias. La edición no regenera recomendaciones ni actualiza
+las preferencias del usuario; el método indica el origen de la ruta.
+
+`DELETE /routes/{routeId}` no requiere cuerpo y devuelve `204 No Content`.
+Elimina permanentemente la ruta y sus asociaciones, conservando el catálogo.
+Ambas operaciones requieren sesión y devuelven `404 route_not_found` si la ruta
+no existe o pertenece a otro usuario. Una edición inválida devuelve `400`;
+los cambios se guardan en una transacción para evitar actualizaciones parciales.
+
+</details>
 
 <details>
 <summary>Sesión, respuestas y errores</summary>
