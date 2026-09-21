@@ -1,6 +1,11 @@
 @CodeQuest2026.Server_HostAddress = http://localhost:5107
 @DiscordCallbackPath = /auth/discord/callback
 
+### Recomendación semántica V2 con IA (requiere cookie de sesión y preferencias)
+# Configurar Groq__ApiKey en el backend. Ver docs/SEMANTIC_V2.md.
+GET {{CodeQuest2026.Server_HostAddress}}/routes/recommendation/semantic/v2
+Accept: application/json
+
 ### Estado general (API y base de datos)
 GET {{CodeQuest2026.Server_HostAddress}}/health
 Accept: text/plain

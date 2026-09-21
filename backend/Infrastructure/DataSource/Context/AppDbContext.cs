@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CodeQuest2026.Server.Infrastructure.DataSource.Context;
 

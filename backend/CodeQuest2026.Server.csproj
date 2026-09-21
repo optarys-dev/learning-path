@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <EmbeddedResource Include="Application/Routes/route-refinement.schema.json" />
     <Folder Include="Infrastructure\DataSource\Migrations\" />
   </ItemGroup>
   <ItemGroup>

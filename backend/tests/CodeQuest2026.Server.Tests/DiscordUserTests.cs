@@ -1,9 +1,8 @@
-using System.Security.Claims;
 using CodeQuest2026.Server.Application.Users.Commands;
 using CodeQuest2026.Server.Application.Users.Queries;
 using CodeQuest2026.Server.Controllers;
-using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using CodeQuest2026.Server.Infrastructure.DataSource.Configurations;
+using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Security.Claims;
 using Xunit;
 
 namespace CodeQuest2026.Server.Tests;
@@ -102,11 +102,14 @@ public sealed class DiscordUserTests : IAsyncLifetime
         await Sender.Send(new SyncDiscordUserCommand("456", "bob", null, null));
         var controller = new UsersController(Sender)
         {
-            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext
+            ControllerContext = new ControllerContext
             {
-                User = new ClaimsPrincipal(new ClaimsIdentity(
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(
                     [new Claim(ClaimTypes.NameIdentifier, "123")], "test"))
-            }}
+                }
+            }
         };
         var result = await controller.Me(CancellationToken.None);
         var user = Assert.IsType<CodeQuest2026.Server.Application.Users.UserDto>(
