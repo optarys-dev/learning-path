@@ -1,4 +1,5 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { useAuthSession } from './features/auth/useAuthSession';
 import { AppLayout } from './components/layout/AppLayout';
 import { SectionPage } from './pages/SectionPage';
 import { WelcomePage } from './pages/WelcomePage';
@@ -12,6 +13,12 @@ const WelcomePreviewPage = import.meta.env.DEV
 import { QuestionnairePage } from './pages/QuestionnairePage';
 
 function App() {
+  const { user, isLoading } = useAuthSession();
+  const { pathname } = useLocation();
+  if (!isLoading && user?.isNewUser === true && pathname !== '/learning-profile') {
+    return <Navigate to="/learning-profile" replace />;
+  }
+
   return (
     <Routes>
       <Route element={<AppLayout variant="welcome" />}>

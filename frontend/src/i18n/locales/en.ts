@@ -72,6 +72,18 @@ export const en = {
     completeTitle: 'Your learning profile is ready',
     completeDescription: 'We have what we need to prepare your learning path.',
     editAnswers: 'Edit my answers', generatePath: 'Generate my path',
+    preferences: {
+      save: 'Save preferences',
+      saving: 'Saving preferences…',
+      success: 'Your preferences were saved successfully.',
+      errors: {
+        validation: 'Preferences could not be saved. Review your answers and try again.',
+        unauthorized: 'Your session expired or you need to sign in to save your preferences. Your answers are preserved.',
+        server: 'The server could not save your preferences. Please try again.',
+        http: 'Your preferences could not be saved. Please try again.',
+        network: 'We could not confirm the save. Check your connection and try again.',
+      },
+    },
     summaryArea: 'Area', summaryLevel: 'Current experience', summaryOutcome: 'Goal',
     summaryExperience: 'Practical experience',
     summaryInterests: 'Interests', summarySkills: 'Known skills', noneSelected: 'None selected',

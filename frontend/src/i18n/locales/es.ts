@@ -72,6 +72,18 @@ export const es = {
     completeTitle: 'Tu perfil de aprendizaje está listo',
     completeDescription: 'Ya tenemos lo necesario para preparar tu ruta de aprendizaje.',
     editAnswers: 'Modificar mis respuestas', generatePath: 'Generar mi ruta',
+    preferences: {
+      save: 'Guardar preferencias',
+      saving: 'Guardando preferencias…',
+      success: 'Tus preferencias se guardaron correctamente.',
+      errors: {
+        validation: 'No se pudieron guardar las preferencias. Revisa tus respuestas e inténtalo de nuevo.',
+        unauthorized: 'Tu sesión expiró o necesitas iniciar sesión para guardar tus preferencias. Tus respuestas se conservan.',
+        server: 'El servidor no pudo guardar tus preferencias. Inténtalo de nuevo.',
+        http: 'No se pudieron guardar tus preferencias. Inténtalo de nuevo.',
+        network: 'No pudimos confirmar el guardado. Revisa tu conexión e inténtalo de nuevo.',
+      },
+    },
     summaryArea: 'Área', summaryLevel: 'Experiencia actual', summaryOutcome: 'Objetivo',
     summaryExperience: 'Experiencia práctica',
     summaryInterests: 'Intereses', summarySkills: 'Habilidades conocidas', noneSelected: 'Ninguna seleccionada',

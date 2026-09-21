@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type TransitionEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useAuthSession } from '../features/auth/useAuthSession';
 import deviLaptop from '../assets/assessment/04_aprendiendo_con_laptop.svg';
 import deviSelection from '../assets/assessment/05_seleccion_correcta.svg';
 import deviNeedsAnswer from '../assets/assessment/06_necesita_una_respuesta.svg';
@@ -10,6 +11,8 @@ import { Button } from '../components/ui/Button/Button';
 import { areas, desiredOutcomes, levels, practicalExperiences, questions } from '../questionnaire/config';
 import { clearQuestionnaireDraft, loadQuestionnaireDraft, saveQuestionnaireDraft } from '../questionnaire/draft';
 import { selectArea } from '../questionnaire/state';
+import { mapPreferences } from '../questionnaire/preferencesMapping';
+import { PreferencesError, savePreferences, type PreferencesErrorKind } from '../features/preferences/preferences';
 import type { AreaId, QuestionnaireAnswers, QuestionnaireState, TechnologyId } from '../questionnaire/types';
 import './QuestionnairePage.css';
 
@@ -32,6 +35,7 @@ const COMPLETE_TOP_GAP = 12;
 export function QuestionnairePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { markPreferencesSaved } = useAuthSession();
   const [state, setState] = useState<QuestionnaireState>(loadQuestionnaireDraft);
   const [welcome, setWelcome] = useState(() => state.currentStep === 0 &&
     state.answers.goal === null && state.answers.level === null && state.answers.desiredOutcome === null &&
@@ -50,6 +54,10 @@ export function QuestionnairePage() {
   const [showError, setShowError] = useState(false);
   const [hasNavigated, setHasNavigated] = useState(false);
   const [result, setResult] = useState<QuestionnaireAnswers | null>(null);
+  const [saveState, setSaveState] = useState<
+    { status: 'idle' | 'saving' | 'success' } | { status: 'error'; kind: PreferencesErrorKind }
+  >({ status: 'idle' });
+  const savingRef = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const completeRef = useRef<HTMLElement>(null);
   const areasRef = useRef<HTMLFieldSetElement>(null);
@@ -259,14 +267,33 @@ export function QuestionnairePage() {
     }
     pendingProfileScroll.current = 'complete';
     setResult({ ...answers, interests: [...answers.interests], knownSkills: [...answers.knownSkills] });
-    clearQuestionnaireDraft();
+    saveQuestionnaireDraft(state);
   }
 
   function editAnswers() {
+    if (savingRef.current) return;
+    setSaveState({ status: 'idle' });
     setState(previous => ({ ...previous, currentStep: 0 }));
     setResult(null);
     setWelcome(false);
     setShowError(false);
+  }
+
+  async function submitPreferences() {
+    if (result === null || savingRef.current || saveState.status === 'success') return;
+    savingRef.current = true;
+    setSaveState({ status: 'saving' });
+    try {
+      await savePreferences(mapPreferences(result));
+      clearQuestionnaireDraft();
+      markPreferencesSaved();
+      setSaveState({ status: 'success' });
+      navigate('/my-path', { replace: true });
+    } catch (error) {
+      setSaveState({ status: 'error', kind: error instanceof PreferencesError ? error.kind : 'http' });
+    } finally {
+      savingRef.current = false;
+    }
   }
 
   return (
@@ -423,9 +450,19 @@ export function QuestionnairePage() {
             <div><dt>{t('questionnaire.summarySkills')}</dt><dd>{result.knownSkills.length ? result.knownSkills.map(item => t(`questionnaire.technologies.${item}`)).join(', ') : t('questionnaire.noneSelected')}</dd></div>
           </dl>
           <div className="learning-profile__complete-actions">
-            <Button variant="secondary" onClick={editAnswers}>{t('questionnaire.editAnswers')}</Button>
-            <Button onClick={() => navigate('/my-path')}>{t('questionnaire.generatePath')}</Button>
+            <Button variant="secondary" onClick={editAnswers} disabled={saveState.status === 'saving'}>{t('questionnaire.editAnswers')}</Button>
+            <Button onClick={submitPreferences} isLoading={saveState.status === 'saving'}
+              loadingLabel={t('questionnaire.preferences.saving')} disabled={saveState.status === 'success'}>
+              {t(saveState.status === 'error' ? 'layout.retry' : 'questionnaire.preferences.save')}
+            </Button>
           </div>
+          <p role="status" aria-live="polite" aria-atomic="true">
+            {saveState.status === 'saving' && t('questionnaire.preferences.saving')}
+            {saveState.status === 'success' && t('questionnaire.preferences.success')}
+          </p>
+          <p role="alert" aria-atomic="true">
+            {saveState.status === 'error' && t(`questionnaire.preferences.errors.${saveState.kind}`)}
+          </p>
         </section>
           )}
         </div>

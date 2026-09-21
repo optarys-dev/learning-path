@@ -6,7 +6,7 @@
 .learning-profile__progress { height: var(--cq-space-2); background: var(--cq-color-border-default); border-radius: var(--cq-radius-pill); overflow: hidden; }
 .learning-profile__progress span { display: block; height: 100%; background: var(--cq-color-brand-primary); }
 .learning-profile__step h2 { margin-block: var(--cq-space-8); font-family: var(--cq-font-heading); font-size: var(--cq-font-size-h2); }
-.learning-profile__options { display: grid; gap: var(--cq-space-3); margin: 0; padding: 0; border: 0; }
+.learning-profile__options { display: grid; grid-template-columns: 1fr; gap: var(--cq-space-3); margin: 0; padding: 0; border: 0; }
 .learning-profile__options + .learning-profile__options { margin-top: var(--cq-space-8); }
 .learning-profile__technology-section {
   margin-top: var(--cq-space-6);
@@ -40,11 +40,14 @@
 /* Reserve the page scrollbar before the taller questionnaire is revealed. */
 html:has(.learning-profile) { scrollbar-gutter: stable; }
 
+/* Widen only this page; keep the shared layout's lateral gutters. */
+.app-main:has(.learning-profile) { width: min(100% - var(--cq-space-8), 90rem); }
+
 .learning-profile {
   position: relative;
   isolation: isolate;
   width: 100%;
-  max-width: 68rem;
+  max-width: 90rem;
   margin-top: 0;
   margin-inline: auto;
   --profile-sweep-background: linear-gradient(90deg, transparent, var(--cq-color-brand-primary), var(--cq-color-focus), transparent);
@@ -136,7 +139,6 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
   background: var(--cq-color-border-default);
 }
 .learning-profile__step h2 { margin: var(--cq-space-8) 0 var(--cq-space-6); line-height: var(--cq-line-height-h2); }
-.learning-profile__options--areas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .learning-profile__option {
   min-width: 0;
   border-color: transparent;
@@ -152,7 +154,6 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__area-card strong { font-family: var(--cq-font-heading); font-size: var(--cq-font-size-body); }
 .learning-profile__area-card small { line-height: var(--cq-line-height-label); }
 .learning-profile__chip { min-height: 2.875rem; padding-block: var(--cq-space-2); border-radius: var(--cq-radius-pill); }
-.learning-profile__options--compact { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
 .learning-profile__interests {
   /* The header is in normal flow; leave responsive context above the legend. */
   scroll-margin-top: clamp(var(--cq-space-8), 12vh, 7rem);
@@ -318,7 +319,7 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 /* flow-root prevents intro margins from changing absolute-to-normal geometry. */
 .learning-profile__flow { display: flow-root; min-width: 0; }
 .learning-profile--welcome .learning-profile__flow {
-  width: min(100%, calc(68rem - var(--profile-flow-padding)));
+  width: min(100%, calc(90rem - var(--profile-flow-padding)));
   margin-inline: auto;
 }
 .learning-profile--entering {
@@ -333,7 +334,7 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 }
 .learning-profile--welcome .learning-profile__step,
 .learning-profile--welcome .learning-profile__question-content { animation: none; }
-.learning-profile.learning-profile--sliding { max-width: 68rem; margin-top: 0; }
+.learning-profile.learning-profile--sliding { max-width: 90rem; margin-top: 0; }
 /* Finish the welcome entrance before measuring/sliding, even on an early click. */
 .learning-profile--entering .learning-profile__welcome-content,
 .learning-profile--entering .learning-profile__mascot--welcome,
@@ -472,21 +473,18 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
   box-shadow: inset 0 0 0 1px var(--cq-color-brand-primary), var(--cq-focus-ring);
 }
 
-/* Natural questionnaire rhythm: content grows with the document. */
-@media (min-width: 52rem) {
-  .learning-profile__options--areas > :last-child { grid-column: 1 / -1; }
-  .learning-profile [data-question='currentExperience'] .learning-profile__options,
-  .learning-profile [data-question='desiredOutcome'] .learning-profile__options,
-  .learning-profile [data-question='practicalExperience'] .learning-profile__options {
+/* Shared responsive grid for areas, technologies and all single-choice steps. */
+@media (min-width: 38.001rem) {
+  .learning-profile__options {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+@media (min-width: 68rem) {
+  .learning-profile__options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (min-width: 38.001rem) {
   .learning-profile__question-content > h2 { padding-inline-end: clamp(8rem, 16vw, 11rem); }
   .learning-profile__question-hint { max-width: calc(100% - clamp(8rem, 16vw, 11rem)); }
-}
-
-@media (max-width: 51.999rem) {
-  .learning-profile:not(.learning-profile--welcome) .learning-profile__options--areas { grid-template-columns: 1fr; }
 }
