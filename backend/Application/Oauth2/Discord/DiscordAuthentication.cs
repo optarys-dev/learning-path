@@ -1,11 +1,11 @@
-using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Text.Json;
 using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Users.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace CodeQuest2026.Server.Application.Oauth2.Discord;
 

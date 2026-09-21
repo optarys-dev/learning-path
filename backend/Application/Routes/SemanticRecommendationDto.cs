@@ -1,11 +1,11 @@
 namespace CodeQuest2026.Server.Application.Routes;
 
-/// <summary>Resultado reproducible del motor de recomendación estático.</summary>
+/// <summary>Resultado de una recomendación semántica.</summary>
 /// <param name="Method">Versión del algoritmo utilizado.</param>
 /// <param name="Goal">Objetivo guardado del usuario.</param>
 /// <param name="Explanation">Cómo se eligieron y ordenaron los cursos.</param>
 /// <param name="Courses">Cursos recomendados en el orden propuesto.</param>
-public sealed record StaticRecommendationDto(
+public sealed record SemanticRecommendationDto(
     string Method, string Goal, string Explanation,
     IReadOnlyList<RecommendedCourseDto> Courses);
 

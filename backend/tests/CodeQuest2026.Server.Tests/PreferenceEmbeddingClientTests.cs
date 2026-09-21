@@ -1,8 +1,8 @@
+using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
+using CodeQuest2026.Server.Infrastructure.Embeddings;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
-using CodeQuest2026.Server.Infrastructure.Embeddings;
 using Xunit;
 
 namespace CodeQuest2026.Server.Tests;

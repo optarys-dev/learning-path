@@ -1,7 +1,10 @@
-using CodeQuest2026.Server.Infrastructure.DataSource.Context;
-using CodeQuest2026.Server.Application.Users.Commands;
+using CodeQuest2026.Server.Application.Common.AI;
 using CodeQuest2026.Server.Application.Routes;
+using CodeQuest2026.Server.Application.Routes.Queries;
+using CodeQuest2026.Server.Application.Users.Commands;
+using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using CodeQuest2026.Server.Infrastructure.Embeddings;
+using CodeQuest2026.Server.Infrastructure.Groq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -13,7 +16,17 @@ public static class ServiceCollectionExtensions
     {
         services.AddMediatR(options =>
             options.RegisterServicesFromAssemblyContaining<SyncDiscordUserCommand>());
-        services.AddSingleton<IStaticCourseRecommendationEngine, StaticCourseRecommendationEngine>();
+        services.AddSingleton<HybridSemanticRecommendationEngine>();
+        services.AddScoped<GetSemanticRecommendationQueryHandler>();
+        services.AddHttpClient<GroqProvider>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
+        services.AddScoped<IStructuredAiProvider>(provider =>
+            provider.GetRequiredService<GroqProvider>());
+        services.AddScoped<RouteRefinementService>();
+
         var embeddingServiceUrl = configuration["EmbeddingService:Url"] ?? "http://127.0.0.1:8765/";
         services.AddHttpClient<PreferenceEmbeddingClient>(client =>
         {

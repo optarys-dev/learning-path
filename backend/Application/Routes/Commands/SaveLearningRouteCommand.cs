@@ -1,8 +1,8 @@
-using System.Text.Json;
 using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace CodeQuest2026.Server.Application.Routes.Commands;
 
@@ -43,14 +43,20 @@ public sealed class SaveLearningRouteCommandHandler(AppDbContext db)
             Explanation = request.Explanation?.Trim(),
             PreferencesSnapshot = JsonSerializer.Serialize(new
             {
-                preference.Goal, preference.ExperienceLevel, preference.Interests,
-                preference.ExistingSkills, preference.PreferredLanguage, preference.MinutesPerWeek,
+                preference.Goal,
+                preference.ExperienceLevel,
+                preference.Interests,
+                preference.ExistingSkills,
+                preference.PreferredLanguage,
+                preference.MinutesPerWeek,
                 preference.UpdatedAt
             }),
             CreatedAt = DateTimeOffset.UtcNow,
             Courses = request.Courses.Select((x, index) => new LearningRouteCourse
             {
-                CourseId = x.CourseId, Position = index + 1, Reason = x.Reason?.Trim()
+                CourseId = x.CourseId,
+                Position = index + 1,
+                Reason = x.Reason?.Trim()
             }).ToList()
         };
         db.LearningRoutes.Add(route);
