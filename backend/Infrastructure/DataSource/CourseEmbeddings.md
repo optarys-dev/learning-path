@@ -21,9 +21,14 @@ dotnet ef database update --context AppDbContext
 python -m venv embedding-worker/.venv
 embedding-worker/.venv/Scripts/python -m pip install -r embedding-worker/requirements.txt
 $env:DATABASE_URL = 'postgresql://USUARIO:CLAVE@localhost:5432/codequest2026'
-embedding-worker/.venv/Scripts/python embedding-worker/worker.py index
-embedding-worker/.venv/Scripts/python embedding-worker/worker.py serve
+embedding-worker/.venv/Scripts/python embedding-worker/embedding_cli.py index
+embedding-worker/.venv/Scripts/python embedding-worker/embedding_cli.py serve
 ```
+
+`serve` inicia la API FastAPI en Uvicorn. El endpoint compatible es
+`POST /embed-preferences`; `GET /health` indica si el modelo terminó de cargar y
+`GET /docs` expone la documentación interactiva. Desde `embedding-worker/` también
+se puede ejecutar `python -m uvicorn api:app --host 127.0.0.1 --port 8765`.
 
 La migración crea course_embeddings sin filas. No genera vectores sintéticos:
 se necesita seleccionar un modelo y ejecutar un proceso de embeddings real.
@@ -73,5 +78,31 @@ La similitud no es una probabilidad. Para los 72 cursos se usa búsqueda exacta,
 con índice B-tree por Model y Dimensions. No hay índice HNSW por ahora: al elegir
 un modelo y medir la necesidad, fijar vector(n) y agregar vector_cosine_ops en
 otra migración. Los índices actuales de categorías, tags y títulos se conservan.
+
+## Recomendación híbrida
+
+`GET /routes/recommendation/semantic` evalúa todos los cursos activos con embeddings
+compatibles y del idioma elegible. El motor `semantic-graph-v6` deriva asociaciones
+categoría–tag de esos cursos, reconoce términos específicos del título y las
+equivalencias `web`→Frontend/Backend y `js`→JavaScript, y favorece
+la cobertura de tags distintos al seleccionar hasta seis cursos. No crea una
+jerarquía editorial ni añade tablas o índices: una coocurrencia indica relación
+observada en el catálogo, no dependencia pedagógica.
+
+Cuando el objetivo nombra un tema etiquetado y combina una categoría reconocida, ese
+tema prevalece sobre otros intereses al definir los cursos centrales. Se
+priorizan cursos que cubren ambos aspectos y cursos de fundamentos de ese
+tema. Si existe al menos un curso central, se admite como máximo un curso
+complementario para evitar que una
+coincidencia semántica aislada desplace el objetivo principal. Por ello la ruta
+puede contener menos de seis cursos.
+
+El puntaje devuelto combina similitud coseno normalizada y relación temática, y
+reduce la prioridad de títulos `Legacy` si no se solicitan; no es una probabilidad
+ni se compara directamente con el puntaje de versiones semánticas anteriores.
+El orden favorece el nivel y, dentro del nivel, requisitos reconocibles en
+metadatos verificados. Frases sobre instalación, requisitos opcionales, inferidos
+o negados no se convierten en conocimientos previos. El
+endpoint sigue siendo una vista previa; `POST /routes` guarda una propuesta.
 
 Modelo: [Qwen3 Embedding](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B).

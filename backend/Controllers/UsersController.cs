@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Users;
 using CodeQuest2026.Server.Application.Users.Commands;
@@ -6,6 +5,7 @@ using CodeQuest2026.Server.Application.Users.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CodeQuest2026.Server.Controllers;
 

@@ -1,7 +1,7 @@
-using System.Text.Json;
 using CodeQuest2026.Server.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Text.Json;
 using Xunit;
 
 namespace CodeQuest2026.Server.Tests;

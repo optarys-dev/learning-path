@@ -1,5 +1,5 @@
-using System.Security.Claims;
 using CodeQuest2026.Server.Application.Common;
+using CodeQuest2026.Server.Application.Oauth2.Discord;
 using CodeQuest2026.Server.Application.Users;
 using CodeQuest2026.Server.Application.Users.Queries;
 using MediatR;
@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CodeQuest2026.Server.Application.Oauth2.Discord;
+using System.Security.Claims;
 
 namespace CodeQuest2026.Server.Controllers;
 

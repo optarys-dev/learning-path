@@ -1,0 +1,232 @@
+using System.Security.Claims;
+using CodeQuest2026.Server.Application.Routes;
+using CodeQuest2026.Server.Application.Routes.Commands;
+using CodeQuest2026.Server.Controllers;
+using CodeQuest2026.Server.Infrastructure.DataSource.Configurations;
+using CodeQuest2026.Server.Infrastructure.DataSource.Context;
+using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Xunit;
+
+namespace CodeQuest2026.Server.Tests;
+
+public sealed class LearningRouteMutationTests : IAsyncLifetime
+{
+    private readonly SqliteConnection connection = new("Data Source=:memory:");
+    private readonly Guid routeId = Guid.NewGuid();
+    private ServiceProvider services = null!;
+    private IServiceScope scope = null!;
+    private AppDbContext Db => scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    public async Task InitializeAsync()
+    {
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+        var registrations = new ServiceCollection();
+        registrations.AddScoped<AppDbContext>(_ => new RouteTestDbContext(options));
+        registrations.AddMediatR(options => options.RegisterServicesFromAssemblyContaining<UpdateLearningRouteCommand>());
+        services = registrations.BuildServiceProvider();
+        scope = services.CreateScope();
+        await Db.Database.EnsureCreatedAsync();
+
+        Db.Users.Add(new User { UserId = "owner", DiscordId = "123", Username = "owner" });
+        Db.Courses.AddRange(
+            new Course { CourseId = 1, Title = "Python" },
+            new Course { CourseId = 2, Title = "Backend" },
+            new Course { CourseId = 3, Title = "SQL" },
+            new Course { CourseId = 4, Title = "Inactive", IsActive = false });
+        Db.LearningRoutes.Add(new LearningRoute
+        {
+            RouteId = routeId,
+            UserId = "owner",
+            Goal = "Original",
+            Explanation = "Original explanation",
+            RecommendationMethod = "semantic-groq-v2",
+            PreferencesSnapshot = "{\"goal\":\"Original\"}",
+            CreatedAt = DateTimeOffset.Parse("2026-01-01T00:00:00Z"),
+            Courses = [
+                new() { CourseId = 1, Position = 1, Reason = "First" },
+                new() { CourseId = 2, Position = 2, Reason = "Second" }
+            ]
+        });
+        await Db.SaveChangesAsync();
+        Db.ChangeTracker.Clear();
+    }
+
+    [Fact]
+    public async Task UpdateSwapsPositionsAndPreservesProvenance()
+    {
+        var response = await Controller("123").Update(routeId, Request(2, 1), default);
+        var route = Assert.IsType<LearningRouteDto>(Assert.IsType<OkObjectResult>(response.Result).Value);
+        Assert.Equal(new long[] { 2, 1 }, route.Courses.Select(course => course.CourseId));
+        Assert.Equal(new[] { 1, 2 }, route.Courses.Select(course => course.Position));
+        Assert.Equal("Updated", route.Goal);
+        Assert.Equal("Updated explanation", route.Explanation);
+        Assert.Equal("Updated reason", route.Courses[0].Reason);
+        Assert.Equal("semantic-groq-v2", route.RecommendationMethod);
+
+        var stored = await Db.LearningRoutes.AsNoTracking().Include(route => route.Courses).SingleAsync();
+        Assert.Equal("{\"goal\":\"Original\"}", stored.PreferencesSnapshot);
+        Assert.Equal(DateTimeOffset.Parse("2026-01-01T00:00:00Z"), stored.CreatedAt);
+        Assert.Equal(2, stored.Courses.Single(course => course.Position == 1).CourseId);
+    }
+
+    [Fact]
+    public async Task UpdateAddsRemovesCoursesAndCanClearExplanation()
+    {
+        var request = Request(3);
+        request.Explanation = null;
+        var response = await Controller("123").Update(routeId, request, default);
+        Assert.IsType<OkObjectResult>(response.Result);
+        Assert.Equal(3, (await Db.LearningRouteCourses.SingleAsync()).CourseId);
+        Assert.Null((await Db.LearningRoutes.AsNoTracking().SingleAsync()).Explanation);
+        Assert.Equal(4, await Db.Courses.CountAsync());
+    }
+
+    [Theory]
+    [InlineData(4)]
+    [InlineData(999)]
+    public async Task UpdateRejectsUnavailableCoursesWithoutChangingRoute(long id)
+    {
+        var response = await Controller("123").Update(routeId, Request(id), default);
+        Assert.IsType<BadRequestObjectResult>(response.Result);
+        await AssertOriginal();
+    }
+
+    [Theory]
+    [InlineData("duplicate")]
+    [InlineData("empty")]
+    [InlineData("too_many")]
+    [InlineData("null_courses")]
+    [InlineData("null_course")]
+    [InlineData("goal")]
+    [InlineData("reason")]
+    [InlineData("explanation")]
+    public async Task UpdateRejectsInvalidContent(string scenario)
+    {
+        var request = Request(1, 2);
+        switch (scenario)
+        {
+            case "duplicate": request = Request(1, 1); break;
+            case "empty": request.Courses = []; break;
+            case "too_many": request = Request(Enumerable.Range(1, 31).Select(id => (long)id).ToArray()); break;
+            case "null_courses": request.Courses = null!; break;
+            case "null_course": request.Courses = [null!]; break;
+            case "goal": request.Goal = " "; break;
+            case "reason": request.Courses[0].Reason = new string('x', 1001); break;
+            case "explanation": request.Explanation = new string('x', 4001); break;
+        }
+
+        var response = await Controller("123").Update(routeId, request, default);
+        Assert.IsType<BadRequestObjectResult>(response.Result);
+        await AssertOriginal();
+    }
+
+    [Fact]
+    public async Task DeleteRemovesRouteAndAssociationsButKeepsCatalog()
+    {
+        Assert.IsType<NoContentResult>(await Controller("123").Delete(routeId, default));
+        Assert.Equal(0, await Db.LearningRoutes.CountAsync());
+        Assert.Equal(0, await Db.LearningRouteCourses.CountAsync());
+        Assert.Equal(4, await Db.Courses.CountAsync());
+        Assert.IsType<NotFoundObjectResult>(await Controller("123").Delete(routeId, default));
+    }
+
+    [Fact]
+    public async Task OtherUsersAndMissingRoutesReturnNotFound()
+    {
+        Assert.IsType<NotFoundObjectResult>(await Controller("456").Delete(routeId, default));
+        Assert.IsType<NotFoundObjectResult>((await Controller("456").Update(routeId, Request(3), default)).Result);
+        Assert.IsType<NotFoundObjectResult>(await Controller("123").Delete(Guid.NewGuid(), default));
+        Assert.IsType<NotFoundObjectResult>((await Controller("123").Update(Guid.NewGuid(), Request(3), default)).Result);
+        await AssertOriginal();
+    }
+
+    [Fact]
+    public async Task MissingIdentityReturnsUnauthorized()
+    {
+        Assert.IsType<UnauthorizedObjectResult>(await Controller(null).Delete(routeId, default));
+        Assert.IsType<UnauthorizedObjectResult>((await Controller(null).Update(routeId, Request(3), default)).Result);
+        await AssertOriginal();
+    }
+
+    [Fact]
+    public async Task FailedInsertionRollsBackGoalAndDeletedAssociations()
+    {
+        await Db.Database.ExecuteSqlRawAsync("""
+            CREATE TRIGGER reject_new_course BEFORE INSERT ON learning_route_courses
+            WHEN NEW.course_id = 3 BEGIN SELECT RAISE(ABORT, 'test failure'); END;
+            """);
+
+        await Assert.ThrowsAsync<DbUpdateException>(() => Controller("123").Update(routeId, Request(3), default));
+        await AssertOriginal();
+    }
+
+    private async Task AssertOriginal()
+    {
+        var route = await Db.LearningRoutes.AsNoTracking().Include(route => route.Courses).SingleAsync();
+        Assert.Equal("Original", route.Goal);
+        Assert.Equal("Original explanation", route.Explanation);
+        Assert.Equal(new long[] { 1, 2 }, route.Courses.OrderBy(course => course.Position).Select(course => course.CourseId));
+    }
+
+    private static UpdateLearningRouteRequest Request(params long[] ids) => new()
+    {
+        Goal = " Updated ",
+        Explanation = " Updated explanation ",
+        Courses = ids.Select(id => new SaveRouteCourseRequest { CourseId = id, Reason = " Updated reason " }).ToList()
+    };
+
+    private RoutesController Controller(string? discordId)
+    {
+        var context = new DefaultHttpContext();
+        if (discordId is not null)
+        {
+            context.User = new ClaimsPrincipal(new ClaimsIdentity(
+                [new Claim(ClaimTypes.NameIdentifier, discordId)], "test"));
+        }
+
+        return new RoutesController(scope.ServiceProvider.GetRequiredService<ISender>())
+        {
+            ControllerContext = new ControllerContext { HttpContext = context }
+        };
+    }
+
+    public async Task DisposeAsync()
+    {
+        scope.Dispose();
+        await services.DisposeAsync();
+        await connection.DisposeAsync();
+    }
+
+    private sealed class RouteTestDbContext(DbContextOptions<AppDbContext> options) : AppDbContext(options)
+    {
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Ignore<UserPreference>();
+            modelBuilder.Ignore<CourseEmbedding>();
+            modelBuilder.Ignore<Category>();
+            modelBuilder.Ignore<Tag>();
+            new UserConfiguration().Configure(modelBuilder.Entity<User>());
+            modelBuilder.Entity<User>().Ignore(user => user.Preferences);
+            new LearningRouteConfiguration().Configure(modelBuilder.Entity<LearningRoute>());
+            new LearningRouteCourseConfiguration().Configure(modelBuilder.Entity<LearningRouteCourse>());
+
+            var course = modelBuilder.Entity<Course>();
+            foreach (var property in typeof(Course).GetProperties())
+            {
+                if (property.Name is not (nameof(Course.CourseId) or nameof(Course.Title) or nameof(Course.IsActive)))
+                {
+                    course.Ignore(property.Name);
+                }
+            }
+            course.HasKey(course => course.CourseId);
+            course.Property(course => course.CourseId).ValueGeneratedNever();
+        }
+    }
+}

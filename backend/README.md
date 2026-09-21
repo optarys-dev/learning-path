@@ -1,70 +1,38 @@
 # CodeQuest2026 — Backend
 
-Backend ASP.NET Core de CodeQuest2026, un proyecto para recomendar cursos y construir rutas de aprendizaje.
+API para recomendar cursos y construir rutas de aprendizaje según objetivos,
+intereses y conocimientos previos. Combina **búsqueda semántica**, **asociaciones
+del catálogo** y **refinamiento opcional con IA**.
 
-## Estado actual
+## Índice
 
-Autenticación con Discord disponible mediante `/auth/discord`, callback OAuth
-y consulta de sesión en `/auth/me`. Ver [configuración y pruebas](docs/DISCORD_OAUTH.md).
+- [Descripción general](#descripcion-general)
+- [Inicio rápido](#inicio-rapido)
+- [API y flujo de uso](#api-y-flujo)
+- [Estrategia de recomendación](#estrategia)
+- [Proveedores de IA](#proveedores)
+- [Estructura del proyecto](#estructura)
+- [Docker](#docker)
+- [Pruebas y comprobaciones](#pruebas)
+- [Documentación](#documentacion)
 
-- Catálogo inicial de 72 cursos de DevTalles.
-- 9 categorías y 96 tags relacionados muchos a muchos con cursos.
-- Metadatos inferidos para pruebas: descripción, temario sugerido, objetivos, habilidades, prerrequisitos y público.
-- Extracción de metadatos públicos de las 72 páginas de cursos, con fuente y fecha; importación SQL revisable.
-- Índices de filtrado por estado/nivel, título, categoría y tag.
-- Almacenamiento de embeddings mediante pgvector.
-- Health checks, documento OpenAPI y panel interactivo Swagger en desarrollo.
+<a id="descripcion-general"></a>
 
-El cuestionario y el seguimiento de progreso todavía no están implementados en este backend.
+## Descripción general
 
-Las preferencias se pueden guardar con `PUT /users/me/preferences` y consultar con
-`GET /users/me/preferences`. `isNewUser` en `/auth/me` y `/users/me` es verdadero
-hasta que se guardan las preferencias. Las rutas ya analizadas se guardan con
-`POST /routes` y se consultan con `GET /routes` o `GET /routes/{routeId}`.
-El motor estático ofrece una vista previa con `GET /routes/recommendation` y genera
-y guarda la ruta con `POST /routes/generate`.
-La búsqueda con embeddings se consulta con `GET /routes/recommendation/semantic`;
-devuelve una propuesta sin guardarla. `POST /routes/generate` usa `static-v1`,
-no la recomendación semántica. Para guardar una propuesta semántica, enviar sus
-cursos a `POST /routes` con `recommendationMethod`, `explanation` y `courses`.
-Estos endpoints requieren la sesión de Discord. Aplicar la migración
-`AddUserPreferencesAndLearningRoutes` antes de usarlos. Véase
-[propuesta de recomendaciones](docs/RECOMMENDATIONS.md).
+| Capacidad | Implementación |
+| --- | --- |
+| Autenticación | Discord OAuth y cookie de sesión. |
+| Preferencias | Objetivo, intereses, experiencia, habilidades, idioma y tiempo disponible. |
+| Catálogo inicial | 72 cursos de DevTalles, 9 categorías y 96 tags. |
+| Recomendación | Embeddings locales, pgvector y asociaciones categoría–tag. |
+| Refinamiento V2 | Groq organiza los cursos y personaliza las razones con JSON Schema estricto. |
+| Rutas | Guardado explícito, consulta y copia de las preferencias utilizadas. |
 
-### Crear una ruta desde las preferencias
+El cuestionario y el seguimiento de progreso aún no están implementados.
 
-1. Guardar las preferencias con `PUT /users/me/preferences`.
-2. Consultar `GET /routes/recommendation` para previsualizar la selección estática.
-3. Enviar `POST /routes/generate` sin cuerpo. La respuesta `201 Created` incluye
-   la ruta y el encabezado `Location` apunta a `GET /routes/{routeId}`.
-
-Si se desea usar Hugging Face, ejecutar antes `embedding-worker/worker.py index`
-y mantener `embedding-worker/worker.py serve` disponible. Consultar
-`GET /routes/recommendation/semantic` y guardar la propuesta con `POST /routes`.
-Este último acepta de 1 a 30 cursos activos y usa el orden del arreglo `courses`.
-
-```mermaid
-flowchart TD
-    A["Iniciar sesión con Discord"] --> B["PUT /users/me/preferences"]
-    B --> C{"Método de recomendación"}
-    C -->|Estático| D["GET /routes/recommendation<br/>Vista previa opcional"]
-    D --> E["POST /routes/generate<br/>Sin cuerpo JSON"]
-    C -->|Estático directo| E
-    C -->|Semántico| F["Indexar cursos<br/>worker.py index"]
-    F --> G["Iniciar servicio<br/>worker.py serve"]
-    G --> H["GET /routes/recommendation/semantic<br/>Vista previa con embeddings"]
-    H --> I["POST /routes<br/>Enviar método, explicación y cursos"]
-    E --> J["201 Created<br/>Ruta guardada"]
-    I --> J
-    J --> K["GET /routes/{routeId}"]
-```
-
-Swagger documenta los cuerpos, la cookie requerida y las respuestas de preferencias
-y rutas. Los errores de la API usan `{ "error": "código", "message": "descripción" }`;
-los errores inesperados devuelven HTTP 500 con `error = internal_error` y se registran
-en el servidor sin exponer detalles internos al cliente.
-
-## Tecnologías
+<details>
+<summary>Tecnologías y procedencia de los datos</summary>
 
 | Componente | Versión declarada |
 | --- | --- |
@@ -72,67 +40,434 @@ en el servidor sin exponer detalles internos al cliente.
 | EF Core Design / dotnet-ef | 10.0.12 |
 | Npgsql EF Core | 10.0.3 |
 | Pgvector.EntityFrameworkCore | 0.3.0 |
-| Base de datos | PostgreSQL con vector y pg_trgm |
+| PostgreSQL | Extensiones `vector` y `pg_trgm`. |
+| Worker | Python, FastAPI y sentence-transformers. |
 
-Ver [proyecto y dependencias](CodeQuest2026.Server.csproj). El proyecto referencia el cliente React de `../frontend`; conservar la estructura del repositorio.
+Las versiones se declaran en [el proyecto](CodeQuest2026.Server.csproj). El backend
+se compila de forma independiente; el cliente React está en `../frontend`.
 
-## Configuración local
+El catálogo tiene relaciones muchos a muchos mediante `course_categories` y
+`course_tags`, metadatos públicos con fuente y fecha, e índices de filtrado.
+Los registros `inferred-seed-v1` son datos de prueba, no temarios ni requisitos
+confirmados. El seed conserva los metadatos previamente completados.
+Cada curso puede tener un embedding; las migraciones no generan los vectores.
 
-Ejecutar los comandos en PowerShell desde `backend/`.
+</details>
 
-### Requisitos
+<a id="inicio-rapido"></a>
+
+## Inicio rápido
+
+Ejecutar los comandos en **PowerShell desde `backend/`**, salvo donde se indique.
+
+### 1. Preparar los requisitos
 
 - SDK de .NET 10.
-- PostgreSQL accesible con pgvector instalado y pg_trgm disponible.
-- Base de datos de desarrollo y usuario con permisos para crear el esquema y habilitar extensiones, o extensiones habilitadas previamente por su administrador.
-- Node.js y npm compatibles con el cliente si se ejecuta el frontend o el proxy SPA.
+- PostgreSQL con `vector` y `pg_trgm`, y permisos para aplicar las migraciones.
+- Python 3.10+ y [dependencias del worker](embedding-worker/README.md#instalación).
+- [Credenciales de Discord](docs/DISCORD_OAUTH.md) para las rutas autenticadas.
+- Clave de Groq si se desea aplicar el refinamiento V2.
 
-La extensión SQL se llama **vector**. Instalar el paquete NuGet no instala pgvector en el servidor PostgreSQL.
+Node.js y npm son necesarios solo para ejecutar o compilar el frontend.
+Instalar el paquete NuGet de pgvector no instala la extensión de PostgreSQL.
 
-### Conexión
-
-Configurar `ConnectionStrings:DefaultConnection`. Ejemplo para la sesión actual:
+### 2. Configurar el backend
 
 ```powershell
-$env:ConnectionStrings__DefaultConnection = 'Host=localhost;Port=5432;Database=codequest2026;Username=TU_USUARIO;Password=TU_PASSWORD'
 $env:ASPNETCORE_ENVIRONMENT = 'Development'
+$env:ConnectionStrings__DefaultConnection = 'Host=localhost;Port=5432;Database=codequest2026;Username=TU_USUARIO;Password=TU_PASSWORD'
+$env:EmbeddingService__Url = 'http://127.0.0.1:8765/'
+
+# Opcional: refinamiento de la V2
+$env:Groq__ApiKey = 'TU_CLAVE_GROQ'
+$env:Groq__Model = 'openai/gpt-oss-20b'
 ```
 
-Sustituir los valores de ejemplo. La variable de entorno prevalece sobre appsettings.json. Un archivo `.env` no se carga automáticamente en este backend. No guardar credenciales reales en el repositorio.
+Configurar también Discord según [su guía](docs/DISCORD_OAUTH.md). La URL del worker
+y el modelo de Groq del ejemplo son los predeterminados. Las variables de entorno
+prevalecen sobre `appsettings.json`; también se puede usar .NET User Secrets.
+El backend no carga archivos `.env` automáticamente. No guardar claves reales en el repositorio.
 
-### Restaurar, compilar y migrar
+### 3. Compilar y aplicar las migraciones
 
 ```powershell
 dotnet tool restore --tool-manifest dotnet-tools.json
 dotnet restore CodeQuest2026.Server.csproj
-dotnet build CodeQuest2026.Server.csproj --no-restore -p:BuildProjectReferences=false
+dotnet build CodeQuest2026.Server.csproj --no-restore
 dotnet ef database update --context AppDbContext --no-build
 ```
 
-BuildProjectReferences=false evita compilar el cliente en este paso, aunque MSBuild todavía puede necesitar resolver su SDK JavaScript.
+Las migraciones crean el esquema y los seeds. La aplicación no migra al iniciar.
+El archivo histórico `../database/seeds/Seed Courses.sql` no debe ejecutarse sobre
+el esquema actual. Más información en [Migraciones](docs/MIGRATIONS.md).
 
-Las migraciones crean el esquema, habilitan las extensiones e incorporan los seeds. La aplicación no migra automáticamente al iniciar. Para una instalación nueva usar las migraciones: `../database/seeds/Seed Courses.sql` es una referencia histórica con Track y no debe ejecutarse sobre el esquema actual ni antes de la migración inicial.
+### 4. Indexar cursos e iniciar el worker
 
-### Ejecutar solo el backend
+En una terminal con el entorno Python del worker activado:
 
-Con las variables anteriores, sin activar el perfil del proxy SPA:
+```powershell
+$env:DATABASE_URL = 'postgresql://TU_USUARIO:TU_PASSWORD@localhost:5432/codequest2026'
+python embedding-worker/embedding_cli.py index
+python embedding-worker/embedding_cli.py serve
+```
+
+Usar la misma base de datos que .NET. `index` es una tarea puntual; `serve` permanece
+activo en `127.0.0.1:8765`. El modelo se descarga en el primer uso.
+Ver [instalación y opciones del worker](embedding-worker/README.md).
+
+### 5. Iniciar la API
+
+En la terminal donde se configuró el backend:
 
 ```powershell
 dotnet run --project CodeQuest2026.Server.csproj --no-build --no-launch-profile --urls http://localhost:5107
 ```
 
-### Ejecutar con el perfil HTTPS y proxy SPA
+Abrir [Swagger](http://localhost:5107/swagger) para explorar los endpoints.
 
-Instalar primero las dependencias del cliente ejecutando `npm install` desde `frontend/`. Después, desde `backend/`:
+<details>
+<summary>Perfil HTTPS y frontend local</summary>
 
 ```powershell
 dotnet dev-certs https --trust
 dotnet run --project CodeQuest2026.Server.csproj --no-build --launch-profile https
 ```
 
-El perfil escucha en https://localhost:7281 y http://localhost:5107. Activa el proxy SPA configurado para iniciar `npm run dev` en el cliente.
+El perfil escucha en `https://localhost:7281` y `http://localhost:5107`.
+El frontend se ejecuta por separado desde `frontend/` con `npm install` y
+`npm run dev`. Configurar `Cors:AllowedOrigins` para su origen; el valor local es
+`http://localhost:5173`.
 
-## Docker: frontend y backend en una imagen
+</details>
+
+<a id="api-y-flujo"></a>
+
+## API y flujo de uso
+
+**Iniciar sesión → guardar preferencias → consultar una propuesta → guardar la ruta.**
+
+| Método | Endpoint | Función |
+| --- | --- | --- |
+| GET | `/auth/discord` | Iniciar sesión con Discord. |
+| GET | `/auth/me` | Consultar la sesión. |
+| GET / PUT | `/users/me/preferences` | Consultar o guardar preferencias. |
+| GET | `/routes/recommendation/semantic` | Obtener una propuesta semántica. |
+| GET | `/routes/recommendation/semantic/v2` | Refinar el orden y las razones con IA. |
+| POST | `/routes` | Guardar la propuesta elegida. |
+| GET | `/routes` | Listar las rutas guardadas. |
+| GET | `/routes/{routeId}` | Consultar una ruta propia. |
+| PUT | `/routes/{routeId}` | Reemplazar objetivo, explicación y cursos de una ruta propia. |
+| DELETE | `/routes/{routeId}` | Eliminar una ruta propia. |
+
+Las preferencias y rutas requieren sesión de Discord. Las dos recomendaciones
+son **vistas previas**: para persistir una, enviar su `method` como
+`recommendationMethod`, junto con `explanation` y `courses` (IDs y razones) a
+`POST /routes`. Se acepta de 1 a 30 cursos activos, sin duplicados, en el orden
+solicitado. La respuesta es `201 Created` con un encabezado `Location`.
+
+<details>
+<summary>Editar y eliminar una ruta</summary>
+
+`PUT /routes/{routeId}` reemplaza todos los campos editables y devuelve la ruta
+actualizada con `200 OK`. El arreglo `courses` permite agregar, quitar y reordenar
+cursos; debe contener de 1 a 30 cursos activos, sin duplicados.
+
+```json
+{
+  "goal": "Aprender desarrollo backend con Python",
+  "explanation": "Ruta ajustada a mis prioridades",
+  "courses": [
+    { "courseId": 2, "reason": "Primero reforzar estos conocimientos" },
+    { "courseId": 1, "reason": "Continuar con este curso" }
+  ]
+}
+```
+
+Los IDs del ejemplo deben sustituirse por cursos activos del catálogo.
+`goal` es obligatorio (hasta 1000 caracteres), `explanation` admite `null` y hasta
+4000 caracteres, y cada `reason` admite `null` y hasta 1000 caracteres.
+Se conservan la fecha de creación, el método de recomendación original y la copia
+histórica de preferencias. La edición no regenera recomendaciones ni actualiza
+las preferencias del usuario; el método indica el origen de la ruta.
+
+`DELETE /routes/{routeId}` no requiere cuerpo y devuelve `204 No Content`.
+Elimina permanentemente la ruta y sus asociaciones, conservando el catálogo.
+Ambas operaciones requieren sesión y devuelven `404 route_not_found` si la ruta
+no existe o pertenece a otro usuario. Una edición inválida devuelve `400`;
+los cambios se guardan en una transacción para evitar actualizaciones parciales.
+
+</details>
+
+<details>
+<summary>Sesión, respuestas y errores</summary>
+
+`isNewUser` en `/auth/me` y `/users/me` es verdadero hasta guardar las preferencias.
+Para probar rutas protegidas en Swagger, completar `/auth/discord` en el mismo
+navegador. La cookie HttpOnly se envía automáticamente.
+
+La propuesta semántica incluye `method`, `goal`, `explanation` y `courses`.
+La V2 agrega `refinementStatus` y `model`; estos indican si se aplicó IA.
+Los errores usan `{ "error": "código", "message": "descripción" }`.
+Los errores inesperados devuelven HTTP 500 con `internal_error` y se registran
+sin exponer detalles internos al cliente.
+
+</details>
+
+<a id="estrategia"></a>
+
+## Estrategia de recomendación
+
+El motor `semantic-graph-v6` selecciona hasta seis cursos. El grafo representa
+**asociaciones temáticas del catálogo**, no dependencias obligatorias entre cursos.
+
+```mermaid
+flowchart TD
+    C["Cursos + metadatos"] --> E["Embeddings locales en pgvector"]
+    P["Objetivo + intereses + experiencia"] --> Q["Embedding de consulta"]
+    E --> S["Búsqueda por coseno y filtro de idioma"]
+    Q --> S
+    S --> G["Asociaciones categoría-tag"]
+    G --> R["82 % semántica + 18 % asociaciones"]
+    R --> O["Selección y orden según preparación"]
+    O --> V1["Propuesta semántica"]
+    V1 --> AI["V2: refinamiento con IA y validación JSON"]
+    AI --> V2["Propuesta refinada o propuesta original si falla"]
+```
+
+| Etapa | Estrategia |
+| --- | --- |
+| Indexación | Texto del curso → vector normalizado; hash SHA-256 para evitar regeneraciones sin cambios. |
+| Recuperación | Coseno sobre todos los cursos activos compatibles con modelo, dimensiones e idioma. |
+| Grafo | Coocurrencias categoría–tag calculadas en memoria sobre los candidatos. |
+| Selección | Relevancia híbrida, diversidad temática y requisitos pendientes. |
+| Orden | Tema central, nivel publicado, preparación y relevancia. |
+| V2 | Reorganiza los mismos cursos y personaliza las razones con un esquema estricto. |
+
+<details>
+<summary>Detalle técnico: embeddings, preferencias, grafo, fórmulas y orden pedagógico</summary>
+
+### 1. Construcción e indexación de embeddings
+
+[`course_text`](embedding-worker/embedding_service.py) prepara un texto etiquetado
+por curso con título, nivel, categorías y tags. Categorías y tags se ordenan para
+mantener estable la representación. Descripción, temario, resultados, habilidades,
+requisitos y público se incorporan cuando el origen no es `inferred-seed-v1` y hay
+una URL de fuente o una fecha de verificación. Los campos vacíos se omiten.
+
+`EmbeddingService` carga `Qwen/Qwen3-Embedding-0.6B` mediante `sentence-transformers`
+y genera vectores normalizados. El identificador almacenado incluye modelo,
+revisión y versión del texto: `hf/{modelo}@{revision}/course-text-v1`.
+
+[`embedding_cli.py index`](embedding-worker/embedding_cli.py) calcula un SHA-256
+del texto de cada curso activo. Si coinciden el identificador del modelo y el hash
+almacenados, omite la generación; en otro caso actualiza el vector, dimensiones,
+hash y fecha en `course_embeddings`. Para reproducibilidad conviene fijar una
+revisión del modelo: el valor predeterminado `main` puede cambiar sin que cambie
+el identificador guardado. Si cambia la preparación del texto, se debe versionar
+su formato y volver a indexar.
+
+### 2. Consulta semántica y uso de las preferencias
+
+El worker construye el texto de consulta con objetivo, intereses y experiencia.
+Le añade la instrucción de recuperación
+`Represent the learning goal for retrieving relevant courses` y lo convierte en
+un vector con el mismo modelo utilizado para los cursos.
+
+| Preferencia | Uso en la recomendación |
+| --- | --- |
+| Objetivo e intereses | Embedding de consulta y detección de categorías y temas. |
+| Experiencia declarada | Embedding de consulta; el motor híbrido no le asigna otro peso explícito. |
+| Habilidades previas | Preparación, selección y orden; no forman parte del embedding de consulta. |
+| Idioma preferido | Filtro de cursos antes de construir las asociaciones. Se permiten cursos sin idioma registrado. |
+| Minutos por semana | Estimación de semanas de contenido; no elimina cursos por duración. |
+
+[`GetSemanticRecommendationQuery`](Application/Routes/Queries/GetSemanticRecommendationQuery.cs)
+calcula en PostgreSQL `similitud = 1 - distancia_coseno` para todos los cursos
+activos con modelo y dimensiones compatibles que pasan el filtro de idioma.
+No limita primero a los vecinos más próximos: las asociaciones y la selección
+posterior necesitan observar todo ese conjunto. La búsqueda actual es exacta,
+sin índice HNSW ni umbral mínimo de similitud.
+
+### 3. Construcción del grafo de asociaciones
+
+Las relaciones persistidas son **curso–categoría** y **curso–tag**. En cada consulta,
+el motor construye en memoria una proyección **categoría–tag** a partir de los
+cursos candidatos. No se almacena un grafo adicional ni se ejecuta un recorrido
+de dependencias entre cursos.
+
+Para cada candidato se cuenta una aparición de sus categorías y tags, y una
+coocurrencia por cada par categoría–tag presente en él. Si un curso pertenece a
+Backend y tiene el tag Python, aumenta el contador del par `(Backend, Python)`.
+Estos contadores se calculan sobre el conjunto filtrado de la consulta; cambiar
+el idioma o los cursos disponibles puede cambiar las asociaciones.
+
+El objetivo y los intereses se normalizan sin mayúsculas ni acentos, con nombres
+como `c#`, `.net` y `node.js` normalizados. Una categoría mencionada directamente
+recibe peso `1`; la expansión `web → frontend/backend` recibe `0.45`. Los tags
+coincidentes reciben `1`, incluido el alias `js → javascript`.
+
+Sin intención compuesta, `graphScore` toma la mayor coincidencia de categoría o tag;
+una palabra específica compartida con el título puede elevarlo a `1`. Si todavía
+es menor que `1`, se consideran asociaciones indirectas:
+
+```text
+Desde una categoría solicitada hacia un tag del curso:
+  asociación = 0.4 × peso_categoría × coocurrencias(categoría, tag) / frecuencia(tag)
+
+Desde un tag solicitado hacia una categoría del curso:
+  asociación = 0.4 × peso_tag × coocurrencias(categoría, tag) / frecuencia(categoría)
+```
+
+Se conserva el máximo entre la coincidencia inicial y estas asociaciones; no se
+suman todas las coincidencias. Así, acumular tags no aumenta por sí solo la puntuación.
+
+Cuando se reconoce una **categoría y un tema**, se sustituye ese cálculo por:
+
+| Relación del curso con la intención | graphScore |
+| --- | ---: |
+| Coincide con tema y dominio | 1.00 |
+| Coincide con tema y pertenece a Fundamentos | 0.85 |
+| Coincide solo con dominio | 0.35 |
+| Coincide solo con tema | 0.15 |
+| No coincide | 0.00 |
+
+El tema se reconoce por tags; el dominio, por categorías o términos de dominio
+en el título. Si el objetivo nombra tags concretos, estos prevalecen sobre otros
+intereses al definir el tema central. Mencionar una tecnología como requisito no
+demuestra que el curso la enseñe. El grafo expresa asociaciones temáticas, no
+prerrequisitos obligatorios ni relaciones extraídas por un LLM.
+
+### 4. Puntuación y selección de cursos
+
+El motor combina ambas señales:
+
+```text
+semanticScore = clamp((similitud_coseno + 1) / 2, 0, 1)
+score = 0.82 × semanticScore + 0.18 × graphScore
+```
+
+Un título que contiene `legacy` recibe una penalización de `0.08`, con mínimo `0`,
+si el usuario no lo pidió en objetivo o intereses. `score` es relevancia relativa,
+no una probabilidad ni un porcentaje de compatibilidad.
+
+La selección es iterativa: en cada paso elige el curso con mayor valor de:
+
+```text
+selectionScore = score + bono_novedad - penalización_preparación
+bono_novedad = 0.06 × proporción_de_tags_aún_no_cubiertos
+penalización_preparación = 0.06 × proporción_de_requisitos_temáticos_pendientes
+```
+
+El bono es cero si el curso no tiene tags o su `graphScore` es cero. La proporción
+de requisitos pendientes es cero cuando no se detectan requisitos. Tras elegir
+un curso, se actualizan los tags cubiertos y las habilidades atribuidas a la ruta.
+Los empates se resuelven por menor ID de curso.
+
+Si hay intención compuesta con tema explícito en el objetivo y existen cursos
+centrales (`graphScore >= 0.8`), se excluyen los candidatos por debajo de `0.35`
+y se permite como máximo un complemento entre `0.35` y `0.8`. La ruta puede
+tener menos de seis cursos.
+
+### 5. Orden pedagógico y requisitos
+
+La selección se reordena tomando las habilidades iniciales del usuario y
+actualizándolas después de cada curso. Las prioridades son, en este orden:
+
+1. Cursos centrales antes que complementarios cuando existe intención compuesta.
+2. Nivel publicado: principiante, intermedio y avanzado; valores desconocidos se
+   ubican en el grupo intermedio.
+3. Menor proporción de requisitos temáticos pendientes.
+4. Mayor `score` y, como desempate, menor ID.
+
+Los requisitos se detectan mediante coincidencias textuales con temas del catálogo
+en frases de conocimiento, excluyendo formulaciones negativas u opcionales. Esta
+heurística exige metadatos verificados y origen distinto de `inferred-seed-v1`.
+La propagación de habilidades usa `SkillsTaught` y tags presentes en el título
+que no figuren como requisito de conocimiento, bajo la misma condición de verificación.
+
+Ese estado representa una progresión sugerida, no cursos completados realmente.
+Los requisitos pendientes se muestran en las razones y no bloquean cursos. No hay
+una ordenación topológica ni garantía de que todos los prerrequisitos queden cubiertos.
+Las semanas estimadas son `ceil(duración_minutos / minutos_semanales)` cuando ambos
+valores son positivos; en otro caso son `null`.
+
+### 6. Refinamiento y explicación con IA
+
+La V2 entrega los cursos seleccionados y las preferencias a `RouteRefinementService`.
+El proveedor recibe contexto textual y el JSON Schema, no los vectores ni todo el
+catálogo. Puede reorganizar la selección y redactar razones, pero no agregar ni
+quitar cursos. El backend conserva los datos originales y recalcula las posiciones
+según el arreglo validado. Ante un fallo conserva la propuesta del motor semántico.
+
+La validez estructural del JSON no acredita la calidad pedagógica de las razones.
+Los pesos y heurísticas actuales deben evaluarse con perfiles y objetivos reales.
+La implementación del cálculo está en
+[`HybridSemanticRecommendationEngine`](Application/Routes/HybridSemanticRecommendationEngine.cs);
+el contrato de generación y sus límites se describen en [la guía V2](docs/SEMANTIC_V2.md).
+
+</details>
+
+<a id="proveedores"></a>
+
+## Proveedores de IA
+
+`GroqProvider` implementa [IStructuredAiProvider](Application/Common/AI/IStructuredAiProvider.cs)
+y se registra como servicio **scoped**, con `HttpClient` administrado, en
+[ServiceCollectionExtensions.cs](Extensions/ServiceCollectionExtensions.cs).
+`RouteRefinementService` prepara el contexto y valida el resultado.
+
+| Ajuste | Valor actual |
+| --- | --- |
+| Proveedor registrado | Groq |
+| Modelo predeterminado | `openai/gpt-oss-20b` |
+| Credencial | `Groq__ApiKey` |
+| Modelo configurable | `Groq__Model` |
+| Tiempo límite | 30 segundos |
+| Límite de salida | 2500 tokens |
+| Caché / reintentos automáticos | No incluidos |
+
+La V2 valida el [JSON Schema](Application/Routes/route-refinement.schema.json)
+y los IDs antes de aplicar cambios. Si se aplica Groq, devuelve
+`method: semantic-groq-v2` y `refinementStatus: applied`. Si falta la clave o falla
+la IA, conserva la propuesta semántica original. Los fallos del worker de embeddings
+siguen siendo errores del flujo previo.
+
+Para cambiar de proveedor, sustituir su registro en código. `OpenAiProvider` está
+disponible y usa `OpenAI:ApiKey` y `OpenAI:Model`; no existe un selector por variable
+de entorno. Ver [contrato, configuración y estados de la V2](docs/SEMANTIC_V2.md).
+
+<a id="estructura"></a>
+
+## Estructura del proyecto
+
+```text
+Application/
+  Common/AI/                       Contrato común de proveedores
+  Routes/                          Motor, refinamiento, DTOs y JSON Schema
+    Queries/                       Búsquedas y consultas de rutas
+    Commands/                      Guardado de rutas
+Controllers/                       Endpoints HTTP
+Extensions/                        Registro de servicios
+Infrastructure/
+  DataSource/                      Entidades, EF Core, migraciones y seeds
+  Embeddings/                      Cliente HTTP del worker
+  Groq/                            Proveedor de IA registrado
+  OpenAI/                          Implementación alternativa
+embedding-worker/                  Indexación local y API FastAPI
+tests/CodeQuest2026.Server.Tests/   Pruebas del backend
+docs/                              Guías específicas
+```
+
+<a id="docker"></a>
+
+## Docker
+
+La imagen reúne frontend y API .NET. **PostgreSQL y el worker se ejecutan por separado.**
+
+<details>
+<summary>Comandos de construcción, ejecución y configuración de red</summary>
+
+### Construir y ejecutar la imagen
 
 El `Dockerfile` está en la raíz de la solución, junto a `CodeQuest2026.slnx`.
 Desde esa carpeta:
@@ -159,67 +494,53 @@ Los archivos `appsettings*.json` y `.env*` se excluyen de la imagen; proporciona
 configuración mediante variables de entorno. `host.docker.internal` apunta al equipo
 anfitrión en Docker Desktop; para PostgreSQL remoto, usar su hostname.
 
-## Comprobar el servicio
+El worker de embeddings se ejecuta por separado y no está incluido en esta imagen.
+Configurar `EmbeddingService__Url` con una dirección accesible desde el contenedor
+y pasar `Groq__ApiKey` para habilitar el refinamiento V2. `127.0.0.1` dentro del
+contenedor apunta al propio contenedor, no al worker del equipo anfitrión.
 
-| Ruta | Función |
-| --- | --- |
-| /health/api | Disponibilidad del proceso API. |
-| /health/db | Conectividad con PostgreSQL. |
-| /health | Todos los health checks registrados. |
-| /openapi/v1.json | Documento OpenAPI, solo en Development. |
-| /swagger | Panel Swagger para consultar la documentación y probar endpoints, solo en Development. |
-| /swagger/v1/swagger.json | Documento OpenAPI generado por Swagger, solo en Development. |
+</details>
 
-Para probar rutas autenticadas desde Swagger, abrir primero `/auth/discord` en el
-mismo navegador y completar el inicio de sesión. Después, volver a `/swagger` y
-ejecutar `/auth/me` o `/users/me` con **Try it out**. La cookie HttpOnly se envía
-automáticamente; no es necesario copiar tokens ni introducir la cookie en el panel.
+<a id="pruebas"></a>
 
-Para la ejecución HTTP sin perfil:
+## Pruebas y comprobaciones
+
+Desde `backend/`:
 
 ```powershell
+dotnet test tests/CodeQuest2026.Server.Tests
 Invoke-WebRequest http://localhost:5107/health/api
 Invoke-WebRequest http://localhost:5107/health/db
 ```
 
-Un health check de base de datos correcto no demuestra que se hayan aplicado las migraciones ni cargado embeddings.
+| Ruta | Comprobación |
+| --- | --- |
+| `/health/api` | Disponibilidad de la API. |
+| `/health/db` | Conexión con PostgreSQL. |
+| `/health` | Todos los health checks. |
+| `/swagger` | Panel de pruebas, solo en Development. |
+| `/openapi/v1.json` y `/swagger/v1/swagger.json` | Documentos OpenAPI, solo en Development. |
 
-## Estructura
+Las pruebas de Groq y OpenAI simulan HTTP y no requieren claves ni consumen crédito.
+Cubren esquema, conservación de cursos y manejo de fallos. Las pruebas del worker
+están en `embedding-worker/test_embedding_service.py`; ver [su guía](embedding-worker/README.md).
 
-```text
-Extensions/                         Registro de servicios
-Infrastructure/DataSource/
-  Context/                          AppDbContext
-  Entities/                         Course, Category, Tag, CourseEmbedding
-  Configurations/                   Mapeos, relaciones, restricciones e índices
-  Migrations/                       Historial, snapshot y seeds versionados
-  CourseMetadata.md                 Metadatos y procedencia
-  CourseEmbeddings.md               Configuración y consulta por coseno
-docs/MIGRATIONS.md                  Flujo de trabajo de migraciones
-```
+Un health check correcto no verifica migraciones ni embeddings. La conexión real
+con los proveedores, la inferencia del modelo y la calidad pedagógica requieren
+validación en el entorno de destino.
 
-## Modelo y datos de prueba
-
-Course tiene categorías y tags mediante course_categories y course_tags. Track fue reemplazado por categorías. Cada curso puede tener un CourseEmbedding; mientras no se genere, esa relación estará vacía.
-
-Los registros con MetadataOrigin = inferred-seed-v1 son propuestas para pruebas, no temarios o prerrequisitos confirmados por DevTalles. Idioma, duración y verificación quedan pendientes cuando se desconocen. El seed conserva los metadatos previamente completados.
-
-Los embeddings requieren seleccionar un modelo y generar vectores reales. Comparar únicamente vectores del mismo modelo y dimensiones. Se plantea búsqueda exacta para el catálogo actual; no hay índice HNSW.
-El worker Python `embedding-worker/worker.py index` genera los vectores localmente
-con `Qwen/Qwen3-Embedding-0.6B` de Hugging Face.
-`embedding-worker/worker.py serve` genera el vector de cada consulta; .NET busca
-los cursos en pgvector mediante `GET /routes/recommendation/semantic`. Véase
-[la guía de embeddings](Infrastructure/DataSource/CourseEmbeddings.md).
+<a id="documentacion"></a>
 
 ## Documentación
 
-- [Crear, aplicar y revertir migraciones](docs/MIGRATIONS.md).
-- [Metadatos y seed de pruebas](Infrastructure/DataSource/CourseMetadata.md).
-- [Embeddings y búsqueda por coseno](Infrastructure/DataSource/CourseEmbeddings.md).
-- [Changelog](CHANGELOG.md).
-- [Reglas de colaboración](../CONTRIBUTING.md).
-
-## Validación
-
-Se comprobaron compilación, correspondencia entre modelo y snapshot, generación de SQL y traducción de consultas por coseno. Hay pruebas automatizadas en `tests/CodeQuest2026.Server.Tests` y `embedding-worker/test_worker.py`. La ejecución contra PostgreSQL, el modelo descargado y el servicio HTTP requieren validación en el entorno de destino.
-
+| Guía | Contenido |
+| --- | --- |
+| [Discord OAuth](docs/DISCORD_OAUTH.md) | Credenciales, sesión y pruebas. |
+| [Migraciones](docs/MIGRATIONS.md) | Crear, aplicar y revertir cambios de base de datos. |
+| [Metadatos](Infrastructure/DataSource/CourseMetadata.md) | Procedencia y datos inferidos de prueba. |
+| [Embeddings](Infrastructure/DataSource/CourseEmbeddings.md) | Configuración, indexación y consulta por coseno. |
+| [Worker](embedding-worker/README.md) | Instalación y ejecución de FastAPI. |
+| [Recomendaciones](docs/RECOMMENDATIONS.md) | Flujo semántico y guardado de rutas. |
+| [V2 y proveedores](docs/SEMANTIC_V2.md) | Contrato común, esquema y estados de respuesta. |
+| [Changelog](CHANGELOG.md) | Historial de cambios. |
+| [Colaboración](../CONTRIBUTING.md) | Reglas del repositorio. |

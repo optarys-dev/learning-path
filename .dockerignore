@@ -1,3 +1,7 @@
+**/.venv
+**/__pycache__
+**/*.pyc
+backend/embedding-worker/
 **/.classpath
 **/.dockerignore
 **/.env
