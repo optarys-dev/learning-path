@@ -1,12 +1,10 @@
-export type NumericApiValue = string | number;
-
 export interface RecommendationCourse {
   courseId: string;
-  position: NumericApiValue;
+  position: number;
   title: string;
-  score: NumericApiValue;
+  score: number;
   reason: string;
-  estimatedWeeks: NumericApiValue;
+  estimatedWeeks: number;
 }
 
 export interface RouteRecommendation {

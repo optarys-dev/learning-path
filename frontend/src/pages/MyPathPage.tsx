@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { Map as MapIcon, Rocket, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import deviProgress from '../assets/assessment/07_progreso_de_la_ruta.svg';
 import { Button } from '../components/ui/Button/Button';
@@ -8,7 +8,7 @@ import { PageState } from '../components/ui/PageState/PageState';
 import { useAuthSession } from '../features/auth/useAuthSession';
 import { buildSaveRouteRequest, createDraftRoute } from '../features/routes/draftRoute';
 import { RouteCourseItem } from '../features/routes/RouteCourseItem';
-import { getRouteRecommendation, saveRoute } from '../features/routes/routes';
+import { getRouteRecommendation, isRouteRecommendationMockEnabled, saveRoute } from '../features/routes/routes';
 import { RouteRequestError, type DraftRoute, type DraftRouteCourse, type RouteRequestErrorKind } from '../features/routes/types';
 import './MyPathPage.css';
 
@@ -141,7 +141,7 @@ export function MyPathPage() {
   }
 
   async function saveCurrentRoute() {
-    if (state.status !== 'proposal' || state.route.courses.length === 0 ||
+    if (isRouteRecommendationMockEnabled || state.status !== 'proposal' || state.route.courses.length === 0 ||
       state.operation !== 'idle' || state.saveStatus === 'saved' || saveInFlight.current) return;
     const currentProposal = state;
     saveInFlight.current = true;
@@ -203,87 +203,119 @@ export function MyPathPage() {
 
   return (
     <div className="my-path" aria-busy={operation !== 'idle'}>
-      <header className="my-path__route-header">
-        <div>
+      <header className="my-path__hero">
+        <div className="my-path__hero-copy">
           <p className="my-path__eyebrow"><Sparkles size={16} aria-hidden="true" />{t('myPath.routeEyebrow')}</p>
           <h1>{t('myPath.routeTitle')}</h1>
           <p>{t('myPath.routeDescription')}</p>
+          <span className="my-path__hero-orbit" aria-hidden="true"><Rocket size={18} /></span>
         </div>
-        <p className="my-path__course-count">{t('myPath.courseCount', { count: route.courses.length })}</p>
+        <section className="my-path__recommendation" aria-labelledby="recommendation-goal">
+          <div className="my-path__recommendation-heading">
+            <p>{t('myPath.goalLabel')}</p>
+            <p className="my-path__course-count">{t('myPath.courseCount', { count: route.courses.length })}</p>
+          </div>
+          <h2 id="recommendation-goal">{route.goal}</h2>
+          {route.explanation && <p>{route.explanation}</p>}
+        </section>
       </header>
-
-      <section className="my-path__recommendation" aria-labelledby="recommendation-goal">
-        <p>{t('myPath.goalLabel')}</p>
-        <h2 id="recommendation-goal">{route.goal}</h2>
-        {route.explanation && <p>{route.explanation}</p>}
-        {modified && <span className="my-path__modified">{t('myPath.modified')}</span>}
-      </section>
 
       {generationError && <div className="my-path__feedback my-path__feedback--error" role="alert">{generationError}</div>}
 
-      {empty ? (
-        <div className="my-path__empty" role="alert" tabIndex={-1} ref={emptyStateRef}>
-          <h2>{t('myPath.emptyTitle')}</h2>
-          <p>{t('myPath.emptyDescription')}</p>
+      <section className="my-path__route-panel" aria-labelledby="route-panel-title">
+        <div className="my-path__route-panel-header">
+          <div className="my-path__route-panel-title">
+            <span aria-hidden="true"><MapIcon size={20} /></span>
+            <h2 id="route-panel-title">{t('myPath.proposedRoute')}</h2>
+            {modified && <span className="my-path__modified">{t('myPath.modified')}</span>}
+          </div>
+          <div className="my-path__route-overview">
+            <p>{t('myPath.routeSummary', { count: route.courses.length })}</p>
+            {!empty && (
+              <div className="my-path__route-progress" aria-hidden="true">
+                {route.courses.map(course => <span key={course.uiKey} />)}
+              </div>
+            )}
+          </div>
         </div>
-      ) : (
-        <ol className="my-path__course-list" aria-label={t('myPath.courseListLabel')}>
-          {route.courses.map((course, position) => (
-            <RouteCourseItem key={course.uiKey} course={course} position={position}
-              courseCount={route.courses.length} locked={locked} dragging={draggingCourse === course.uiKey}
-              elementRef={element => {
-                if (element) courseElements.current.set(course.uiKey, element);
-                else courseElements.current.delete(course.uiKey);
-              }}
-              onMove={offset => {
-                const target = route.courses[position + offset];
-                if (target) moveCourse(course.uiKey, target.uiKey);
-              }}
-              onRemove={() => removeCourse(course.uiKey)}
-              onDragStart={(event: DragEvent<HTMLElement>) => {
-                draggedCourse.current = course.uiKey;
-                setDraggingCourse(course.uiKey);
-                event.dataTransfer.effectAllowed = 'move';
-                event.dataTransfer.setData('text/plain', course.uiKey);
-              }}
-              onDragOver={event => {
-                if (draggedCourse.current && draggedCourse.current !== course.uiKey) {
+
+        {empty ? (
+          <div className="my-path__empty" role="alert" tabIndex={-1} ref={emptyStateRef}>
+            <h2>{t('myPath.emptyTitle')}</h2>
+            <p>{t('myPath.emptyDescription')}</p>
+          </div>
+        ) : (
+          <ol className="my-path__course-list" aria-label={t('myPath.courseListLabel')}>
+            {route.courses.map((course, position) => (
+              <RouteCourseItem key={course.uiKey} course={course} position={position}
+                courseCount={route.courses.length} locked={locked} dragging={draggingCourse === course.uiKey}
+                elementRef={element => {
+                  if (element) courseElements.current.set(course.uiKey, element);
+                  else courseElements.current.delete(course.uiKey);
+                }}
+                onMove={offset => {
+                  const target = route.courses[position + offset];
+                  if (target) moveCourse(course.uiKey, target.uiKey);
+                }}
+                onRemove={() => removeCourse(course.uiKey)}
+                onDragStart={(event: DragEvent<HTMLElement>) => {
+                  draggedCourse.current = course.uiKey;
+                  setDraggingCourse(course.uiKey);
+                  event.dataTransfer.effectAllowed = 'move';
+                  event.dataTransfer.setData('text/plain', course.uiKey);
+                }}
+                onDragOver={event => {
+                  if (draggedCourse.current && draggedCourse.current !== course.uiKey) {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = 'move';
+                  }
+                }}
+                onDrop={event => {
                   event.preventDefault();
-                  event.dataTransfer.dropEffect = 'move';
-                }
-              }}
-              onDrop={event => {
-                event.preventDefault();
-                const source = draggedCourse.current ?? event.dataTransfer.getData('text/plain');
-                if (source) moveCourse(source, course.uiKey);
-                draggedCourse.current = null;
-                setDraggingCourse(null);
-              }}
-              onDragEnd={() => {
-                draggedCourse.current = null;
-                setDraggingCourse(null);
-              }} />
-          ))}
-        </ol>
-      )}
+                  const source = draggedCourse.current ?? event.dataTransfer.getData('text/plain');
+                  if (source) moveCourse(source, course.uiKey);
+                  draggedCourse.current = null;
+                  setDraggingCourse(null);
+                }}
+                onDragEnd={() => {
+                  draggedCourse.current = null;
+                  setDraggingCourse(null);
+                }} />
+            ))}
+          </ol>
+        )}
 
-      <div className="my-path__feedback-stack">
-        {empty && <p className="my-path__feedback my-path__feedback--error" role="alert">{t('myPath.emptySaveError')}</p>}
-        {saveStatus === 'error' && <p className="my-path__feedback my-path__feedback--error" role="alert">{saveError}</p>}
-        {saveStatus === 'saved' && <p className="my-path__feedback my-path__feedback--success" role="status">{t('myPath.saveSuccess')}</p>}
-      </div>
+        <div className="my-path__feedback-stack">
+          {empty && <p className="my-path__feedback my-path__feedback--error" role="alert">{t('myPath.emptySaveError')}</p>}
+          {saveStatus === 'error' && <p className="my-path__feedback my-path__feedback--error" role="alert">{saveError}</p>}
+          {saveStatus === 'saved' && <p className="my-path__feedback my-path__feedback--success" role="status">{t('myPath.saveSuccess')}</p>}
+        </div>
 
-      <div className="my-path__primary-actions">
-        <Button variant="secondary" onClick={() => { void generateRoute(true); }}
-          isLoading={operation === 'regenerating'} loadingLabel={t('myPath.regenerating')}
-          disabled={operation === 'saving'}>
-          {t('myPath.regenerate')}
-        </Button>
-        <Button onClick={() => { void saveCurrentRoute(); }} isLoading={operation === 'saving'}
-          loadingLabel={t('myPath.saving')} disabled={empty || operation === 'regenerating' || saveStatus === 'saved'}>
-          {t(saveStatus === 'error' ? 'myPath.retrySave' : 'myPath.save')}
-        </Button>
-      </div>
+        <footer className="my-path__completion">
+          <div className="my-path__completion-copy">
+            <Sparkles size={20} aria-hidden="true" />
+            <div>
+              <h2>{t('myPath.actionTitle')}</h2>
+              <p>{t('myPath.actionDescription')}</p>
+              {isRouteRecommendationMockEnabled && (
+                <p className="my-path__mock-save-note" id="mock-save-note">{t('myPath.mockSaveDisabled')}</p>
+              )}
+            </div>
+          </div>
+          <div className="my-path__primary-actions">
+            <Button variant="secondary" onClick={() => { void generateRoute(true); }}
+              isLoading={operation === 'regenerating'} loadingLabel={t('myPath.regenerating')}
+              disabled={operation === 'saving'}>
+              {t('myPath.regenerate')}
+            </Button>
+            <Button onClick={() => { void saveCurrentRoute(); }} isLoading={operation === 'saving'}
+              loadingLabel={t('myPath.saving')} aria-describedby={isRouteRecommendationMockEnabled ? 'mock-save-note' : undefined}
+              disabled={isRouteRecommendationMockEnabled || empty || operation === 'regenerating' || saveStatus === 'saved'}>
+              {t(saveStatus === 'error' ? 'myPath.retrySave' : 'myPath.save')}
+            </Button>
+          </div>
+        </footer>
+      </section>
 
       <p className="my-path__sr-only" aria-live="polite" aria-atomic="true">{announcement}</p>
     </div>
