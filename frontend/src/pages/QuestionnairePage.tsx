@@ -19,6 +19,7 @@ import './QuestionnairePage.css';
 function isStepComplete(step: number, answers: QuestionnaireAnswers): boolean {
   switch (questions[step].id) {
     case 'learningGoal': return answers.goal !== null;
+    case 'technologyInterests': return answers.interests.length >= 1;
     case 'currentExperience': return answers.level !== null;
     case 'knownSkills': return true;
     case 'desiredOutcome': return answers.desiredOutcome !== null;
@@ -60,14 +61,12 @@ export function QuestionnairePage() {
   const savingRef = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const completeRef = useRef<HTMLElement>(null);
-  const areasRef = useRef<HTMLFieldSetElement>(null);
-  const technologySectionRef = useRef<HTMLDivElement>(null);
-  const manualAreaSelection = useRef(false);
   const pendingProfileScroll = useRef<'start' | 'step' | 'complete' | null>(null);
   const { answers, currentStep } = state;
   const question = questions[currentStep];
   const stepMascot = {
     learningGoal: deviSelection,
+    technologyInterests: deviSelection,
     currentExperience: deviSelection,
     knownSkills: deviLaptop,
     desiredOutcome: deviSelection,
@@ -75,36 +74,6 @@ export function QuestionnairePage() {
   }[question.id];
   const technologies = answers.goal === null ? [] : areas[answers.goal];
   const progressPercent = questions.length > 1 ? (currentStep / (questions.length - 1)) * 100 : 100;
-  const interestsPrompt = t('questionnaire.interestsPrompt');
-  const interestsQuestionEnd = interestsPrompt.indexOf('?') + 1;
-
-  useLayoutEffect(() => {
-    // Only the area radio handler requests this; restored answers never do.
-    if (!manualAreaSelection.current) return;
-    const profile = profileRef.current;
-    const areaOptions = areasRef.current?.querySelectorAll<HTMLElement>('.learning-profile__area-card');
-    const technologySection = technologySectionRef.current;
-    const header = profile?.closest('.app-shell')?.querySelector<HTMLElement>('.app-header');
-    if (!profile || !areaOptions?.length || !technologySection || !header) return;
-    const areaCards = [...areaOptions];
-    const lastAreaBounds = areaCards.at(-1)?.getBoundingClientRect();
-    if (!lastAreaBounds) return;
-    const hasTwoColumns = areaCards.length > 1 &&
-      Math.abs(areaCards[0].getBoundingClientRect().top - areaCards[1].getBoundingClientRect().top) < 1;
-    const contextArea = hasTwoColumns
-      ? [...areaCards].reverse().find(area => area.getBoundingClientRect().top < lastAreaBounds.top - 1) ?? areaCards.at(-1)
-      : areaCards.at(-1);
-    const contextBounds = contextArea?.getBoundingClientRect();
-    if (!contextBounds) return;
-    const sectionStyle = getComputedStyle(technologySection);
-    const visualGap = parseFloat(sectionStyle.paddingTop);
-    const topInset = header.getBoundingClientRect().height + visualGap;
-    manualAreaSelection.current = false;
-    window.scrollTo({
-      top: Math.max(0, window.scrollY + contextBounds.top - topInset),
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-    });
-  }, [answers.goal]);
 
   useEffect(() => { if (result === null) saveQuestionnaireDraft(state); }, [state, result]);
   useEffect(() => { document.title = `${t('questionnaire.title')} · CODE QUEST 2026`; }, [t]);
@@ -338,38 +307,29 @@ export function QuestionnairePage() {
           <h2 id="question-title" ref={headingRef} tabIndex={-1}>{t(`questionnaire.questions.${question.id}`)}</h2>
           <p className="learning-profile__question-hint"><span aria-hidden="true">✦</span>{t(`questionnaire.stepHints.${question.id}`)}</p>
           {question.id === 'learningGoal' && (
-            <>
-              <fieldset ref={areasRef} className="learning-profile__options learning-profile__options--areas" aria-describedby={showError ? 'question-error' : undefined}>
+              <fieldset className="learning-profile__options learning-profile__options--areas" aria-describedby={showError ? 'question-error' : undefined}>
                 <legend className="sr-only">{t('questionnaire.questions.learningGoal')}</legend>
                 {(Object.keys(areas) as AreaId[]).map(area => (
                   <label className="learning-profile__option learning-profile__area-card" key={area}>
                     <input type="radio" name="learning-area" checked={answers.goal === area}
-                      onChange={() => {
-                        manualAreaSelection.current = true;
-                        setAnswers(selectArea(answers, area));
-                      }} />
+                      onChange={() => setAnswers(selectArea(answers, area))} />
                     <span><strong>{t(`questionnaire.areas.${area}`)}</strong><small>{t(`questionnaire.areaDescriptions.${area}`)}</small></span>
                   </label>
                 ))}
               </fieldset>
-              {answers.goal !== null && (
-                <div className="learning-profile__technology-section" ref={technologySectionRef}>
-                <fieldset className="learning-profile__options learning-profile__options--compact learning-profile__interests">
-                  <legend>
-                    <span className="learning-profile__technology-title">{interestsQuestionEnd ? interestsPrompt.slice(0, interestsQuestionEnd) : interestsPrompt}</span>
-                    {interestsQuestionEnd > 0 && <span className="learning-profile__technology-hint">{interestsPrompt.slice(interestsQuestionEnd).trim()}</span>}
-                  </legend>
-                  {technologies.map(item => (
-                    <label className="learning-profile__option learning-profile__chip" key={item}>
-                      <input type="checkbox" checked={answers.interests.includes(item)}
-                        onChange={() => setAnswers({ ...answers, interests: toggle(answers.interests, item) })} />
-                      <span>{t(`questionnaire.technologies.${item}`)}</span>
-                    </label>
-                  ))}
-                </fieldset>
-                </div>
-              )}
-            </>
+          )}
+          {question.id === 'technologyInterests' && (
+            <fieldset className="learning-profile__options learning-profile__options--compact"
+              aria-describedby={showError ? 'question-error' : undefined}>
+              <legend className="sr-only">{t('questionnaire.questions.technologyInterests')}</legend>
+              {technologies.map(item => (
+                <label className="learning-profile__option learning-profile__chip" key={item}>
+                  <input type="checkbox" checked={answers.interests.includes(item)}
+                    onChange={() => setAnswers({ ...answers, interests: toggle(answers.interests, item) })} />
+                  <span>{t(`questionnaire.technologies.${item}`)}</span>
+                </label>
+              ))}
+            </fieldset>
           )}
           {question.id === 'currentExperience' && (
             <fieldset className="learning-profile__options" aria-describedby={showError ? 'question-error' : undefined}>
