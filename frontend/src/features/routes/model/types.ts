@@ -1,12 +1,10 @@
-export type NumericApiValue = string | number;
-
 export interface RecommendationCourse {
   courseId: string;
-  position: NumericApiValue;
+  position: number;
   title: string;
-  score: NumericApiValue;
+  score: number;
   reason: string;
-  estimatedWeeks: NumericApiValue;
+  estimatedWeeks: number;
 }
 
 export interface RouteRecommendation {
@@ -26,18 +24,63 @@ export interface DraftRoute extends Omit<RouteRecommendation, 'courses'> {
   courses: DraftRouteCourse[];
 }
 
-export interface SaveRouteRequest {
+export interface CreateRouteDto {
   recommendationMethod: string;
   courses: Array<{
     courseId: string;
-    reason: string;
+    reason: string | null;
   }>;
   explanation: string | null;
+}
+
+export interface SavedRouteCourse {
+  courseId: string;
+  position: number;
+  title: string;
+  reason: string | null;
+  imageUrl: string | null;
+  courseUrl: string | null;
+}
+
+export interface SavedRoute {
+  routeId: string;
+  goal: string;
+  recommendationMethod: string;
+  explanation: string | null;
+  createdAt: string;
+  courses: SavedRouteCourse[];
+}
+
+export interface DraftSavedRouteCourse extends SavedRouteCourse {
+  uiKey: string;
+}
+
+export interface DraftSavedRoute extends Omit<SavedRoute, 'courses'> {
+  courses: DraftSavedRouteCourse[];
+}
+
+export interface UpdateRouteDto {
+  goal: string;
+  courses: Array<{
+    courseId: string;
+    reason: string | null;
+  }>;
+  explanation: string | null;
+}
+
+export interface EditableRouteCourse {
+  courseId: string;
+  uiKey: string;
+  title: string;
+  reason: string | null;
+  estimatedWeeks?: number | null;
+  courseUrl?: string | null;
 }
 
 export type RouteRequestErrorKind =
   | 'unauthorized'
   | 'validation'
+  | 'not-found'
   | 'server'
   | 'http'
   | 'network'

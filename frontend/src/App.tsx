@@ -12,6 +12,7 @@ const WelcomePreviewPage = import.meta.env.DEV
   : null;
 import { QuestionnairePage } from './features/questionnaire/pages/QuestionnairePage';
 import { MyPathPage } from './features/routes/pages/MyPathPage';
+import { SavedRouteDetailPage } from './features/routes/pages/SavedRouteDetailPage';
 import { CatalogPage } from './features/catalog/pages/CatalogPage';
 import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
 
@@ -37,6 +38,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="my-path" element={<MyPathPage />} />
+          <Route path="my-path/:routeId" element={<SavedRouteDetailPage />} />
           <Route path="learning-profile" element={<QuestionnairePage />} />
         </Route>
       </Route>
