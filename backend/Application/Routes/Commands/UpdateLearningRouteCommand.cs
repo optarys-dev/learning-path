@@ -81,6 +81,10 @@ public sealed class UpdateLearningRouteCommandHandler(AppDbContext db)
                 return new UpdateRouteResult(UpdateRouteStatus.NotFound);
             }
 
+            var progress = await db.LearningRouteCourses.AsNoTracking()
+                .Where(course => course.RouteId == command.RouteId)
+                .ToDictionaryAsync(course => course.CourseId, course => course.ProgressPercentage, cancellationToken);
+
             await db.LearningRouteCourses
                 .Where(course => course.RouteId == command.RouteId)
                 .ExecuteDeleteAsync(cancellationToken);
@@ -90,6 +94,7 @@ public sealed class UpdateLearningRouteCommandHandler(AppDbContext db)
                 RouteId = command.RouteId,
                 CourseId = course.CourseId,
                 Position = index + 1,
+                ProgressPercentage = progress.GetValueOrDefault(course.CourseId),
                 Reason = course.Reason?.Trim()
             }).ToArray();
 

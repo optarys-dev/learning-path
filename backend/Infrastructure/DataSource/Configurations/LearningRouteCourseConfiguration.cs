@@ -9,11 +9,15 @@ public class LearningRouteCourseConfiguration : IEntityTypeConfiguration<Learnin
     public void Configure(EntityTypeBuilder<LearningRouteCourse> builder)
     {
         builder.ToTable("learning_route_courses", table =>
-            table.HasCheckConstraint("ck_learning_route_courses_position", "position > 0"));
+        {
+            table.HasCheckConstraint("ck_learning_route_courses_position", "position > 0");
+            table.HasCheckConstraint("ck_learning_route_courses_progress", "progress_percentage BETWEEN 0 AND 100");
+        });
         builder.HasKey(x => new { x.RouteId, x.CourseId });
         builder.Property(x => x.RouteId).HasColumnName("route_id");
         builder.Property(x => x.CourseId).HasColumnName("course_id");
         builder.Property(x => x.Position).HasColumnName("position");
+        builder.Property(x => x.ProgressPercentage).HasColumnName("progress_percentage").HasDefaultValue(0);
         builder.Property(x => x.Reason).HasColumnName("reason").HasMaxLength(1000);
         builder.HasIndex(x => new { x.RouteId, x.Position }).IsUnique();
         builder.HasOne(x => x.Route).WithMany(x => x.Courses).HasForeignKey(x => x.RouteId).OnDelete(DeleteBehavior.Cascade);

@@ -96,6 +96,93 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ProgressPersistsAndSurvivesReorderingWhileNewCoursesStartAtZero()
+    {
+        var response = await Controller("123").UpdateCourseProgress(routeId, 1,
+            new() { ProgressPercentage = 65 }, default);
+        var updated = Assert.IsType<LearningRouteDto>(Assert.IsType<OkObjectResult>(response.Result).Value);
+        Assert.Equal(65, updated.Courses.Single(course => course.CourseId == 1).ProgressPercentage);
+        Assert.Equal(32.5m, updated.ProgressPercentage);
+
+        var edited = await Controller("123").Update(routeId, Request(2, 1, 3), default);
+        var route = Assert.IsType<LearningRouteDto>(Assert.IsType<OkObjectResult>(edited.Result).Value);
+        Assert.Equal(new[] { 0, 65, 0 }, route.Courses.Select(course => course.ProgressPercentage));
+        Assert.Equal(21.67m, route.ProgressPercentage);
+        var detail = Assert.IsType<LearningRouteDto>(
+            Assert.IsType<OkObjectResult>((await Controller("123").GetById(routeId, default)).Result).Value);
+        Assert.Equal(65, detail.Courses.Single(course => course.CourseId == 1).ProgressPercentage);
+        Assert.Equal(21.67m, detail.ProgressPercentage);
+        var routes = Assert.IsAssignableFrom<IReadOnlyList<LearningRouteDto>>(
+            Assert.IsType<OkObjectResult>((await Controller("123").List(default)).Result).Value);
+        Assert.Equal(65, Assert.Single(routes).Courses.Single(course => course.CourseId == 1).ProgressPercentage);
+        Assert.Equal(21.67m, Assert.Single(routes).ProgressPercentage);
+        var json = System.Text.Json.JsonSerializer.SerializeToElement(detail,
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+        Assert.Equal(21.67m, json.GetProperty("progressPercentage").GetDecimal());
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(100)]
+    public async Task RouteProgressReflectsAllCoursesAndCourseRemoval(int progress)
+    {
+        foreach (var courseId in new long[] { 1, 2 })
+            await Controller("123").UpdateCourseProgress(routeId, courseId,
+                new() { ProgressPercentage = progress }, default);
+
+        var detail = Assert.IsType<LearningRouteDto>(
+            Assert.IsType<OkObjectResult>((await Controller("123").GetById(routeId, default)).Result).Value);
+        Assert.Equal((decimal)progress, detail.ProgressPercentage);
+
+        var edited = await Controller("123").Update(routeId, Request(2, 3), default);
+        var route = Assert.IsType<LearningRouteDto>(Assert.IsType<OkObjectResult>(edited.Result).Value);
+        Assert.Equal(progress / 2m, route.ProgressPercentage);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(101)]
+    [InlineData(null)]
+    public async Task InvalidProgressDoesNotChangeStoredValue(int? progress)
+    {
+        Assert.IsType<BadRequestObjectResult>((await Controller("123").UpdateCourseProgress(
+            routeId, 1, new() { ProgressPercentage = progress }, default)).Result);
+        Assert.All(await Db.LearningRouteCourses.AsNoTracking().ToListAsync(), course => Assert.Equal(0, course.ProgressPercentage));
+    }
+
+    [Fact]
+    public async Task ProgressRequiresOwnerAndCourseMembership()
+    {
+        var request = new UpdateCourseProgressRequest { ProgressPercentage = 100 };
+        Assert.IsType<UnauthorizedObjectResult>((await Controller(null).UpdateCourseProgress(routeId, 1, request, default)).Result);
+        Assert.IsType<NotFoundObjectResult>((await Controller("456").UpdateCourseProgress(routeId, 1, request, default)).Result);
+        Assert.IsType<NotFoundObjectResult>((await Controller("123").UpdateCourseProgress(Guid.NewGuid(), 1, request, default)).Result);
+        Assert.IsType<NotFoundObjectResult>((await Controller("123").UpdateCourseProgress(routeId, 3, request, default)).Result);
+        Assert.All(await Db.LearningRouteCourses.AsNoTracking().ToListAsync(), course => Assert.Equal(0, course.ProgressPercentage));
+    }
+
+    [Fact]
+    public async Task ProgressCanCompleteAndResetInactiveSavedCourseWithoutAffectingOtherRoutes()
+    {
+        var otherRouteId = Guid.NewGuid();
+        Db.LearningRoutes.Add(new LearningRoute
+        {
+            RouteId = otherRouteId, UserId = "owner", Goal = "Other", RecommendationMethod = "test",
+            PreferencesSnapshot = "{}", Courses = [new() { CourseId = 1, Position = 1 }]
+        });
+        await Db.SaveChangesAsync();
+        Db.ChangeTracker.Clear();
+        await Db.Courses.Where(course => course.CourseId == 1).ExecuteUpdateAsync(setters => setters.SetProperty(course => course.IsActive, false));
+        foreach (var progress in new[] { 100, 100, 0 })
+        {
+            Assert.IsType<OkObjectResult>((await Controller("123").UpdateCourseProgress(
+                routeId, 1, new() { ProgressPercentage = progress }, default)).Result);
+            Assert.Equal(progress, (await Db.LearningRouteCourses.AsNoTracking().SingleAsync(course => course.RouteId == routeId && course.CourseId == 1)).ProgressPercentage);
+            Assert.Equal(0, (await Db.LearningRouteCourses.AsNoTracking().SingleAsync(course => course.RouteId == otherRouteId)).ProgressPercentage);
+        }
+    }
+
+    [Fact]
     public async Task UpdateAddsRemovesCoursesAndCanClearExplanation()
     {
         var request = Request(3);
