@@ -29,7 +29,8 @@ del catálogo** y **refinamiento opcional con IA**.
 | Refinamiento V2 | Groq organiza los cursos y personaliza las razones con JSON Schema estricto. |
 | Rutas | Guardado explícito, consulta y copia de las preferencias utilizadas. |
 
-El cuestionario y el seguimiento de progreso aún no están implementados.
+El cuestionario aún no está implementado. Cada curso de una ruta guardada incluye
+su progreso como porcentaje entero de 0 a 100.
 
 <details>
 <summary>Tecnologías y procedencia de los datos</summary>
@@ -160,12 +161,33 @@ El frontend se ejecuta por separado desde `frontend/` con `npm install` y
 | GET | `/routes/{routeId}` | Consultar una ruta propia. |
 | PUT | `/routes/{routeId}` | Reemplazar objetivo, explicación y cursos de una ruta propia. |
 | DELETE | `/routes/{routeId}` | Eliminar una ruta propia. |
+| PATCH | `/routes/{routeId}/courses/{courseId}/progress` | Actualizar el avance de un curso en una ruta propia. |
 
 Las preferencias y rutas requieren sesión de Discord. Las dos recomendaciones
 son **vistas previas**: para persistir una, enviar su `method` como
 `recommendationMethod`, junto con `explanation` y `courses` (IDs y razones) a
 `POST /routes`. Se acepta de 1 a 30 cursos activos, sin duplicados, en el orden
 solicitado. La respuesta es `201 Created` con un encabezado `Location`.
+
+Para registrar avance, enviar `PATCH /routes/{routeId}/courses/{courseId}/progress`
+con `{"progressPercentage": 65}` y la cookie de sesión. El porcentaje es obligatorio
+y entero: 0 significa pendiente y 100 completado; se permite reducirlo o reiniciarlo.
+La respuesta `200` contiene la ruta actualizada. Cada elemento de `courses` incluye
+`progressPercentage` también al crear, editar, listar y consultar rutas.
+La ruta también incluye `progressPercentage` en el nivel principal: es el promedio
+del avance de todos sus cursos, con igual peso y redondeado a dos decimales
+(por ejemplo, cursos al 100 y al 50 producen una ruta al 75). Se recalcula al
+actualizar avances o cambiar los cursos; una ruta sin cursos devuelve 0.
+Este total es calculado y no requiere una migración adicional.
+Una ruta ajena, inexistente o un curso fuera de ella devuelve `404 route_course_not_found`.
+Valores omitidos, nulos o fuera de rango devuelven `400`.
+
+El avance es independiente para cada combinación de ruta y curso. Los cursos nuevos
+y los de rutas existentes comienzan en 0. Editar o reordenar una ruta conserva el
+avance de los cursos que permanecen; quitar un curso elimina su avance y volverlo a
+agregar lo inicia en 0. Se puede actualizar un curso guardado aunque esté inactivo.
+Aplicar la migración `AddLearningRouteCourseProgress` con
+`dotnet ef database update --context AppDbContext` antes de usar esta versión.
 
 El catálogo es público y devuelve `courseId`, `slug`, `title`, `level`,
 `imageUrl`, `imageAlt` y `courseUrl`. `GET /courses` acepta `page` (predeterminado

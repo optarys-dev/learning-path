@@ -15,6 +15,31 @@ namespace CodeQuest2026.Server.Controllers;
 [Route("routes")]
 public class RoutesController(ISender sender) : ControllerBase
 {
+    /// <summary>Actualiza el porcentaje de avance de un curso en una ruta propia.</summary>
+    /// <remarks>Permite valores de 0 a 100 y reiniciar el avance. Devuelve la ruta actualizada.</remarks>
+    [HttpPatch("{routeId:guid}/courses/{courseId:long}/progress")]
+    [ProducesResponseType<LearningRouteDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<LearningRouteDto>> UpdateCourseProgress(
+        Guid routeId, long courseId, UpdateCourseProgressRequest request, CancellationToken cancellationToken)
+    {
+        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(discordId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
+
+        var result = await sender.Send(new UpdateCourseProgressCommand(discordId, routeId, courseId, request), cancellationToken);
+        return result.Status switch
+        {
+            UpdateCourseProgressStatus.InvalidProgress => BadRequest(new ApiErrorDto(
+                "invalid_progress", "Indica un porcentaje entero entre 0 y 100.")),
+            UpdateCourseProgressStatus.NotFound => NotFound(new ApiErrorDto(
+                "route_course_not_found", "No se encontró el curso en la ruta solicitada.")),
+            _ => Ok(result.Route)
+        };
+    }
+
     /// <summary>Busca cursos con embeddings locales a partir de las preferencias guardadas.</summary>
     /// <remarks>El servicio Python genera el vector de consulta. La API combina similitud en pgvector con títulos y asociaciones observadas entre categorías, tags y cursos. No guarda una ruta.</remarks>
     /// <response code="200">Cursos relevantes con cobertura temática, ordenados para estudio por nivel y requisitos publicados.</response>
