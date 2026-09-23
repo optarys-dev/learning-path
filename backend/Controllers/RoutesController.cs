@@ -145,15 +145,7 @@ public class RoutesController(ISender sender) : ControllerBase
         var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(discordId))
             return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
-        SaveRouteResult result;
-        try
-        {
-            result = await sender.Send(new SaveLearningRouteCommand(discordId, request), cancellationToken);
-        }
-        catch (ArgumentException exception) when (exception.Message == "invalid_route")
-        {
-            return BadRequest(new ApiErrorDto("invalid_route", "La ruta debe incluir de 1 a 30 cursos activos, sin repetir."));
-        }
+        var result = await sender.Send(new SaveLearningRouteCommand(discordId, request), cancellationToken);
         return result.Status switch
         {
             SaveRouteStatus.PreferencesRequired => Conflict(new ApiErrorDto("preferences_required", "Guarda tus preferencias antes de crear una ruta.")),

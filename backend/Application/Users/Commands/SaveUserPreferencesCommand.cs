@@ -1,3 +1,4 @@
+using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
 using MediatR;
@@ -18,7 +19,7 @@ public sealed class SaveUserPreferencesCommandHandler(AppDbContext db)
             || request.Interests is null || request.ExistingSkills is null
             || request.Interests.Length > 30 || request.ExistingSkills.Length > 30
             || request.Interests.Concat(request.ExistingSkills).Any(x => string.IsNullOrWhiteSpace(x) || x.Length > 100))
-            throw new ArgumentException("invalid_preferences");
+            throw new DomainValidationException(ApiErrorCodes.InvalidPreferences);
 
         var userId = await db.Users.AsNoTracking().Where(x => x.DiscordId == command.DiscordId)
             .Select(x => x.UserId).SingleOrDefaultAsync(cancellationToken);
