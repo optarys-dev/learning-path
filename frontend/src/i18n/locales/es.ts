@@ -21,7 +21,7 @@ export const es = {
   },
   layout: {
     skip: 'Saltar al contenido', navigation: 'Navegación principal',
-    openMenu: 'Menú', closeMenu: 'Cerrar menú', home: 'Inicio', catalog: 'Catálogo', myPath: 'Mi ruta',
+    openMenu: 'Menú', closeMenu: 'Cerrar menú', home: 'Inicio', catalog: 'Catálogo', myPath: 'Mi ruta', createPath: 'Crear ruta', myPaths: 'Mis rutas',
     footer: 'Aprende a tu ritmo. Construye tu siguiente paso.',
     retry: 'Volver a intentar', loading: 'Cargando…',
     error: 'Algo salió mal', errorDescription: 'No pudimos mostrar esta sección. Inténtalo de nuevo.',
@@ -36,10 +36,20 @@ export const es = {
   app: {
     name: 'CODE QUEST 2026',
   },
+  catalog: {
+    pageTitle: 'Catálogo', eyebrow: 'Cursos reales para explorar', title: 'Explorá el catálogo de', titleAccent: 'DevTalles.',
+    description: 'Conocé los cursos disponibles. Cuando tengamos tu perfil, los ordenaremos en una ruta pensada para vos.',
+    personalized: 'Hola, {{name}}. Encontrá cursos que pueden formar parte de tu próxima ruta.',
+    resultsEyebrow: 'Explorar por tu cuenta', resultsTitle: 'Cursos disponibles', totalCourses: '{{count}} cursos disponibles', listLabel: 'Cursos disponibles en DevTalles',
+    paginationLabel: 'Paginación del catálogo', previousPage: 'Anterior', nextPage: 'Siguiente', pageStatus: 'Página {{page}} de {{total}}',
+    openCourse: 'Ver en DevTalles', errorTitle: 'No pudimos cargar el catálogo', errorDescription: 'Intentá nuevamente en unos instantes.', retry: 'Reintentar',
+    emptyTitle: 'Aún no hay cursos disponibles', emptyDescription: 'Volvé a intentarlo más tarde.',
+    ctaEyebrow: 'Tu ruta empieza con una decisión', ctaTitle: 'No necesitás elegir a ciegas.', ctaDescription: 'Contanos qué querés aprender y prepararemos un recorrido con estos cursos.', ctaLoggedIn: 'Crear mi ruta', ctaLoggedOut: 'Iniciar sesión para crear mi ruta',
+  },
   auth: {
     profile: 'Mi perfil',
     signedInAs: 'Sesión iniciada como {{name}}',
-    logout: 'Cerrar sesión', loggingOut: 'Cerrando sesión…',
+    logout: 'Cerrar sesión', signingOut: 'Cerrando sesión…',
     logoutSuccess: 'Sesión cerrada correctamente.', logoutError: 'No pudimos cerrar tu sesión. Inténtalo nuevamente.',
   },
   language: {

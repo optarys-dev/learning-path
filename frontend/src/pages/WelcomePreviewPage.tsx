@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { LoginView, type DiscordLoginState } from '../features/auth';
+import type { DiscordLoginState } from '../features/auth/hooks/useDiscordLogin';
+import { LoginView } from '../features/auth/components/LoginView';
 
 const previewStates = ['idle', 'loading', 'error', 'cancelled', 'authenticated', 'unavailable'] as const;
 
