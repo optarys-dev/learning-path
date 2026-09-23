@@ -34,23 +34,3 @@ export interface SaveRouteRequest {
   }>;
   explanation: string | null;
 }
-
-export type RouteRequestErrorKind =
-  | 'unauthorized'
-  | 'validation'
-  | 'server'
-  | 'http'
-  | 'network'
-  | 'invalid-response';
-
-export class RouteRequestError extends Error {
-  readonly kind: RouteRequestErrorKind;
-  readonly apiMessage: string | null;
-
-  constructor(kind: RouteRequestErrorKind, apiMessage: string | null = null) {
-    super(`Route request failed: ${kind}`);
-    this.name = 'RouteRequestError';
-    this.kind = kind;
-    this.apiMessage = apiMessage;
-  }
-}

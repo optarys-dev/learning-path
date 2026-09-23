@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type TransitionEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useAuthSession } from '../features/auth/useAuthSession';
+import { useAuthSession } from '../features/auth';
 import deviLaptop from '../assets/assessment/04_aprendiendo_con_laptop.svg';
 import deviSelection from '../assets/assessment/05_seleccion_correcta.svg';
 import deviNeedsAnswer from '../assets/assessment/06_necesita_una_respuesta.svg';
@@ -12,7 +12,9 @@ import { areas, desiredOutcomes, levels, practicalExperiences, questions } from 
 import { clearQuestionnaireDraft, loadQuestionnaireDraft, saveQuestionnaireDraft } from '../questionnaire/draft';
 import { selectArea } from '../questionnaire/state';
 import { mapPreferences } from '../questionnaire/preferencesMapping';
-import { PreferencesError, savePreferences, type PreferencesErrorKind } from '../features/preferences/preferences';
+import { savePreferences } from '../features/preferences';
+import { isApiError } from '../lib/api';
+import { useNotifications } from '../components/notifications';
 import type { AreaId, QuestionnaireAnswers, QuestionnaireState, TechnologyId } from '../questionnaire/types';
 import './QuestionnairePage.css';
 
@@ -32,11 +34,22 @@ function toggle(items: TechnologyId[], item: TechnologyId): TechnologyId[] {
 }
 
 const COMPLETE_TOP_GAP = 12;
+type PreferencesErrorKind = 'validation' | 'unauthorized' | 'server' | 'http' | 'network';
+
+function preferenceErrorKind(error: unknown): PreferencesErrorKind {
+  if (!isApiError(error)) return 'http';
+  if (error.isUnauthenticated) return 'unauthorized';
+  if (error.kind === 'network') return 'network';
+  if (error.status === 400) return 'validation';
+  if (error.status !== null && error.status >= 500) return 'server';
+  return 'http';
+}
 
 export function QuestionnairePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { markPreferencesSaved } = useAuthSession();
+  const { notify } = useNotifications();
   const [state, setState] = useState<QuestionnaireState>(loadQuestionnaireDraft);
   const [welcome, setWelcome] = useState(() => state.currentStep === 0 &&
     state.answers.goal === null && state.answers.level === null && state.answers.desiredOutcome === null &&
@@ -257,9 +270,12 @@ export function QuestionnairePage() {
       clearQuestionnaireDraft();
       markPreferencesSaved();
       setSaveState({ status: 'success' });
+      notify({ tone: 'success', title: t('questionnaire.preferences.success') });
       navigate('/my-path', { replace: true });
     } catch (error) {
-      setSaveState({ status: 'error', kind: error instanceof PreferencesError ? error.kind : 'http' });
+      const kind = preferenceErrorKind(error);
+      setSaveState({ status: 'error', kind });
+      notify({ tone: 'error', title: t(`questionnaire.preferences.errors.${kind}`) });
     } finally {
       savingRef.current = false;
     }

@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useAuthSession } from './features/auth/useAuthSession';
+import { useTranslation } from 'react-i18next';
+import { useAuthSession } from './features/auth';
 import { AppLayout } from './components/layout/AppLayout';
 import { SectionPage } from './pages/SectionPage';
 import { WelcomePage } from './pages/WelcomePage';
@@ -12,10 +13,16 @@ const WelcomePreviewPage = import.meta.env.DEV
   : null;
 import { QuestionnairePage } from './pages/QuestionnairePage';
 import { MyPathPage } from './pages/MyPathPage';
+import { PageState } from './components/ui/PageState/PageState';
 
 function App() {
-  const { user, isLoading } = useAuthSession();
+  const { user, isLoading, sessionError, refresh } = useAuthSession();
+  const { t } = useTranslation();
   const { pathname } = useLocation();
+  if (!isLoading && sessionError) {
+    return <PageState kind="error" title={t('errors.sessionUnavailable')}
+      description={t('errors.sessionUnavailableDescription')} onRetry={() => { void refresh(); }} />;
+  }
   if (!isLoading && user?.isNewUser === true && pathname !== '/learning-profile') {
     return <Navigate to="/learning-profile" replace />;
   }

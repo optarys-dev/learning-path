@@ -1,6 +1,5 @@
-import { apiUrl } from '../../config/api';
 import type { NumericApiValue, RecommendationCourse, RouteRecommendation, SaveRouteRequest } from './types';
-import { RouteRequestError, type RouteRequestErrorKind } from './types';
+import { ApiError, requestJson, requestVoid } from '../../lib/api';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -43,55 +42,13 @@ function parseRecommendation(value: unknown): RouteRecommendation | null {
   };
 }
 
-async function readApiMessage(response: Response): Promise<string | null> {
-  try {
-    const body: unknown = await response.json();
-    return isRecord(body) && typeof body.message === 'string' ? body.message : null;
-  } catch {
-    return null;
-  }
-}
-
-function errorKind(response: Response): RouteRequestErrorKind {
-  if (response.status === 400) return 'validation';
-  if (response.status === 401 || response.status === 403) return 'unauthorized';
-  if (response.status >= 500) return 'server';
-  return 'http';
-}
-
 export async function getRouteRecommendation(): Promise<RouteRecommendation> {
-  let response: Response;
-  try {
-    response = await fetch(`${apiUrl}/routes/recommendation/semantic/v2`, { credentials: 'include' });
-  } catch {
-    throw new RouteRequestError('network');
-  }
-
-  if (!response.ok) throw new RouteRequestError(errorKind(response), await readApiMessage(response));
-
-  let body: unknown;
-  try {
-    body = await response.json();
-  } catch {
-    throw new RouteRequestError('invalid-response');
-  }
+  const body = await requestJson<unknown>('/routes/recommendation/semantic/v2');
   const recommendation = parseRecommendation(body);
-  if (recommendation === null) throw new RouteRequestError('invalid-response');
+  if (recommendation === null) throw new ApiError({ message: 'El servicio devolvió una respuesta inválida.', kind: 'invalid-response' });
   return recommendation;
 }
 
 export async function saveRoute(request: SaveRouteRequest): Promise<void> {
-  let response: Response;
-  try {
-    response = await fetch(`${apiUrl}/routes`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
-    });
-  } catch {
-    throw new RouteRequestError('network');
-  }
-
-  if (!response.ok) throw new RouteRequestError(errorKind(response), await readApiMessage(response));
+  await requestVoid('/routes', { method: 'POST', json: request });
 }

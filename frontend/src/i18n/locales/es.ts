@@ -39,6 +39,8 @@ export const es = {
   auth: {
     profile: 'Mi perfil',
     signedInAs: 'Sesión iniciada como {{name}}',
+    logout: 'Cerrar sesión', loggingOut: 'Cerrando sesión…',
+    logoutSuccess: 'Sesión cerrada correctamente.', logoutError: 'No pudimos cerrar tu sesión. Inténtalo nuevamente.',
   },
   language: {
     label: 'Idioma',
@@ -171,6 +173,7 @@ export const es = {
     saveSuccess: 'Tu ruta fue guardada correctamente.',
     errors: {
       unauthorized: 'Tu sesión expiró. Inicia sesión nuevamente para continuar.',
+      forbidden: 'Tu sesión está activa, pero no tienes permiso para realizar esta acción.',
       validation: 'La solicitud no pudo validarse. Revisa la propuesta e inténtalo de nuevo.',
       server: 'El servidor no pudo completar la solicitud. Inténtalo nuevamente.',
       http: 'No pudimos completar la solicitud. Inténtalo nuevamente.',
@@ -188,7 +191,10 @@ export const es = {
   },
   errors: {
     apiBaseUrlMissing: 'Falta configurar la URL de la API. Revisa frontend/.env.example.',
+    sessionUnavailable: 'No pudimos comprobar tu sesión',
+    sessionUnavailableDescription: 'Revisa tu conexión e inténtalo nuevamente.',
   },
+  notifications: { label: 'Notificaciones', dismiss: 'Cerrar notificación' },
 } as const;
 
 type ToStringValues<T> = {

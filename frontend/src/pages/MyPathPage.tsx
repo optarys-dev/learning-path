@@ -5,11 +5,11 @@ import { useTranslation } from 'react-i18next';
 import deviProgress from '../assets/assessment/07_progreso_de_la_ruta.svg';
 import { Button } from '../components/ui/Button/Button';
 import { PageState } from '../components/ui/PageState/PageState';
-import { useAuthSession } from '../features/auth/useAuthSession';
-import { buildSaveRouteRequest, createDraftRoute } from '../features/routes/draftRoute';
-import { RouteCourseItem } from '../features/routes/RouteCourseItem';
-import { getRouteRecommendation, saveRoute } from '../features/routes/routes';
-import { RouteRequestError, type DraftRoute, type DraftRouteCourse, type RouteRequestErrorKind } from '../features/routes/types';
+import { useAuthSession } from '../features/auth';
+import { ApiError, isApiError } from '../lib/api';
+import { useNotifications } from '../components/notifications';
+import { buildSaveRouteRequest, createDraftRoute, getRouteRecommendation, RouteCourseItem, saveRoute,
+  type DraftRoute, type DraftRouteCourse } from '../features/routes';
 import './MyPathPage.css';
 
 type ProposalOperation = 'idle' | 'regenerating' | 'saving';
@@ -36,6 +36,7 @@ function replaceCourseOrder(route: DraftRoute, courses: DraftRouteCourse[]): Dra
 export function MyPathPage() {
   const { t } = useTranslation();
   const { user, isLoading: isSessionLoading } = useAuthSession();
+  const { notify } = useNotifications();
   const [state, setState] = useState<MyPathState>({ status: 'idle' });
   const [announcement, setAnnouncement] = useState('');
   const generationInFlight = useRef(false);
@@ -49,21 +50,18 @@ export function MyPathPage() {
     document.title = `${t('myPath.pageTitle')} · CODE QUEST 2026`;
   }, [t]);
 
-  function fallbackError(kind: RouteRequestErrorKind): string {
-    switch (kind) {
-      case 'unauthorized': return t('myPath.errors.unauthorized');
-      case 'validation': return t('myPath.errors.validation');
-      case 'server': return t('myPath.errors.server');
-      case 'network': return t('myPath.errors.network');
-      case 'invalid-response': return t('myPath.errors.invalidResponse');
-      case 'http': return t('myPath.errors.http');
-    }
+  function fallbackError(error: ApiError): string {
+    if (error.isUnauthenticated) return t('myPath.errors.unauthorized');
+    if (error.isForbidden) return t('myPath.errors.forbidden');
+    if (error.kind === 'network') return t('myPath.errors.network');
+    if (error.kind === 'invalid-response') return t('myPath.errors.invalidResponse');
+    if (error.status === 400) return t('myPath.errors.validation');
+    if (error.status !== null && error.status >= 500) return t('myPath.errors.server');
+    return t('myPath.errors.http');
   }
 
   function errorMessage(error: unknown): string {
-    return error instanceof RouteRequestError
-      ? error.apiMessage ?? fallbackError(error.kind)
-      : t('myPath.errors.http');
+    return isApiError(error) ? fallbackError(error) : t('myPath.errors.http');
   }
 
   async function generateRoute(regenerating: boolean) {
@@ -92,6 +90,7 @@ export function MyPathPage() {
       setAnnouncement(t('myPath.generatedAnnouncement', { count: route.courses.length }));
     } catch (error) {
       const message = errorMessage(error);
+      notify({ tone: 'error', title: t('myPath.generationErrorTitle'), message });
       if (currentProposal) {
         setState({ ...currentProposal, operation: 'idle', generationError: message });
       } else {
@@ -151,8 +150,11 @@ export function MyPathPage() {
       await saveRoute(buildSaveRouteRequest(currentProposal.route));
       setState({ ...currentProposal, modified: false, operation: 'idle', saveStatus: 'saved', saveError: null });
       setAnnouncement(t('myPath.saveSuccess'));
+      notify({ tone: 'success', title: t('myPath.saveSuccess') });
     } catch (error) {
-      setState({ ...currentProposal, operation: 'idle', saveStatus: 'error', saveError: errorMessage(error) });
+      const message = errorMessage(error);
+      setState({ ...currentProposal, operation: 'idle', saveStatus: 'error', saveError: message });
+      notify({ tone: 'error', title: t('myPath.errors.http'), message });
     } finally {
       saveInFlight.current = false;
     }

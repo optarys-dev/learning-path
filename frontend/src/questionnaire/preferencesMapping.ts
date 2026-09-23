@@ -1,4 +1,5 @@
-import { PreferencesError, type PreferencesDto } from '../features/preferences/preferences';
+import { ApiError } from '../lib/api';
+import type { PreferencesDto } from '../features/preferences';
 import { es } from '../i18n/locales/es';
 import { areas, desiredOutcomes, levels, practicalExperiences } from './config';
 import type { LevelId, QuestionnaireAnswers, TechnologyId } from './types';
@@ -15,16 +16,18 @@ export function mapPreferences(answers: QuestionnaireAnswers): PreferencesDto {
     answers.desiredOutcome === null || !desiredOutcomes.includes(answers.desiredOutcome) ||
     answers.level === null || !levels.includes(answers.level) ||
     answers.experience === null || !practicalExperiences.includes(answers.experience)) {
-    throw new PreferencesError('validation');
+    throw new ApiError({ message: 'Revisa las respuestas antes de continuar.', status: 400, code: 'validation_error' });
   }
 
   const technologies: readonly string[] = areas[answers.goal];
   function canonicalTechnologies(ids: TechnologyId[]): string[] {
     if (!Array.isArray(ids) || ids.length > 30 || ids.some(id => !technologies.includes(id))) {
-      throw new PreferencesError('validation');
+      throw new ApiError({ message: 'Revisa las respuestas antes de continuar.', status: 400, code: 'validation_error' });
     }
     const names = ids.map(id => es.questionnaire.technologies[id]);
-    if (names.some(name => !name || name.length > 100)) throw new PreferencesError('validation');
+    if (names.some(name => !name || name.length > 100)) {
+      throw new ApiError({ message: 'Revisa las respuestas antes de continuar.', status: 400, code: 'validation_error' });
+    }
     return names;
   }
 

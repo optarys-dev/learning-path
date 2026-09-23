@@ -1,3 +1,4 @@
+import { ApiError, requestJson, requestVoid } from '../../lib/api';
 import { apiUrl } from '../../config/api';
 
 export interface AuthenticatedUser {
@@ -10,15 +11,16 @@ export interface AuthenticatedUser {
 }
 
 export async function getCurrentSession(signal?: AbortSignal): Promise<AuthenticatedUser | null> {
-  const response = await fetch(`${apiUrl}/auth/me`, {
-    credentials: 'include',
-    signal,
-  });
+  try {
+    return await requestJson<AuthenticatedUser>('/auth/me', { signal, notifyOnUnauthenticated: false });
+  } catch (error) {
+    if (error instanceof ApiError && error.isUnauthenticated) return null;
+    throw error;
+  }
+}
 
-  if (response.status === 401) return null;
-  if (!response.ok) throw new Error('Unable to load the current session.');
-
-  return response.json() as Promise<AuthenticatedUser>;
+export function endSession(): Promise<void> {
+  return requestVoid('/auth/logout', { method: 'POST', notifyOnUnauthenticated: false });
 }
 
 export function startDiscordLogin() {
