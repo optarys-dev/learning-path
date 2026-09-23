@@ -22,6 +22,10 @@ export default defineConfig({
         target: 'http://localhost:5107',
         changeOrigin: false,
       },
+      '/routes': {
+        target: 'http://localhost:5107',
+        changeOrigin: false,
+      },
       '/health': {
         target: 'http://localhost:5107',
         changeOrigin: false,

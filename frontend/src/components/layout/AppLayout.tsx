@@ -8,14 +8,17 @@ import { ThemeToggle } from '../ui/ThemeToggle/ThemeToggle';
 import './AppLayout.css';
 import { ContentBoundary } from './ContentBoundary';
 import { PageState } from '../ui/PageState/PageState';
-import { useAuthSession } from '../../features/auth/useAuthSession';
+import { useAuthSession } from '../../features/auth';
+import { useNotifications } from '../notifications';
 import '../../features/welcome/landing.css';
 
 export function AppLayout({ variant = 'application' }: { variant?: 'application' | 'welcome' }) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user, isLoading: isSessionLoading } = useAuthSession();
+  const { user, isLoading: isSessionLoading, logout } = useAuthSession();
+  const { notify } = useNotifications();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const main = useRef<HTMLElement>(null);
   const previousPath = useRef(pathname);
@@ -44,6 +47,20 @@ export function AppLayout({ variant = 'application' }: { variant?: 'application'
     ? <span className="session-identity session-identity--loading" aria-label={t('layout.loading')} />
     : profileLink ?? <NavLink className="welcome-navigation__login" to="/login">{t('login.navigation')}</NavLink>;
 
+  async function handleLogout() {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      setMenuOpen(false);
+      notify({ tone: 'success', title: t('auth.logoutSuccess') });
+    } catch {
+      notify({ tone: 'error', title: t('auth.logoutError') });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }
+
   return (
     <div className={`app-shell app-shell--${variant}`}>
       <a className="skip-link" href="#main-content">{t('layout.skip')}</a>
@@ -62,6 +79,8 @@ export function AppLayout({ variant = 'application' }: { variant?: 'application'
             <ThemeToggle />
             <LanguageSelector />
             {authenticationControl}
+            {user && <Button variant="ghost" onClick={() => { void handleLogout(); }} isLoading={isLoggingOut}
+              loadingLabel={t('auth.loggingOut')}>{t('auth.logout')}</Button>}
           </div> : <>
           <Button ref={menuButton} variant="secondary" className="menu-toggle"
             aria-expanded={menuOpen} aria-controls="primary-navigation"
@@ -83,6 +102,8 @@ export function AppLayout({ variant = 'application' }: { variant?: 'application'
             <ThemeToggle />
             <LanguageSelector />
             {profileLink}
+            {user && <Button variant="ghost" onClick={() => { void handleLogout(); }} isLoading={isLoggingOut}
+              loadingLabel={t('auth.loggingOut')}>{t('auth.logout')}</Button>}
           </div>
           </>}
         </div>
