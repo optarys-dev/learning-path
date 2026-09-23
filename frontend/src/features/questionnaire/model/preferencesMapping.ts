@@ -1,5 +1,5 @@
-import { PreferencesError, type PreferencesDto } from '../features/preferences/preferences';
-import { es } from '../i18n/locales/es';
+import { PreferencesError, type PreferencesDto } from '../api/preferences';
+import { es } from '../../../i18n/locales/es';
 import { areas, desiredOutcomes, levels, practicalExperiences } from './config';
 import type { LevelId, QuestionnaireAnswers, TechnologyId } from './types';
 

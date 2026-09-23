@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageState } from '../components/ui/PageState/PageState';
-import { useAuthSession } from '../features/auth/useAuthSession';
+import { useAuthSession } from '../features/auth/hooks/useAuthSession';
 
 export function LoginCallbackPage() {
   const { user, isLoading } = useAuthSession();

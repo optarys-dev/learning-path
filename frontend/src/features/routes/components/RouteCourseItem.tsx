@@ -1,7 +1,7 @@
 import type { DragEvent } from 'react';
 import { ArrowDown, ArrowUp, Clock3, GripVertical, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { DraftRouteCourse } from './types';
+import type { DraftRouteCourse } from '../model/types';
 
 interface RouteCourseItemProps {
   course: DraftRouteCourse;

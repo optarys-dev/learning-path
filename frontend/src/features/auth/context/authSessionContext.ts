@@ -1,10 +1,11 @@
 import { createContext } from 'react';
-import type { AuthenticatedUser } from './session';
+import type { AuthenticatedUser } from '../api/session';
 
 export interface AuthSessionContextValue {
   user: AuthenticatedUser | null;
   isLoading: boolean;
   refresh: () => Promise<void>;
+  logout: () => Promise<void>;
   markPreferencesSaved: () => void;
 }
 

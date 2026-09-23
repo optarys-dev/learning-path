@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { supportedLanguages } from '../../i18n';
-import spanishFlag from '../../assets/flags/es.svg';
-import englishFlag from '../../assets/flags/us.svg';
+import { supportedLanguages } from '../../../i18n';
+import spanishFlag from '../../../assets/flags/es.svg';
+import englishFlag from '../../../assets/flags/us.svg';
 import './LanguageSelector.css';
 
 export function LanguageSelector() {

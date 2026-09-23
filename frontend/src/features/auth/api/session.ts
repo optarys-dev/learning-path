@@ -1,4 +1,4 @@
-import { apiUrl } from '../../config/api';
+import { apiUrl } from '../../../config/api';
 
 export interface AuthenticatedUser {
   id: string;
@@ -19,6 +19,17 @@ export async function getCurrentSession(signal?: AbortSignal): Promise<Authentic
   if (!response.ok) throw new Error('Unable to load the current session.');
 
   return response.json() as Promise<AuthenticatedUser>;
+}
+
+export async function endCurrentSession(): Promise<void> {
+  const response = await fetch(`${apiUrl}/auth/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+
+  if (!response.ok && response.status !== 401) {
+    throw new Error('Unable to end the current session.');
+  }
 }
 
 export function startDiscordLogin() {

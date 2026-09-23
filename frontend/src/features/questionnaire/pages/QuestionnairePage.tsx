@@ -1,19 +1,19 @@
 import { useEffect, useLayoutEffect, useRef, useState, type TransitionEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useAuthSession } from '../features/auth/useAuthSession';
-import deviLaptop from '../assets/assessment/04_aprendiendo_con_laptop.svg';
-import deviSelection from '../assets/assessment/05_seleccion_correcta.svg';
-import deviNeedsAnswer from '../assets/assessment/06_necesita_una_respuesta.svg';
-import deviProgress from '../assets/assessment/07_progreso_de_la_ruta.svg';
-import deviReady from '../assets/assessment/08_perfil_completado.svg';
-import { Button } from '../components/ui/Button/Button';
-import { areas, desiredOutcomes, levels, practicalExperiences, questions } from '../questionnaire/config';
-import { clearQuestionnaireDraft, loadQuestionnaireDraft, saveQuestionnaireDraft } from '../questionnaire/draft';
-import { selectArea } from '../questionnaire/state';
-import { mapPreferences } from '../questionnaire/preferencesMapping';
-import { PreferencesError, savePreferences, type PreferencesErrorKind } from '../features/preferences/preferences';
-import type { AreaId, QuestionnaireAnswers, QuestionnaireState, TechnologyId } from '../questionnaire/types';
+import { useAuthSession } from '../../auth/hooks/useAuthSession';
+import deviLaptop from '../../../assets/assessment/04_aprendiendo_con_laptop.svg';
+import deviSelection from '../../../assets/assessment/05_seleccion_correcta.svg';
+import deviNeedsAnswer from '../../../assets/assessment/06_necesita_una_respuesta.svg';
+import deviProgress from '../../../assets/assessment/07_progreso_de_la_ruta.svg';
+import deviReady from '../../../assets/assessment/08_perfil_completado.svg';
+import { Button } from '../../../components/ui/Button/Button';
+import { savePreferences, PreferencesError, type PreferencesErrorKind } from '../api/preferences';
+import { areas, desiredOutcomes, levels, practicalExperiences, questions } from '../model/config';
+import { clearQuestionnaireDraft, loadQuestionnaireDraft, saveQuestionnaireDraft } from '../model/draft';
+import { mapPreferences } from '../model/preferencesMapping';
+import { selectArea } from '../model/state';
+import type { AreaId, QuestionnaireAnswers, QuestionnaireState, TechnologyId } from '../model/types';
 import './QuestionnairePage.css';
 
 function isStepComplete(step: number, answers: QuestionnaireAnswers): boolean {

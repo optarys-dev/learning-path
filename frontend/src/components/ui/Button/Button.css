@@ -31,7 +31,7 @@
 
 .cq-button--primary {
   background: linear-gradient(135deg, var(--cq-color-action-start), var(--cq-color-action-end));
-  color: var(--cq-color-text-primary);
+  color: var(--cq-color-text-on-brand);
 }
 
 .cq-button--primary:hover:not(:disabled) {
@@ -39,9 +39,9 @@
 }
 
 .cq-button--secondary {
-  border-color: var(--cq-color-brand-primary);
+  border-color: var(--cq-color-action-start);
   background: transparent;
-  color: var(--cq-color-text-secondary);
+  color: var(--cq-color-action-start);
 }
 
 .cq-button--secondary:hover:not(:disabled) {
@@ -50,7 +50,7 @@
 
 .cq-button--ghost {
   background: transparent;
-  color: var(--cq-color-text-secondary);
+  color: var(--cq-color-brand-primary);
 }
 
 .cq-button--ghost:hover:not(:disabled) {

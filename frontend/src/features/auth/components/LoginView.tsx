@@ -2,12 +2,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, CircleAlert, Compass, Route, type LucideIcon } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { DiscordIcon } from '../../components/ui/DiscordIcon/DiscordIcon';
-import deviReady from '../../assets/portal/12_editar_perfil.png';
-import deviLoading from '../../assets/portal/01_cargando.png';
-import deviError from '../../assets/portal/04_error_suave.png';
-import { DiscordLoginButton } from '../welcome/DiscordLoginButton';
-import type { DiscordLoginState } from './useDiscordLogin';
+import { DiscordIcon } from '../../../components/ui/DiscordIcon/DiscordIcon';
+import deviReady from '../../../assets/portal/10_continuar_aprendiendo.png';
+import deviLoading from '../../../assets/portal/01_cargando.png';
+import deviError from '../../../assets/portal/04_error_suave.png';
+import { DiscordLoginButton } from '../../welcome/components/DiscordLoginButton';
+import type { DiscordLoginState } from '../hooks/useDiscordLogin';
 import './login.css';
 
 export function LoginView({ state, onLogin }: {
@@ -64,9 +64,6 @@ export function LoginView({ state, onLogin }: {
           })}</ul>
         </div>
         <div className="login-aside__scene" aria-hidden="true">
-          <span className="login-aside__tag login-aside__tag--start">{t('login.sceneStart')}</span>
-          <span className="login-aside__tag login-aside__tag--goal">{t('login.sceneGoal')}</span>
-          <span className="login-aside__node login-aside__node--one" />
           <span className="login-aside__node login-aside__node--two" />
           <img src={sceneDevi} alt="" width="248" height="277" />
         </div>

@@ -1,17 +1,18 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { LogOut } from 'lucide-react';
 
 import { BrandLogo } from '../ui/BrandLogo/BrandLogo';
 import { Button } from '../ui/Button/Button';
-import { LanguageSelector } from '../LanguageSelector/LanguageSelector';
+import { LanguageSelector } from '../ui/LanguageSelector/LanguageSelector';
 import { ThemeToggle } from '../ui/ThemeToggle/ThemeToggle';
 import { ContentBoundary } from './ContentBoundary';
 import { PageState } from '../ui/PageState/PageState';
-import { useAuthSession } from '../../features/auth/useAuthSession';
+import { useAuthSession } from '../../features/auth/hooks/useAuthSession';
 
 import './AppLayout.css';
-import '../../features/welcome/landing.css';
+import '../../features/welcome/styles/landing.css';
 
 export function AppLayout({
   variant = 'application',
@@ -20,12 +21,15 @@ export function AppLayout({
 }) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const {
     user,
     isLoading: isSessionLoading,
+    logout,
   } = useAuthSession();
 
   const menuButton = useRef<HTMLButtonElement>(null);
@@ -85,6 +89,19 @@ export function AppLayout({
         </span>
       </NavLink>
     ) : null;
+
+  async function handleLogout() {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      setMenuOpen(false);
+      navigate('/', { replace: true });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }
 
   return (
     <div
@@ -172,7 +189,7 @@ export function AppLayout({
                       setMenuOpen(false)
                     }
                   >
-                    Crear ruta
+                    {t('layout.createPath')}
                   </NavLink>
 
                   <NavLink
@@ -181,7 +198,7 @@ export function AppLayout({
                       setMenuOpen(false)
                     }
                   >
-                    Mis rutas
+                    {t('layout.myPaths')}
                   </NavLink>
 
                   <NavLink
@@ -197,6 +214,16 @@ export function AppLayout({
                 <ThemeToggle />
                 <LanguageSelector />
                 {profileLink}
+                <Button
+                  className="session-logout"
+                  variant="ghost"
+                  isLoading={isLoggingOut}
+                  loadingLabel={t('auth.signingOut')}
+                  onClick={() => void handleLogout()}
+                >
+                  <LogOut size={17} aria-hidden="true" />
+                  {t('auth.logout')}
+                </Button>
               </div>
             </>
           ) : (
@@ -211,16 +238,9 @@ export function AppLayout({
                 </NavLink>
 
                 <NavLink to="/catalog">
-                  Catálogo
+                  {t('layout.catalog')}
                 </NavLink>
 
-                <a href="/#how-it-works">
-                  {t('landing.howLink')}
-                </a>
-
-                <a href="/#questions">
-                  {t('landing.faqLink')}
-                </a>
               </nav>
 
               <ThemeToggle />

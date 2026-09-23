@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useDiscordLogin, type DiscordLoginAdapter } from '../features/auth/useDiscordLogin';
-import { LoginView } from '../features/auth/LoginView';
+import { useDiscordLogin, type DiscordLoginAdapter } from '../features/auth/hooks/useDiscordLogin';
+import { LoginView } from '../features/auth/components/LoginView';
 
 export function LoginPage({ adapter, sessionNextPath }: {
   adapter?: DiscordLoginAdapter;

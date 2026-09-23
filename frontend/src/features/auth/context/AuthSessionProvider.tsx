@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { getCurrentSession, type AuthenticatedUser } from './session';
+import { endCurrentSession, getCurrentSession, type AuthenticatedUser } from '../api/session';
 import { AuthSessionContext } from './authSessionContext';
 
 export function AuthSessionProvider({ children }: { children: ReactNode }) {
@@ -25,6 +25,11 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
     setUser(current => current ? { ...current, isNewUser: false } : current);
   }, []);
 
-  const value = useMemo(() => ({ user, isLoading, refresh, markPreferencesSaved }), [user, isLoading, refresh, markPreferencesSaved]);
+  const logout = useCallback(async () => {
+    await endCurrentSession();
+    setUser(null);
+  }, []);
+
+  const value = useMemo(() => ({ user, isLoading, refresh, logout, markPreferencesSaved }), [user, isLoading, refresh, logout, markPreferencesSaved]);
   return <AuthSessionContext.Provider value={value}>{children}</AuthSessionContext.Provider>;
 }

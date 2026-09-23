@@ -1,6 +1,6 @@
-import { apiUrl } from '../../config/api';
-import type { NumericApiValue, RecommendationCourse, RouteRecommendation, SaveRouteRequest } from './types';
-import { RouteRequestError, type RouteRequestErrorKind } from './types';
+import { apiUrl } from '../../../config/api';
+import type { NumericApiValue, RecommendationCourse, RouteRecommendation, SaveRouteRequest } from '../model/types';
+import { RouteRequestError, type RouteRequestErrorKind } from '../model/types';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { startDiscordLogin } from './session';
+import { startDiscordLogin } from '../api/session';
 import { useAuthSession } from './useAuthSession';
 
 export type DiscordLoginState =

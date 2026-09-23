@@ -1,4 +1,4 @@
-import { apiUrl } from '../../config/api';
+import { apiUrl } from '../../../config/api';
 
 export interface PreferencesDto {
   goal: string;
