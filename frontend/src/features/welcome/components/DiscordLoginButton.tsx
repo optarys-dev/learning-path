@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from '../../components/ui/Button/Button';
+import { Button } from '../../../components/ui/Button/Button';
 import { RefreshCw } from 'lucide-react';
-import { DiscordIcon } from '../../components/ui/DiscordIcon/DiscordIcon';
+import { DiscordIcon } from '../../../components/ui/DiscordIcon/DiscordIcon';
 
 export function DiscordLoginButton({ loading, retry, onClick }: {
   loading: boolean;

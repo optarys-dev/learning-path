@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import { LearningJourney } from './LearningJourney';
 import { JourneyExplainer } from './JourneyExplainer';
 import { LandingDetails } from './LandingDetails';
+import { PageTrail } from './PageTrail';
 import { ArrowRight, BookOpen, Compass, Map, type LucideIcon } from 'lucide-react';
-import { useAuthSession } from '../auth/useAuthSession';
-import './welcome.css';
-import './landing.css';
+import { useAuthSession } from '../../auth/hooks/useAuthSession';
+import '../styles/welcome.css';
+import '../styles/landing.css';
 
 export function WelcomeView() {
   const { t } = useTranslation();
@@ -15,6 +16,7 @@ export function WelcomeView() {
 
   return (
     <div className="landing">
+    <PageTrail />
     <section className="welcome welcome--landing" aria-labelledby="welcome-title">
       <div className="welcome__content">
         <p className="welcome__eyebrow">

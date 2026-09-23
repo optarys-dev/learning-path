@@ -1,21 +1,14 @@
 import { Link } from 'react-router-dom';
-import { useAuthSession } from '../auth/useAuthSession';
+import { useAuthSession } from '../../auth/hooks/useAuthSession';
 import { Trans, useTranslation } from 'react-i18next';
-import { ArrowRight, BookOpen, Compass, ExternalLink, Flag, Layers, Map, Route, type LucideIcon } from 'lucide-react';
+import { ArrowRight, Compass, Layers, Route, type LucideIcon } from 'lucide-react';
 import { DeviIllustration } from './DeviIllustration';
-import deviRoute from '../../assets/codequest/characters/04_mascota_astronauta_con_mapa_del_tesoro.png';
-import deviGoal from '../../assets/codequest/characters/02_mascota_astronauta_cq_en_la_cima.png';
-import deviExperience from '../../assets/codequest/characters/03_mascota_astronauta_cq_en_movimiento.png';
+import { CourseRoutePreview } from './CourseRoutePreview';
+import { SectionAccent } from './SectionAccent';
+import deviGoal from '../../../assets/codequest/characters/02_mascota_astronauta_cq_en_la_cima.png';
+import deviExperience from '../../../assets/codequest/characters/03_mascota_astronauta_cq_en_movimiento.png';
 
-const pathPreview = ['foundations', 'javascript', 'react', 'specialization'] as const;
 const experienceIcons: LucideIcon[] = [Compass, Route, Layers];
-const routeMarkers: LucideIcon[] = [Compass, BookOpen, Map, Flag];
-const previewCourseUrls = {
-  foundations: 'https://cursos.devtalles.com/courses/programacion-para-principiantes',
-  javascript: 'https://cursos.devtalles.com/courses/javascript-moderno',
-  react: 'https://cursos.devtalles.com/courses/react-de-cero',
-  specialization: 'https://cursos.devtalles.com/courses/react-pro',
-} as const;
 
 export function LandingDetails() {
   const { t } = useTranslation();
@@ -50,33 +43,14 @@ export function LandingDetails() {
           <h2 id="route-preview-title"><Trans i18nKey="landing.preview.title" components={{ accent: <span className="text-accent" /> }} /></h2>
           <p>{t('landing.preview.description')}</p>
         </div>
-        <div className="route-preview__composition route-map">
-          <svg className="route-map__trail" viewBox="0 0 1200 520" fill="none" aria-hidden="true" preserveAspectRatio="none">
-            <path d="M104 315 C202 85 322 420 452 228 S691 71 795 314 S1015 414 1100 126" />
-          </svg>
-          <div className="route-preview__guide route-map__guide">
-            <DeviIllustration variant="route" src={deviRoute} alt="" width="248" height="277" />
-          </div>
-          <ol className="route-preview__list route-map__stops" aria-label={t('landing.preview.listLabel')}>
-            {pathPreview.map((item, index) => {
-              const MarkerIcon = routeMarkers[index];
-              return <li key={item} className={`route-map__stop route-map__stop--${item}`}>
-              <span className="route-map__marker" aria-hidden="true"><MarkerIcon size={16} /></span>
-              <a className={`route-course ${item === 'react' ? 'route-course--featured' : ''}`} href={previewCourseUrls[item]} target="_blank" rel="noreferrer" aria-label={`${t(`landing.preview.${item}.title`)} · ${t('landing.preview.openCourse')}`}>
-                <h3>{t(`landing.preview.${item}.title`)}</h3>
-                <ExternalLink size={15} aria-hidden="true" />
-              </a>
-            </li>;
-            })}
-          </ol>
-        </div>
+        <CourseRoutePreview />
       </section>
       <section id="questions" className="landing-section landing-faq" aria-labelledby="faq-title">
         <div className="landing-section__heading">
           <p className="landing-eyebrow">{t('landing.faq.eyebrow')}</p>
           <h2 id="faq-title"><Trans i18nKey="landing.faq.title" components={{ accent: <span className="text-accent" /> }} /></h2>
           <p>{t('landing.faq.description')}</p>
-          <span className="landing-faq__spark" aria-hidden="true">✳</span>
+          <SectionAccent kind="beacon" />
         </div>
         <div className="landing-faq__list">
           {(['login', 'courses', 'beginner', 'areas', 'progress'] as const).map(item => (
