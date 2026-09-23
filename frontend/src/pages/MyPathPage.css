@@ -1,39 +1,59 @@
-.my-path {
-  position: relative;
-  isolation: isolate;
-  width: min(calc(100vw - var(--cq-space-8)), 86rem);
+.app-main:has(> .my-path-page) {
+  display: grid;
+  width: 100%;
   max-width: none;
-  margin-left: 50%;
-  transform: translateX(-50%);
+  padding-inline: 0;
 }
 
-.my-path::before,
-.my-path::after {
+.my-path-page {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+}
+
+.my-path-page::before,
+.my-path-page::after {
   content: '';
   position: absolute;
-  z-index: -1;
+  top: calc(var(--cq-space-12) * -1);
+  right: 0;
+  bottom: calc(var(--cq-space-12) * -1);
+  left: 0;
   pointer-events: none;
 }
 
-.my-path::before {
-  inset: -5rem -8vw auto;
-  height: 34rem;
-  background:
-    radial-gradient(circle at 18% 25%, color-mix(in srgb, var(--cq-color-brand-primary) 18%, transparent), transparent 31%),
-    radial-gradient(circle at 88% 5%, color-mix(in srgb, var(--cq-color-brand-lavender) 11%, transparent), transparent 27%);
-  filter: blur(10px);
+.my-path-page::before {
+  z-index: -2;
+  background-image: url('../assets/my-path/route-space-bg.jpeg');
+  background-color: var(--cq-color-bg-page);
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-size: max(100%, 90rem) auto;
 }
 
-.my-path::after {
-  inset: -2rem 0 auto;
-  height: 30rem;
-  opacity: .28;
-  background-image:
-    radial-gradient(circle, var(--cq-color-brand-lavender) 0 1px, transparent 1.3px),
-    radial-gradient(circle, var(--cq-color-text-secondary) 0 1px, transparent 1.4px);
-  background-position: 0 0, 2.5rem 1.25rem;
-  background-size: 7.5rem 7.5rem, 11rem 11rem;
-  mask-image: linear-gradient(to bottom, #000, transparent 88%);
+.my-path-page::after {
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 42rem 26rem at 18% 9rem, rgb(8 5 20 / 64%), transparent 72%),
+    radial-gradient(ellipse 38rem 23rem at 76% 10rem, rgb(8 5 20 / 42%), transparent 76%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--cq-color-bg-page) 8%, transparent) 0,
+      color-mix(in srgb, var(--cq-color-bg-page) 18%, transparent) 25rem,
+      color-mix(in srgb, var(--cq-color-bg-page) 72%, transparent) 43rem,
+      color-mix(in srgb, var(--cq-color-bg-page) 88%, transparent) 53rem);
+}
+
+@media (min-width: 52.01rem) and (hover: hover) and (pointer: fine) {
+  .my-path-page::before { background-attachment: fixed; }
+}
+
+.my-path {
+  position: relative;
+  width: min(calc(100% - var(--cq-space-8)), 86rem);
+  min-width: 0;
+  margin-inline: auto;
 }
 
 .my-path__eyebrow,
@@ -211,6 +231,7 @@
 
 .my-path__route-panel {
   position: relative;
+  min-width: 0;
   overflow: hidden;
   padding: clamp(var(--cq-space-6), 3vw, var(--cq-space-8));
   border: 1px solid color-mix(in srgb, var(--cq-color-brand-primary) 40%, var(--cq-color-border-default));
@@ -231,6 +252,10 @@
   padding-bottom: var(--cq-space-6);
   border-bottom: 1px solid color-mix(in srgb, var(--cq-color-border-default) 65%, transparent);
 }
+
+.my-path__route-panel-header > *,
+.my-path__route-panel-title,
+.my-path__route-overview { min-width: 0; }
 
 .my-path__route-panel-title {
   display: flex;
@@ -270,8 +295,10 @@
 .my-path__route-overview {
   display: grid;
   justify-items: end;
+  flex: 0 1 18rem;
   gap: var(--cq-space-2);
-  min-width: min(100%, 18rem);
+  width: min(100%, 18rem);
+  min-width: 0;
 }
 
 .my-path__route-overview p {
@@ -328,10 +355,14 @@
 
 .my-path__course-step.is-dragging { z-index: 2; }
 .my-path__course-step.is-dragging .my-path__course-card {
-  border-color: var(--cq-color-brand-primary);
-  box-shadow: 0 1rem 2.5rem rgb(8 4 24 / 32%), 0 0 0 1px var(--cq-color-route-line);
-  transform: translateY(-2px) scale(1.005);
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--cq-color-brand-lavender) 48%, var(--cq-color-border-default));
+  background: color-mix(in srgb, var(--cq-color-bg-surface) 58%, transparent);
+  box-shadow: inset 0 0 1.25rem color-mix(in srgb, var(--cq-color-brand-primary) 8%, transparent);
+  transform: none;
+  opacity: .62;
 }
+.my-path__course-step.is-dragging .my-path__course-card > * { visibility: hidden; }
 .my-path__course-step:focus { outline: none; }
 .my-path__course-step:focus-visible .my-path__course-card { box-shadow: var(--cq-focus-ring); }
 
@@ -369,6 +400,53 @@
 .my-path__course-card:hover {
   border-color: color-mix(in srgb, var(--cq-color-brand-primary) 52%, var(--cq-color-border-default));
   box-shadow: 0 8px 24px rgb(0 0 0 / 14%);
+}
+
+.my-path__drag-preview {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 9999 !important;
+  box-sizing: border-box;
+  max-width: none !important;
+  overflow: visible;
+  border-color: color-mix(in srgb, var(--cq-color-brand-lavender) 82%, var(--cq-color-brand-primary)) !important;
+  background: color-mix(in srgb, var(--cq-color-bg-surface) 92%, var(--cq-color-brand-primary)) !important;
+  box-shadow: 0 1.25rem 3rem rgb(6 3 20 / 58%), 0 0 1.75rem color-mix(in srgb, var(--cq-color-brand-primary) 34%, transparent) !important;
+  opacity: .98 !important;
+  pointer-events: none !important;
+  transform: translate3d(var(--my-path-drag-x), var(--my-path-drag-y), 0) scale(1.015);
+  transform-origin: top left;
+  will-change: transform;
+}
+
+.my-path__course-step.is-drop-before::after,
+.my-path__course-step.is-drop-after::after {
+  content: '';
+  position: absolute;
+  z-index: 4;
+  left: calc(2.75rem + var(--cq-space-4));
+  right: var(--cq-space-2);
+  height: 2px;
+  border-radius: var(--cq-radius-pill);
+  background: var(--cq-color-brand-lavender);
+  box-shadow: 0 0 .8rem color-mix(in srgb, var(--cq-color-brand-primary) 78%, transparent);
+  pointer-events: none;
+}
+
+.my-path__course-step.is-drop-before::after { top: calc(var(--cq-space-3) / -2); }
+.my-path__course-step.is-drop-after::after { bottom: calc(var(--cq-space-3) / -2); }
+
+@media (hover: hover) and (pointer: fine) {
+  .my-path__course-card.is-draggable { cursor: grab; }
+  .my-path__course-step.is-dragging .my-path__course-card,
+  .my-path__course-step.is-dragging .my-path__drag-handle { cursor: grabbing; }
+  .my-path__course-card.is-draggable button,
+  .my-path__course-card.is-draggable a,
+  .my-path__course-card.is-draggable input,
+  .my-path__course-card.is-draggable select,
+  .my-path__course-card.is-draggable textarea { cursor: pointer; }
+  .my-path__course-card.is-draggable button:disabled { cursor: not-allowed; }
 }
 
 .my-path__course-visual {
@@ -431,6 +509,22 @@
   font-size: var(--cq-font-size-caption);
   font-weight: 700;
 }
+
+.my-path__course-link,
+.my-path__back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cq-space-2);
+  color: var(--cq-color-brand-lavender);
+  font-size: var(--cq-font-size-caption);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.my-path__course-link { margin-top: var(--cq-space-3); }
+.my-path__course-link:hover,
+.my-path__back-link:hover { text-decoration: underline; }
+.my-path__back-link { margin-bottom: var(--cq-space-6); }
 
 .my-path__course-controls {
   display: flex;
@@ -518,8 +612,63 @@
   font-size: var(--cq-font-size-label);
 }
 
-.my-path__mock-save-note { color: var(--cq-color-warning) !important; font-size: var(--cq-font-size-caption) !important; }
 .my-path__primary-actions { display: flex; justify-content: flex-end; gap: var(--cq-space-3); }
+.my-path__delete-route { background: color-mix(in srgb, var(--cq-color-error) 78%, var(--cq-color-bg-surface)); }
+
+.my-path__saved {
+  margin-top: var(--cq-space-12);
+  padding: clamp(var(--cq-space-4), 3vw, var(--cq-space-8));
+  border: 1px solid color-mix(in srgb, var(--cq-color-border-default) 78%, transparent);
+  border-radius: calc(var(--cq-radius-card) + .25rem);
+  background: color-mix(in srgb, var(--cq-color-bg-elevated) 88%, transparent);
+  box-shadow: var(--cq-shadow-card);
+}
+
+.my-path__saved-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--cq-space-6);
+  margin-bottom: var(--cq-space-6);
+}
+
+.my-path__saved-heading .my-path__eyebrow { margin-bottom: var(--cq-space-2); }
+.my-path__saved-heading h2 { margin: 0; font-family: var(--cq-font-heading); }
+.my-path__saved-heading > span {
+  color: var(--cq-color-text-secondary);
+  font-size: var(--cq-font-size-caption);
+  font-weight: 700;
+}
+.my-path__saved-status { margin: 0; color: var(--cq-color-text-secondary); }
+.my-path__saved-error { display: grid; justify-items: start; gap: var(--cq-space-3); }
+.my-path__saved-error .my-path__feedback { margin-top: 0; }
+.my-path__saved-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--cq-space-4);
+  padding: var(--cq-space-6);
+  border: 1px dashed var(--cq-color-border-default);
+  border-radius: var(--cq-radius-card);
+  color: var(--cq-color-text-secondary);
+}
+.my-path__saved-empty svg { flex: none; color: var(--cq-color-brand-lavender); }
+.my-path__saved-empty h3 { margin: 0 0 var(--cq-space-1); color: var(--cq-color-text-primary); font-family: var(--cq-font-heading); }
+.my-path__saved-empty p { margin: 0; }
+.my-path__saved-list { display: grid; gap: var(--cq-space-3); margin: 0; padding: 0; list-style: none; }
+.my-path__saved-list > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--cq-space-6);
+  padding: var(--cq-space-6);
+  border: 1px solid var(--cq-color-border-default);
+  border-radius: var(--cq-radius-card);
+  background: color-mix(in srgb, var(--cq-color-bg-surface) 92%, transparent);
+}
+.my-path__saved-card-copy { min-width: 0; }
+.my-path__saved-card-copy h3 { margin: 0 0 var(--cq-space-2); font-family: var(--cq-font-heading); font-size: var(--cq-font-size-card-title); }
+.my-path__saved-card-copy p { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cq-space-2); margin: 0; color: var(--cq-color-text-secondary); font-size: var(--cq-font-size-caption); }
+.my-path__saved-card-copy small { display: block; margin-top: var(--cq-space-2); overflow: hidden; color: var(--cq-color-text-secondary); text-overflow: ellipsis; white-space: nowrap; }
 .my-path__sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 @keyframes my-path-reveal {
@@ -528,6 +677,7 @@
 }
 
 @media (max-width: 64rem) {
+  .my-path-page::before { background-position: 58% top; }
   .my-path__hero { grid-template-columns: minmax(0, .8fr) minmax(25rem, 1.2fr); gap: var(--cq-space-6); }
   .my-path__hero-copy { padding-inline: 0; }
   .my-path__course-card { grid-template-columns: 3rem minmax(0, 1fr) auto; gap: var(--cq-space-3); }
@@ -535,6 +685,22 @@
 }
 
 @media (max-width: 52rem) {
+  .my-path-page::before,
+  .my-path-page::after {
+    top: calc(var(--cq-space-8) * -1);
+    bottom: calc(var(--cq-space-8) * -1);
+  }
+  .my-path-page::before { background-position: 62% top; background-size: max(100%, 64rem) auto; }
+  .my-path-page::after {
+    background:
+      radial-gradient(ellipse 34rem 23rem at 24% 8rem, rgb(8 5 20 / 68%), transparent 74%),
+      radial-gradient(ellipse 30rem 22rem at 78% 24rem, rgb(8 5 20 / 46%), transparent 76%),
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--cq-color-bg-page) 14%, transparent) 0,
+        color-mix(in srgb, var(--cq-color-bg-page) 30%, transparent) 24rem,
+        color-mix(in srgb, var(--cq-color-bg-page) 78%, transparent) 39rem,
+        var(--cq-color-bg-page) 49rem);
+  }
   .my-path__hero { grid-template-columns: 1fr; }
   .my-path__hero-copy { padding-block: var(--cq-space-4); }
   .my-path__hero-orbit { right: var(--cq-space-4); }
@@ -548,7 +714,19 @@
 }
 
 @media (max-width: 36rem) {
-  .my-path { width: min(calc(100vw - var(--cq-space-6)), 86rem); }
+  .my-path-page::before {
+    background-position: 68% top;
+    background-size: auto 42rem;
+  }
+  .my-path-page::after {
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--cq-color-bg-page) 34%, transparent) 0,
+        color-mix(in srgb, var(--cq-color-bg-page) 54%, transparent) 21rem,
+        color-mix(in srgb, var(--cq-color-bg-page) 84%, transparent) 34rem,
+        var(--cq-color-bg-page) 43rem);
+  }
+  .my-path { width: min(calc(100% - var(--cq-space-6)), 86rem); }
   .my-path__launch { grid-template-columns: 1fr; min-height: 0; padding: var(--cq-space-6); }
   .my-path__launch-mascot { order: -1; width: 8rem; justify-self: center; }
   .my-path__recommendation { padding: var(--cq-space-4); }
@@ -558,6 +736,8 @@
   .my-path__route-panel-title h2 { font-size: 1.1rem; }
   .my-path__route-panel-header { padding-bottom: var(--cq-space-4); }
   .my-path__course-step { grid-template-columns: 2.25rem minmax(0, 1fr); gap: var(--cq-space-2); align-items: start; }
+  .my-path__course-step.is-drop-before::after,
+  .my-path__course-step.is-drop-after::after { left: calc(2.25rem + var(--cq-space-2)); }
   .my-path__course-list::before { left: 1.1rem; }
   .my-path__step-marker { width: 2.25rem; height: 2.25rem; font-size: var(--cq-font-size-caption); box-shadow: 0 0 0 .2rem var(--cq-color-bg-elevated), 0 0 12px var(--cq-color-route-line); }
   .my-path__course-card { grid-template-columns: 2.5rem minmax(0, 1fr); gap: var(--cq-space-3); padding: var(--cq-space-3); }
@@ -567,4 +747,22 @@
   .my-path__completion { padding: var(--cq-space-4); }
   .my-path__primary-actions { align-items: stretch; flex-direction: column; }
   .my-path__primary-actions .cq-button { width: 100%; }
+  .my-path__saved { padding: var(--cq-space-4); }
+  .my-path__saved-heading { align-items: flex-start; flex-direction: column; gap: var(--cq-space-2); }
+  .my-path__saved-list > li { grid-template-columns: 1fr; padding: var(--cq-space-4); }
+  .my-path__saved-list .cq-button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .my-path-page::before { background-attachment: scroll; }
+  .my-path__hero,
+  .my-path__route-panel { animation: none; }
+  .my-path__course-step,
+  .my-path__course-card,
+  .my-path__course-controls button,
+  .my-path__drag-handle { transition: none; }
+  .my-path__course-step.is-dragging .my-path__course-card,
+  .my-path__drag-preview {
+    transform: translate3d(var(--my-path-drag-x), var(--my-path-drag-y), 0);
+  }
 }
