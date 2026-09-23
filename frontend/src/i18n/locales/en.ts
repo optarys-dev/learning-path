@@ -22,7 +22,7 @@ export const en = {
   },
   layout: {
     skip: 'Skip to content', navigation: 'Main navigation',
-    openMenu: 'Menu', closeMenu: 'Close menu', home: 'Home', catalog: 'Catalog', myPath: 'My path',
+    openMenu: 'Menu', closeMenu: 'Close menu', home: 'Home', catalog: 'Catalog', myPath: 'My path', createPath: 'Create path', myPaths: 'My paths',
     footer: 'Learn at your own pace. Build your next step.',
     retry: 'Try again', loading: 'Loading…',
     error: 'Something went wrong', errorDescription: 'We could not display this section. Please try again.',
@@ -36,9 +36,21 @@ export const en = {
   app: {
     name: 'CODE QUEST 2026',
   },
+  catalog: {
+    pageTitle: 'Catalog', eyebrow: 'Real courses to explore', title: 'Explore the', titleAccent: 'DevTalles catalog.',
+    description: 'Browse the available courses. Once we know your profile, we will arrange them into a path made for you.',
+    personalized: 'Hi, {{name}}. Find courses that can be part of your next path.',
+    resultsEyebrow: 'Explore on your own', resultsTitle: 'Available courses', totalCourses: '{{count}} courses available', listLabel: 'Available DevTalles courses',
+    paginationLabel: 'Catalog pagination', previousPage: 'Previous', nextPage: 'Next', pageStatus: 'Page {{page}} of {{total}}',
+    openCourse: 'View on DevTalles', errorTitle: 'We could not load the catalog', errorDescription: 'Please try again in a moment.', retry: 'Retry',
+    emptyTitle: 'There are no courses available yet', emptyDescription: 'Please come back later.',
+    ctaEyebrow: 'Your path starts with a decision', ctaTitle: 'You do not have to choose blindly.', ctaDescription: 'Tell us what you want to learn and we will prepare a path from these courses.', ctaLoggedIn: 'Create my path', ctaLoggedOut: 'Sign in to create my path',
+  },
   auth: {
     profile: 'My profile',
     signedInAs: 'Signed in as {{name}}',
+    logout: 'Sign out',
+    signingOut: 'Signing out…',
   },
   language: {
     label: 'Language',

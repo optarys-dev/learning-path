@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { LanguageSelector } from '../components/LanguageSelector/LanguageSelector';
+import { LanguageSelector } from '../components/ui/LanguageSelector/LanguageSelector';
 import { apiUrl } from '../config/api';
 import '../App.css';
 

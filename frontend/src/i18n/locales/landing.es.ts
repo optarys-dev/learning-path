@@ -71,6 +71,8 @@ export const landingEs = {
     guide: 'Vamos a encontrar un buen punto para empezar.',
     listLabel: 'Ejemplo conceptual de una ruta de aprendizaje', example: 'EJEMPLO VISUAL',
     openCourse: 'Ver en DevTalles', linkUnavailable: 'El enlace estará disponible cuando se genere una ruta real',
+    course: 'Curso de DevTalles',
+    steps: { start: 'Empezá aquí', build: 'Dominá JavaScript', practice: 'Creá con React', next: 'Subí de nivel' },
     foundations: { title: 'Fundamentos', level: 'Base', reason: 'Empezamos por los conceptos necesarios para avanzar con seguridad.', state: 'Punto de partida' },
     javascript: { title: 'JavaScript', level: 'Intermedio', reason: 'Consolidás las bases que vas a usar al construir interfaces.', state: 'Siguiente paso' },
     react: { title: 'React', level: 'Intermedio', reason: 'Se recomienda para tu meta cuando ya dominás los fundamentos previos.', state: 'Meta principal' },

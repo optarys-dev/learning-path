@@ -8,7 +8,6 @@ export const loginEs = {
   asideTitle: 'Tu aprendizaje merece <accent>continuidad.</accent>',
   asideDescription: 'Una cuenta para conectar tus metas, tus rutas y cada paso que decidas dar.',
   benefitOne: 'Guardá distintas rutas de aprendizaje', benefitTwo: 'Marcá tus avances', benefitThree: 'Retomá donde te quedaste',
-  sceneStart: 'Inicio', sceneGoal: 'Tu ruta',
   flowTitle: 'AL CONTINUAR', flowOne: 'Iniciás sesión con tu cuenta de Discord.', flowTwo: 'Volvés a tu recorrido con la sesión lista.',
   privacy: 'Discord identificará tu cuenta para conservar tus rutas y progreso.',
 } as const;
