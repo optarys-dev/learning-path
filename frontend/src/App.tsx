@@ -13,6 +13,7 @@ const WelcomePreviewPage = import.meta.env.DEV
 import { QuestionnairePage } from './features/questionnaire/pages/QuestionnairePage';
 import { MyPathPage } from './features/routes/pages/MyPathPage';
 import { CatalogPage } from './features/catalog/pages/CatalogPage';
+import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
 
 function App() {
   const { user, isLoading } = useAuthSession();
@@ -31,9 +32,13 @@ function App() {
       </Route>
       <Route element={<AppLayout />}>
         <Route path="catalog" element={<CatalogPage />} />
-        <Route path="my-path" element={<MyPathPage />} />
-        <Route path="learning-profile" element={<QuestionnairePage />} />
         <Route path="*" element={<SectionPage section="notFound" />} />
+      </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="my-path" element={<MyPathPage />} />
+          <Route path="learning-profile" element={<QuestionnairePage />} />
+        </Route>
       </Route>
     </Routes>
   );
