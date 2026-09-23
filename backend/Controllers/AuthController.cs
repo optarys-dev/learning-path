@@ -33,6 +33,12 @@ public class AuthController(ISender sender) : ControllerBase
         //if (returnUrl is not null && !Url.IsLocalUrl(returnUrl))
         //    return BadRequest(new { error = "invalid_return_url" });
 
+        // A valid Code Quest session does not need a new OAuth challenge. This avoids
+        // showing Discord's authorization screen again when a signed-in user reaches
+        // the login entry point a second time.
+        if (User.Identity?.IsAuthenticated == true)
+            return Redirect(returnUrl ?? "/auth/me");
+
         return Challenge(new AuthenticationProperties
         {
             RedirectUri = returnUrl ?? "/auth/me"
