@@ -84,6 +84,8 @@ a {
 
 @media (max-width: 40rem) {
   .cq-notifications { right: var(--cq-space-4); bottom: var(--cq-space-4); }
+}
+
 ::selection {
   color: var(--cq-color-text-on-brand);
   background: var(--cq-color-accent-violet);
