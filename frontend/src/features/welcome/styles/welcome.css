@@ -195,7 +195,7 @@
 }
 
 @media (max-width: 30rem) {
-  .app-shell--welcome .app-brand__logo { width: 7rem; }
+  .app-shell--welcome .app-brand__logo { width: 8rem; }
   .app-shell--welcome .language-selector > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .app-shell--welcome .app-header__inner { padding-block: var(--cq-space-4); }
   .welcome__eyebrow { margin-bottom: var(--cq-space-4); }

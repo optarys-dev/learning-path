@@ -1,5 +1,5 @@
 .learning-profile__intro { margin-bottom: var(--cq-space-8); }
-.learning-profile__intro h1 { margin: 0 0 var(--cq-space-3); font-family: var(--cq-font-heading); font-size: var(--cq-font-size-h1); }
+.learning-profile__intro h1 { margin: 0 0 var(--cq-space-3); }
 .learning-profile__intro p, .learning-profile__hint { color: var(--cq-color-text-secondary); }
 .learning-profile__step { padding: var(--cq-space-6); background: var(--cq-color-bg-surface); border-radius: var(--cq-radius-card); }
 .learning-profile__step-count { color: var(--cq-color-text-secondary); font-size: var(--cq-font-size-label); }
@@ -38,9 +38,9 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
   max-width: 90rem;
   margin-top: 0;
   margin-inline: auto;
-  --profile-sweep-background: linear-gradient(90deg, transparent, var(--cq-color-brand-primary), var(--cq-color-focus), transparent);
+  --profile-sweep-background: linear-gradient(90deg, transparent, var(--cq-color-accent-violet), var(--cq-color-accent-cyan), transparent);
   --profile-sweep-glow: color-mix(in srgb, var(--cq-color-brand-primary) 35%, transparent);
-  --profile-accent-text: var(--cq-color-brand-lavender);
+  --profile-accent-text: var(--cq-color-accent-cyan);
   --profile-summary-surface: linear-gradient(135deg, rgb(126 112 249 / 12%), rgb(20 16 35 / 30%));
   --profile-flow-padding: calc(var(--cq-space-2) * 2);
   padding-inline: var(--cq-space-2);
@@ -92,9 +92,6 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 }
 .learning-profile__welcome h1 {
   margin: var(--cq-space-6) 0 var(--cq-space-2);
-  font-family: var(--cq-font-heading);
-  font-size: clamp(var(--cq-font-size-h1), 6vw, var(--cq-font-size-display));
-  line-height: var(--cq-line-height-display);
 }
 .learning-profile__welcome-lead {
   margin: 0;
@@ -107,7 +104,6 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
   color: var(--cq-color-text-secondary);
 }
 .learning-profile__intro { text-align: center; margin-bottom: var(--cq-space-6); }
-.learning-profile__intro h1 { font-size: clamp(var(--cq-font-size-h2), 4vw, var(--cq-font-size-h1)); }
 .learning-profile__intro p { max-width: 54ch; margin-inline: auto; }
 .learning-profile__step {
   border: 1px solid var(--cq-color-border-default);
@@ -119,7 +115,7 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__step-name { display: inline; margin: 0 0 var(--cq-space-3); color: var(--cq-color-text-secondary); font-size: var(--cq-font-size-label); }
 .learning-profile__step-name::before { content: ' · '; }
 .learning-profile__progress { height: .4375rem; }
-.learning-profile__progress span { background: linear-gradient(90deg, var(--cq-color-action-start), var(--cq-color-brand-primary)); transition: width var(--cq-transition-base); }
+.learning-profile__progress span { background: linear-gradient(90deg, var(--cq-color-accent-violet), var(--cq-color-accent-cyan)); transition: width var(--cq-transition-base); }
 .learning-profile__milestones span {
   width: .55rem;
   height: .55rem;
@@ -176,8 +172,8 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 
 .learning-profile__progress-geometry {
   position: relative;
-  /* Half the milestone diameter plus its 3px current-state ring. */
-  margin-inline: calc(.375rem + 3px);
+  margin: 0 .55rem var(--cq-space-8);
+  padding-block: .6rem;
 }
 .learning-profile__progress { width: 100%; }
 .learning-profile__milestones {
@@ -190,21 +186,57 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__milestones span {
   position: absolute;
   top: 50%;
-  width: .75rem;
-  height: .75rem;
+  display: grid;
+  width: 1rem;
+  height: 1rem;
+  place-items: center;
   transform: translate(-50%, -50%);
-  border: 1px solid var(--cq-color-border-default);
+  border: 2px solid var(--cq-color-border-default);
+  border-radius: 50%;
   background: var(--cq-color-bg-surface);
-  transition: background-color var(--cq-transition-base), box-shadow var(--cq-transition-base);
+  box-shadow: 0 0 0 .2rem var(--cq-color-bg-surface);
+  transition: border-color var(--cq-transition-base), background-color var(--cq-transition-base), box-shadow var(--cq-transition-base), transform var(--cq-transition-base);
 }
-.learning-profile__milestones span.is-complete { border-color: var(--cq-color-brand-primary); background: var(--cq-color-brand-primary); }
-.learning-profile__milestones span.is-current {
+.learning-profile__milestones span::after {
+  display: block;
+  color: var(--cq-color-text-secondary);
+  font-size: .58rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.learning-profile__milestones span.is-pending::after {
+  width: .2rem;
+  height: .2rem;
+  border-radius: 50%;
+  background: var(--cq-color-text-secondary);
+  content: '';
+}
+.learning-profile__milestones span.is-complete {
   border-color: var(--cq-color-brand-primary);
   background: var(--cq-color-brand-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cq-color-brand-primary) 24%, transparent);
+  color: var(--cq-color-text-on-brand);
+}
+.learning-profile__milestones span.is-complete::after {
+  content: '✓';
+  color: currentColor;
+}
+.learning-profile__milestones span.is-current {
+  border-color: var(--cq-color-brand-primary);
+  background: var(--cq-color-bg-surface);
+  box-shadow:
+    0 0 0 .2rem var(--cq-color-bg-surface),
+    0 0 0 .34rem var(--cq-color-brand-primary),
+    0 0 0 .58rem color-mix(in srgb, var(--cq-color-brand-primary) 16%, transparent);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+.learning-profile__milestones span.is-current::after {
+  width: .38rem;
+  height: .38rem;
+  border-radius: 50%;
+  background: var(--cq-color-brand-primary);
+  content: '';
 }
 .learning-profile__progress span { transition: width 180ms ease-out; }
-.learning-profile__milestones span.is-complete { display: grid; place-items: center; color: var(--cq-color-text-on-brand); font-size: .48rem; font-weight: 800; }
 .learning-profile__question-content { position: relative; }
 .learning-profile__question-hint { display: flex; align-items: flex-start; gap: var(--cq-space-3); max-width: 62ch; margin: calc(var(--cq-space-2) * -1) 0 var(--cq-space-6); padding: var(--cq-space-3) var(--cq-space-4); border: 1px solid color-mix(in srgb, var(--cq-color-brand-primary) 32%, var(--cq-color-border-default)); border-radius: var(--cq-radius-sm); background: color-mix(in srgb, var(--cq-color-brand-primary) 9%, transparent); color: var(--cq-color-text-secondary); line-height: var(--cq-line-height-body); }
 .learning-profile__question-hint span { display: grid; flex: none; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: color-mix(in srgb, var(--cq-color-brand-lavender) 18%, transparent); color: var(--profile-accent-text); }
@@ -430,15 +462,15 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 
 /* Theme refinements stay local; reveal and navigation transitions remain unchanged. */
 [data-theme="light"] .learning-profile {
-  --profile-sweep-background: linear-gradient(90deg, transparent, var(--cq-color-brand-primary) 15%, var(--cq-color-action-start) 40%, var(--cq-color-action-start) 60%, var(--cq-color-brand-primary) 85%, transparent);
+  --profile-sweep-background: linear-gradient(90deg, transparent, var(--cq-color-accent-violet) 15%, var(--cq-color-accent-cyan) 40%, var(--cq-color-accent-cyan) 60%, var(--cq-color-accent-violet) 85%, transparent);
   --profile-sweep-glow: color-mix(in srgb, var(--cq-color-brand-primary) 45%, transparent);
-  --profile-accent-text: var(--cq-color-brand-primary);
+  --profile-accent-text: var(--cq-color-accent-cyan);
   --profile-summary-surface: color-mix(in srgb, var(--cq-color-bg-surface) 65%, var(--cq-color-surface-muted));
 }
 
-.learning-profile .cq-button--primary { color: var(--cq-color-text-on-brand); }
+.learning-profile .cq-button--primary { color: var(--cq-color-button-primary-foreground); }
 .learning-profile .cq-button--secondary:hover:not(:disabled) { background: var(--cq-color-surface-tint); }
-.learning-profile .cq-button--primary:active:not(:disabled) { background: var(--cq-color-action-start); }
+.learning-profile .cq-button--primary:active:not(:disabled) { background: var(--cq-color-button-primary-hover); }
 .learning-profile .cq-button--secondary:active:not(:disabled) {
   background: color-mix(in srgb, var(--cq-color-brand-primary) 20%, transparent);
   color: var(--cq-color-text-primary);
@@ -461,6 +493,177 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 }
 
 @media (min-width: 38.001rem) {
-  .learning-profile__question-content > h2 { padding-inline-end: clamp(8rem, 16vw, 11rem); }
-  .learning-profile__question-hint { max-width: calc(100% - clamp(8rem, 16vw, 11rem)); }
+  .learning-profile__question-hint { max-width: 62ch; }
+}
+
+
+/* The progress sticker gives the questionnaire a tangible checkpoint without changing its form controls. */
+.learning-profile__asset-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: var(--cq-space-3);
+}
+
+.learning-profile__asset-row + .learning-profile__step-count {
+  margin-top: 0;
+}
+
+.learning-profile__asset-row {
+  align-items: center;
+  gap: var(--cq-space-2);
+}
+
+.learning-profile__question-note {
+  margin: calc(var(--cq-space-2) * -1) 0 var(--cq-space-6);
+}
+
+@media (min-width: 38.001rem) {
+  .learning-profile__question-note {
+    max-width: calc(100% - clamp(8rem, 16vw, 11rem));
+  }
+}
+
+.learning-profile__quest-progress {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+.learning-profile__quest-progress .cq-quest-progress__track {
+  display: block;
+  height: .28rem;
+  border: 0;
+  background: color-mix(in srgb, var(--cq-color-brand-primary) 13%, var(--cq-color-border-default));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cq-color-brand-primary) 8%, transparent);
+}
+.learning-profile__quest-progress .cq-quest-progress__track > span {
+  background: linear-gradient(90deg, var(--cq-color-brand-primary), var(--cq-color-accent-cyan));
+  box-shadow: 0 0 .6rem color-mix(in srgb, var(--cq-color-brand-primary) 32%, transparent);
+}
+.learning-profile__quest-progress .cq-quest-progress__value { display: none; }
+.learning-profile__question-note { margin: calc(var(--cq-space-2) * -1) 0 var(--cq-space-6); }
+.learning-profile__question-hint { display: none; }
+@media (min-width: 38.001rem) { .learning-profile__question-note { max-width: calc(100% - clamp(8rem, 16vw, 11rem)); } }
+
+/* Echo the catalog's ruled background without competing with Devi or the welcome copy. */
+.learning-profile__welcome {
+  background:
+    radial-gradient(circle at 72% 48%, color-mix(in srgb, var(--cq-color-brand-primary) 10%, transparent), transparent 18rem),
+    repeating-linear-gradient(90deg, transparent 0 1.7rem, color-mix(in srgb, var(--cq-color-brand-lavender) 12%, transparent) 1.7rem 1.76rem),
+    linear-gradient(135deg, var(--cq-color-bg-surface), var(--cq-color-bg-page));
+}
+
+/* Questionnaire refinements: one progress signal, lighter guidance and an adaptive final step. */
+.learning-profile:not(.learning-profile--welcome) { max-width: 78rem; }
+.learning-profile__step { padding: clamp(var(--cq-space-8), 4vw, var(--cq-space-12)); }
+.learning-profile__progress-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cq-space-4);
+  margin-bottom: var(--cq-space-2);
+}
+.learning-profile__progress-heading .learning-profile__step-name,
+.learning-profile__progress-heading .learning-profile__step-count {
+  display: block;
+  margin: 0;
+}
+.learning-profile__progress-heading .learning-profile__step-name {
+  color: var(--cq-color-text-primary);
+  font-family: var(--cq-font-heading);
+  font-size: var(--cq-font-size-body);
+  font-weight: 800;
+}
+.learning-profile__progress-heading .learning-profile__step-name::before { content: none; }
+.learning-profile__progress-heading .learning-profile__step-count {
+  padding: .28rem .65rem;
+  border: 1px solid color-mix(in srgb, var(--cq-color-brand-primary) 25%, var(--cq-color-border-default));
+  border-radius: var(--cq-radius-pill);
+  background: color-mix(in srgb, var(--cq-color-brand-primary) 8%, var(--cq-color-bg-surface));
+  color: var(--cq-color-text-primary);
+  font-size: var(--cq-font-size-label);
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+.learning-profile__question-helper {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cq-space-2);
+  max-width: 64ch;
+  margin: calc(var(--cq-space-2) * -1) 0 var(--cq-space-6);
+  color: var(--cq-color-text-secondary);
+  line-height: var(--cq-line-height-body);
+}
+.learning-profile__question-helper svg { flex: none; margin-top: .15em; color: var(--cq-color-brand-primary); }
+.learning-profile__question-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(7.25rem, 12vw, 9.5rem);
+  align-items: center;
+  gap: clamp(var(--cq-space-4), 4vw, var(--cq-space-8));
+  margin: 0 0 var(--cq-space-6);
+}
+.learning-profile__question-copy { min-width: 0; }
+.learning-profile__question-intro h2 {
+  margin: 0 0 var(--cq-space-3);
+}
+.learning-profile__question-intro .learning-profile__question-helper {
+  max-width: 62ch;
+  margin: 0;
+}
+.learning-profile__mascot--explore {
+  position: static;
+  justify-self: end;
+  width: min(100%, 9.5rem);
+  max-height: 8.75rem;
+  margin: 0;
+  object-fit: contain;
+}
+.learning-profile__final-step { display: grid; gap: var(--cq-space-8); }
+.learning-profile__legacy-context {
+  display: grid;
+  gap: var(--cq-space-3);
+  margin: 0;
+  padding: var(--cq-space-5);
+  border: 1px solid var(--cq-color-border-default);
+  border-radius: var(--cq-radius-sm);
+  background: var(--cq-color-surface-muted);
+}
+.learning-profile__legacy-context legend {
+  padding: 0;
+  color: var(--cq-color-text-primary);
+  font-family: var(--cq-font-heading);
+  font-size: var(--cq-font-size-card-title);
+  font-weight: 800;
+}
+.learning-profile__legacy-context > p { margin: 0; color: var(--cq-color-text-secondary); }
+.learning-profile__legacy-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cq-space-3); }
+.learning-profile__legacy-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cq-space-3);
+  min-width: 0;
+  padding: var(--cq-space-3);
+  border-radius: var(--cq-radius-sm);
+  color: var(--cq-color-text-primary);
+  cursor: pointer;
+}
+.learning-profile__legacy-option:hover { background: color-mix(in srgb, var(--cq-color-brand-primary) 8%, transparent); }
+.learning-profile__legacy-option:has(input:focus-visible) { box-shadow: var(--cq-focus-ring); }
+.learning-profile__legacy-option input { flex: none; width: 1.125rem; height: 1.125rem; margin-top: .1rem; }
+
+@media (min-width: 38.001rem) {
+  .learning-profile__question-helper { max-width: 62ch; }
+}
+
+@media (max-width: 38rem) {
+  .learning-profile__progress-heading { align-items: center; }
+  .learning-profile__question-intro {
+    grid-template-columns: minmax(0, 1fr) 4.75rem;
+    align-items: start;
+    gap: var(--cq-space-3);
+    margin-bottom: var(--cq-space-5);
+  }
+  .learning-profile__mascot--explore { width: 4.75rem; max-height: 4.75rem; }
+  .learning-profile__legacy-context { padding: var(--cq-space-4); }
+  .learning-profile__legacy-options { grid-template-columns: 1fr; gap: var(--cq-space-1); }
 }

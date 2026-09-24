@@ -1,9 +1,9 @@
-import { areas, desiredOutcomes, levels, practicalExperiences, questions } from './config';
-import type { AreaId, QuestionnaireAnswers, QuestionnaireState, TechnologyId } from './types';
+import { areas, desiredOutcomes, legacyContexts, levels, practicalExperiences, questions } from './config';
+import type { AreaId, LegacyContext, QuestionnaireAnswers, QuestionnaireState, TechnologyId } from './types';
 import { initialQuestionnaireState } from './state';
 
 export const DRAFT_KEY = 'codequest-questionnaire-draft';
-const DRAFT_VERSION = 2;
+const DRAFT_VERSION = 3;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -31,10 +31,13 @@ function parseAnswers(value: unknown): QuestionnaireAnswers | null {
   const level = value.level === null ? null : isOption(value.level, levels) ? value.level : undefined;
   const desiredOutcome = value.desiredOutcome === null ? null : isOption(value.desiredOutcome, desiredOutcomes) ? value.desiredOutcome : undefined;
   const experience = value.experience === null ? null : isOption(value.experience, practicalExperiences) ? value.experience : undefined;
+  const legacyContext = value.legacyContext === undefined || value.legacyContext === null
+    ? null
+    : isOption(value.legacyContext, legacyContexts) ? value.legacyContext as LegacyContext : undefined;
   
-  if (level === undefined || desiredOutcome === undefined || experience === undefined) return null;
+  if (level === undefined || desiredOutcome === undefined || experience === undefined || legacyContext === undefined) return null;
   
-  return { goal, interests: value.interests, level, knownSkills: value.knownSkills, desiredOutcome, experience };
+  return { goal, interests: value.interests, level, knownSkills: value.knownSkills, desiredOutcome, experience, legacyContext };
 }
 
 function canResumeAt(step: number, answers: QuestionnaireAnswers): boolean {
@@ -51,7 +54,7 @@ export function loadQuestionnaireDraft(): QuestionnaireState {
 
     const draft: unknown = JSON.parse(raw);
 
-    if (isRecord(draft) && draft.draftVersion === DRAFT_VERSION &&
+    if (isRecord(draft) && (draft.draftVersion === 2 || draft.draftVersion === DRAFT_VERSION) &&
       Number.isInteger(draft.currentStep) && typeof draft.currentStep === 'number' &&
       draft.currentStep >= 0 && draft.currentStep < questions.length) {
 

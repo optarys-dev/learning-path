@@ -32,7 +32,10 @@ export function mapPreferences(answers: QuestionnaireAnswers): PreferencesDto {
   }
 
   // Persist the project's Spanish names regardless of the active UI language.
-  // Area and practical experience remain questionnaire answers, not DTO fields.
+  // The current API contract has no legacyContext field. It remains in the
+  // questionnaire state and summary so a future recommender can deliberately
+  // use it instead of inferring legacy relevance from a technology alone.
+  // Area and practical experience also remain questionnaire answers, not DTO fields.
   return {
     goal: es.questionnaire.outcomes[answers.desiredOutcome],
     interests: canonicalTechnologies(answers.interests),
