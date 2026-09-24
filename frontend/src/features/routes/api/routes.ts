@@ -68,8 +68,9 @@ function parseSavedRouteCourse(value: unknown): SavedRouteCourse | null {
   const reason = nullableString(value.reason);
   const imageUrl = optionalUrl(value.imageUrl);
   const courseUrl = optionalUrl(value.courseUrl);
-  if (courseId === null || position === null || reason === undefined || imageUrl === undefined || courseUrl === undefined) return null;
-  return { courseId, position, title: value.title, reason, imageUrl, courseUrl };
+  const progressPercentage = normalizeNumber(value.progressPercentage) ?? 0;
+  if (courseId === null || position === null || reason === undefined || imageUrl === undefined || courseUrl === undefined || progressPercentage < 0 || progressPercentage > 100) return null;
+  return { courseId, position, title: value.title, reason, imageUrl, courseUrl, progressPercentage };
 }
 
 export function parseSavedRoute(value: unknown): SavedRoute | null {
@@ -165,6 +166,18 @@ export async function updateRoute(routeId: string, dto: UpdateRouteDto): Promise
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(dto),
   })));
+  if (!route) throw new RouteRequestError('invalid-response');
+  return route;
+}
+
+export async function updateCourseProgress(routeId: string, courseId: string, completed: boolean): Promise<SavedRoute> {
+  const route = parseSavedRoute(await readJson(await request(
+    `/routes/${encodeURIComponent(routeId)}/courses/${encodeURIComponent(courseId)}/progress`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ progressPercentage: completed ? 100 : 0 }),
+    },
+  )));
   if (!route) throw new RouteRequestError('invalid-response');
   return route;
 }

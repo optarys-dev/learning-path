@@ -1,8 +1,8 @@
-import { useRef, type DragEvent, type PointerEvent } from 'react';
-import { Code2, ExternalLink, GripVertical, Trash2 } from 'lucide-react';
+import { useRef, useState, type DragEvent, type PointerEvent } from 'react';
+import { CheckCircle2, Code2, ExternalLink, FileText, GripVertical, MoreHorizontal, Repeat2, RotateCcw, Star, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { QuestMetric, QuestTab } from '../../../components/ui';
-import type { EditableRouteCourse } from '../model/types';
+import type { CoursePriority, EditableRouteCourse } from '../model/types';
 
 interface RouteCourseItemProps {
   course: EditableRouteCourse;
@@ -17,6 +17,14 @@ interface RouteCourseItemProps {
   onRemove: () => void;
   position: number;
   showControls?: boolean;
+  canReorder?: boolean;
+  completed?: boolean;
+  hasNote?: boolean;
+  priority?: CoursePriority;
+  onToggleCompleted?: () => void;
+  onNote?: () => void;
+  onPriorityChange?: (priority: CoursePriority) => void;
+  onReplace?: () => void;
 }
 
 function positiveWeeks(value: string | number | null | undefined): number | null {
@@ -57,6 +65,14 @@ export function RouteCourseItem({
   onRemove,
   position,
   showControls = true,
+  canReorder = false,
+  completed = false,
+  hasNote = false,
+  priority = 'normal',
+  onToggleCompleted,
+  onNote,
+  onPriorityChange,
+  onReplace,
 }: RouteCourseItemProps) {
   const { t } = useTranslation();
   const weeks = positiveWeeks(course.estimatedWeeks);
@@ -69,6 +85,7 @@ export function RouteCourseItem({
   const dragMoveListener = useRef<((event: globalThis.DragEvent) => void) | null>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const dragFrame = useRef<number | null>(null);
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   function handlePointerDown(event: PointerEvent<HTMLElement>) {
     const target = event.target;
@@ -155,11 +172,11 @@ export function RouteCourseItem({
   }
 
   return (
-    <li className={`my-path__course-step${dragging ? ' is-dragging' : ''}${dropPosition ? ` is-drop-${dropPosition}` : ''}`}
+    <li className={`my-path__course-step${dragging ? ' is-dragging' : ''}${dropPosition ? ` is-drop-${dropPosition}` : ''}${optionsOpen ? ' is-menu-open' : ''}`}
       ref={elementRef} tabIndex={-1} onDragOver={onDragOver} onDrop={onDrop}>
       <div className="my-path__step-marker" aria-hidden="true">{String(position + 1).padStart(2, '0')}</div>
-      <article className={`my-path__course-card${locked || !showControls ? '' : ' is-draggable'}`}
-        draggable={showControls && !locked} onPointerDownCapture={handlePointerDown}
+      <article className={`my-path__course-card${canReorder && !locked ? ' is-draggable' : ''}${completed ? ' is-completed' : ''}`}
+        draggable={canReorder && !locked} onPointerDownCapture={handlePointerDown}
         onPointerUpCapture={() => { dragBlocked.current = false; }}
         onDragStart={handleDragStart} onDrag={handleDrag} onDragEnd={handleDragEnd}>
         <div className="my-path__course-visual" aria-hidden="true">
@@ -168,6 +185,12 @@ export function RouteCourseItem({
         <div className="my-path__course-copy">
           <div className="my-path__course-signals">
             <QuestTab tone="paper">{t('myPath.stepLabel', { position: position + 1 })}</QuestTab>
+            <span className={`my-path__course-status${completed ? ' is-completed' : ''}`}>
+              {completed ? <CheckCircle2 size={15} aria-hidden="true" /> : <span aria-hidden="true">○</span>}
+              {t(completed ? 'myPath.completed' : 'myPath.notStarted')}
+            </span>
+            {priority !== 'normal' && <span className={`my-path__priority my-path__priority--${priority}`}><Star size={14} aria-hidden="true" />{t(`myPath.priority.${priority}`)}</span>}
+            {hasNote && <span className="my-path__note-indicator"><FileText size={14} aria-hidden="true" />{t('myPath.hasNote')}</span>}
             {weeks !== null && <QuestMetric value={t(weeks === 1 ? 'myPath.durationWeek' : 'myPath.durationWeeks', { count: weeks })} label={t('myPath.durationLabel')} />}
           </div>
           <h2>{course.title}</h2>
@@ -179,18 +202,26 @@ export function RouteCourseItem({
           )}
         </div>
         {showControls && <div className="my-path__course-controls" role="group" aria-label={t('myPath.courseActions', { title: course.title })}>
-          {!locked && (
+          {canReorder && !locked && (
             <span className="my-path__drag-handle"
               role="img" aria-label={t('myPath.dragCourse', { title: course.title })}
               title={t('myPath.dragCourse', { title: course.title })}>
               <GripVertical size={20} aria-hidden="true" />
             </span>
           )}
-          <button type="button" className="my-path__remove-course" onClick={onRemove} disabled={locked}
-            aria-label={t('myPath.removeCourse', { title: course.title })}
-            title={t('myPath.removeCourse', { title: course.title })}>
-            <Trash2 size={18} aria-hidden="true" />
-          </button>
+          {onToggleCompleted && <button type="button" className="my-path__status-toggle" onClick={onToggleCompleted} disabled={locked}
+            aria-label={t(completed ? 'myPath.markNotStarted' : 'myPath.markCompleted')} title={t(completed ? 'myPath.markNotStarted' : 'myPath.markCompleted')}>
+            {completed ? <RotateCcw size={18} aria-hidden="true" /> : <CheckCircle2 size={18} aria-hidden="true" />}
+          </button>}
+          <div className="my-path__course-menu-wrap"><button type="button" className="my-path__more-actions" onClick={() => setOptionsOpen(open => !open)} disabled={locked}
+            aria-expanded={optionsOpen} aria-label={t('myPath.moreCourseActions')} title={t('myPath.moreCourseActions')}><MoreHorizontal size={19} aria-hidden="true" /></button>
+            {optionsOpen && <div className="my-path__course-menu">
+              {onNote && <button type="button" onClick={() => { setOptionsOpen(false); onNote(); }}><FileText size={16} aria-hidden="true" />{t(hasNote ? 'myPath.editNote' : 'myPath.addNote')}</button>}
+              {onPriorityChange && <label><span><Star size={15} aria-hidden="true" />{t('myPath.priority.label')}</span><select value={priority} onChange={event => onPriorityChange(event.target.value as CoursePriority)}><option value="normal">{t('myPath.priority.normal')}</option><option value="medium">{t('myPath.priority.medium')}</option><option value="high">{t('myPath.priority.high')}</option></select></label>}
+              {onReplace && <button type="button" onClick={() => { setOptionsOpen(false); onReplace(); }}><Repeat2 size={16} aria-hidden="true" />{t('myPath.replaceCourse')}</button>}
+              {canReorder && <button type="button" className="my-path__course-menu-delete" onClick={() => { setOptionsOpen(false); onRemove(); }}><Trash2 size={16} aria-hidden="true" />{t('myPath.removeCourse', { title: course.title })}</button>}
+            </div>}
+          </div>
         </div>}
       </article>
     </li>

@@ -18,6 +18,7 @@ import { WelcomePage } from './pages/WelcomePage';
 const WelcomePreviewPage = import.meta.env.DEV
   ? lazy(() => import('./pages/WelcomePreviewPage'))
   : null;
+import { SavedRouteDetailPage } from './features/routes/pages/SavedRouteDetailPage';
 
 function App() {
   const { user, isLoading, sessionError, refresh } = useAuthSession();

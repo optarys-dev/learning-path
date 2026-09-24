@@ -40,6 +40,7 @@ export interface SavedRouteCourse {
   reason: string | null;
   imageUrl: string | null;
   courseUrl: string | null;
+  progressPercentage: number;
 }
 
 export interface SavedRoute {
@@ -76,6 +77,19 @@ export interface EditableRouteCourse {
   estimatedWeeks?: number | null;
   imageUrl?: string | null;
   courseUrl?: string | null;
+  progressPercentage?: number;
+}
+
+export type CoursePriority = 'high' | 'medium' | 'normal';
+
+export interface CourseNote {
+  content: string;
+  updatedAt: string;
+}
+
+export interface RouteCourseLocalState {
+  notes: Record<string, CourseNote>;
+  priorities: Record<string, CoursePriority>;
 }
 
 export type RouteRequestErrorKind =
