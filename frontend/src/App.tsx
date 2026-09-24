@@ -9,6 +9,7 @@ import { useAuthSession } from './features/auth/hooks/useAuthSession';
 import { CatalogPage } from './features/catalog/pages/CatalogPage';
 import { QuestionnairePage } from './features/questionnaire/pages/QuestionnairePage';
 import { MyPathPage } from './features/routes/pages/MyPathPage';
+import { SavedRouteDetailPage } from './features/routes/pages/SavedRouteDetailPage';
 import { LoginCallbackPage } from './pages/LoginCallbackPage';
 import { LoginPage } from './pages/LoginPage';
 import { SectionPage } from './pages/SectionPage';
@@ -53,7 +54,7 @@ function App() {
       </Route>
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="create-route" element={<QuestionnairePage />} />
+          <Route path="create-route" element={<Navigate to="/create-route/proposal" replace />} />
           <Route path="create-route/proposal" element={<MyPathPage mode="proposal" autoGenerate />} />
           <Route path="my-path" element={<MyPathPage mode="collection" />} />
           <Route path="my-path/:routeId" element={<SavedRouteDetailPage />} />

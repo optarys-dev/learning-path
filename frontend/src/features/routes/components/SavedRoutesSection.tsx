@@ -52,7 +52,7 @@ export function SavedRoutesSection({ refreshKey = 0 }: SavedRoutesSectionProps) 
           <p className="my-path__eyebrow"><RouteIcon size={16} aria-hidden="true" />{t('myPath.savedEyebrow')}</p>
           <h1 className="cq-journey-title" id="saved-routes-title">{t('myPath.collectionTitle')}</h1>
           <p>{t('myPath.collectionDescription')}</p>
-          <Link className="cq-button cq-button--primary my-path__saved-create" to="/create-route">{t('myPath.createAnotherRoute')}</Link>
+          <Link className="cq-button cq-button--primary my-path__saved-create" to="/create-route/proposal">{t('myPath.createAnotherRoute')}</Link>
         </div>
         <img className="my-path__saved-mascot" src={roadmapMascot} alt="" />
         <QuestDoodle kind="arrow" className="my-path__saved-doodle" />
