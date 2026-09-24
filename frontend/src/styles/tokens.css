@@ -69,7 +69,12 @@
   --cq-color-brand-ink: #171027;
   --cq-color-brand-lavender: #c7b5ff;
   --cq-color-brand-warm: #fbf9ff;
-  --cq-color-brand-lime: #c8f000;
+  --cq-color-brand-lime: #bef264;
+  --cq-color-accent-violet: #a78bfa;
+  --cq-color-accent-cyan: #22d3ee;
+  --cq-color-accent-pink: #f472b6;
+  --cq-color-accent-amber: #fbbf24;
+  --cq-color-accent-lime: #bef264;
   --cq-color-text-on-brand: #ffffff;
   --cq-color-contrast-surface: #eee9ff;
   --cq-color-contrast-text: #171027;
@@ -81,12 +86,21 @@
   --cq-color-action-end: #5a16c1;
   --cq-color-action-hover: #6d28d9;
 
+  /* Action hierarchy: violet guides the interface; amber confirms the next step. */
+  --cq-color-button-primary: #facc15;
+  --cq-color-button-primary-hover: #fde047;
+  --cq-color-button-primary-foreground: #211934;
+  --cq-color-button-secondary: #facc15;
+  --cq-color-button-secondary-surface: rgb(250 204 21 / 14%);
+  --cq-color-button-ghost: #fbf9ff;
+  --cq-color-button-ghost-surface: rgb(251 249 255 / 10%);
+
   --cq-color-focus: #c0b9fc;
 
-  --cq-color-success: #a7f3d0;
-  --cq-color-warning: #fde68a;
-  --cq-color-error: #fda4af;
-  --cq-color-info: #93c5fd;
+  --cq-color-success: #5eead4;
+  --cq-color-warning: #facc15;
+  --cq-color-error: #fb7185;
+  --cq-color-info: #38bdf8;
 
   --cq-shadow-card: 0 8px 24px rgb(0 0 0 / 16%);
 
@@ -119,7 +133,12 @@
   --cq-color-brand-ink: #211934;
   --cq-color-brand-lavender: #9f86ed;
   --cq-color-brand-warm: #fffdf9;
-  --cq-color-brand-lime: #6d8700;
+  --cq-color-brand-lime: #4d7c0f;
+  --cq-color-accent-violet: #6d28d9;
+  --cq-color-accent-cyan: #0e7490;
+  --cq-color-accent-pink: #be185d;
+  --cq-color-accent-amber: #a16207;
+  --cq-color-accent-lime: #4d7c0f;
   --cq-color-text-on-brand: #ffffff;
   --cq-color-contrast-surface: #eee9ff;
   --cq-color-contrast-text: #211934;
@@ -131,12 +150,20 @@
   --cq-color-action-end: #795cf2;
   --cq-color-action-hover: #5945df;
 
+  --cq-color-button-primary: #211934;
+  --cq-color-button-primary-hover: #33294a;
+  --cq-color-button-primary-foreground: #fffdf9;
+  --cq-color-button-secondary: #211934;
+  --cq-color-button-secondary-surface: rgb(33 25 52 / 8%);
+  --cq-color-button-ghost: #211934;
+  --cq-color-button-ghost-surface: rgb(33 25 52 / 8%);
+
   --cq-color-focus: #6d5df5;
 
-  --cq-color-success: #15803d;
+  --cq-color-success: #047857;
   --cq-color-warning: #a16207;
   --cq-color-error: #be123c;
-  --cq-color-info: #2563eb;
+  --cq-color-info: #0369a1;
 
   --cq-shadow-card: 0 8px 24px rgb(42 30 70 / 10%);
 

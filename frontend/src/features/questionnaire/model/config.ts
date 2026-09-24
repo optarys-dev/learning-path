@@ -11,10 +11,11 @@ export const areas = {
 export const levels = ['none', 'basics', 'small-projects', 'complete-applications'] as const;
 export const desiredOutcomes = ['build-api', 'build-web-app', 'build-mobile-app', 'applied-ai', 'build-automations', 'work-with-databases'] as const;
 export const practicalExperiences = ['none', 'exercises', 'personal-projects', 'complete-applications'] as const;
+export const legacyContexts = ['none', 'maintenance', 'modernization', 'unsure'] as const;
 
 export const questions = [
   { id: 'learningGoal', answer: 'goal', selection: 'single-area', required: true },
-  { id: 'technologyInterests', answer: 'interests', selection: 'multiple-by-area', required: true },
+  { id: 'technologyInterests', answer: 'interests', selection: 'multiple-by-area', required: false },
   { id: 'currentExperience', answer: 'level', selection: 'single', required: true },
   { id: 'knownSkills', answer: 'knownSkills', selection: 'multiple-by-area', required: false },
   { id: 'desiredOutcome', answer: 'desiredOutcome', selection: 'single', required: true },

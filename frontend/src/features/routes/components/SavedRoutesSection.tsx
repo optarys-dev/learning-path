@@ -3,9 +3,11 @@ import { CalendarDays, Map, Route as RouteIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button/Button';
+import { QuestDoodle, QuestMetric, QuestSticker } from '../../../components/ui';
 import { useAuthSession } from '../../auth/hooks/useAuthSession';
 import { getSavedRoutes } from '../api/routes';
 import { RouteRequestError, type SavedRoute } from '../model/types';
+import roadmapMascot from '../../../assets/codequest/characters/05_mascota_astronauta_presenta_el_roadmap.png';
 
 interface SavedRoutesSectionProps {
   refreshKey?: number;
@@ -36,13 +38,17 @@ export function SavedRoutesSection({ refreshKey = 0 }: SavedRoutesSectionProps) 
   }, [refreshKey, refreshSession, retryVersion, t]);
 
   return (
-    <section className="my-path__saved" aria-labelledby="saved-routes-title">
+    <section className="my-path__saved my-path__saved--notebook" aria-labelledby="saved-routes-title">
       <div className="my-path__saved-heading">
-        <div>
+        <div className="my-path__saved-intro">
           <p className="my-path__eyebrow"><RouteIcon size={16} aria-hidden="true" />{t('myPath.savedEyebrow')}</p>
-          <h2 id="saved-routes-title">{t('myPath.savedRoutes')}</h2>
+          <h1 className="cq-journey-title" id="saved-routes-title">{t('myPath.collectionTitle')}</h1>
+          <p>{t('myPath.collectionDescription')}</p>
+          <Link className="cq-button cq-button--primary my-path__saved-create" to="/create-route">{t('myPath.createAnotherRoute')}</Link>
         </div>
-        {state.status === 'ready' && <span>{t('myPath.savedCount', { count: state.routes.length })}</span>}
+        <img className="my-path__saved-mascot" src={roadmapMascot} alt="" />
+        <QuestDoodle kind="arrow" className="my-path__saved-doodle" />
+        {state.status === 'ready' && <QuestMetric value={state.routes.length} label={t('myPath.savedCount', { count: state.routes.length })} />}
       </div>
 
       {state.status === 'loading' && <p className="my-path__saved-status" role="status">{t('myPath.loadingSaved')}</p>}
@@ -64,6 +70,7 @@ export function SavedRoutesSection({ refreshKey = 0 }: SavedRoutesSectionProps) 
           {state.routes.map(route => (
             <li key={route.routeId}>
               <div className="my-path__saved-card-copy">
+                <QuestSticker tone="completed">{t('myPath.savedRoute')}</QuestSticker>
                 <h3>{route.goal}</h3>
                 <p><CalendarDays size={15} aria-hidden="true" />
                   {new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(new Date(route.createdAt))}

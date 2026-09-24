@@ -1,15 +1,18 @@
 import { useEffect, useLayoutEffect, useRef, useState, type TransitionEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { Lightbulb } from 'lucide-react';
 import { useAuthSession } from '../../auth/hooks/useAuthSession';
 import deviLaptop from '../../../assets/assessment/04_aprendiendo_con_laptop.svg';
 import deviSelection from '../../../assets/assessment/05_seleccion_correcta.svg';
 import deviNeedsAnswer from '../../../assets/assessment/06_necesita_una_respuesta.svg';
 import deviProgress from '../../../assets/assessment/07_progreso_de_la_ruta.svg';
 import deviReady from '../../../assets/assessment/08_perfil_completado.svg';
+import routeExplorer from '../../../assets/codequest/characters/04_mascota_astronauta_con_mapa_del_tesoro.png';
 import { Button } from '../../../components/ui/Button/Button';
+import { QuestProgress } from '../../../components/ui';
 import { savePreferences, PreferencesError, type PreferencesErrorKind } from '../api/preferences';
-import { areas, desiredOutcomes, levels, practicalExperiences, questions } from '../model/config';
+import { areas, desiredOutcomes, legacyContexts, levels, practicalExperiences, questions } from '../model/config';
 import { clearQuestionnaireDraft, loadQuestionnaireDraft, saveQuestionnaireDraft } from '../model/draft';
 import { mapPreferences } from '../model/preferencesMapping';
 import { selectArea } from '../model/state';
@@ -19,7 +22,7 @@ import './QuestionnairePage.css';
 function isStepComplete(step: number, answers: QuestionnaireAnswers): boolean {
   switch (questions[step].id) {
     case 'learningGoal': return answers.goal !== null;
-    case 'technologyInterests': return answers.interests.length >= 1;
+    case 'technologyInterests': return true;
     case 'currentExperience': return answers.level !== null;
     case 'knownSkills': return true;
     case 'desiredOutcome': return answers.desiredOutcome !== null;
@@ -40,7 +43,7 @@ export function QuestionnairePage() {
   const [state, setState] = useState<QuestionnaireState>(loadQuestionnaireDraft);
   const [welcome, setWelcome] = useState(() => state.currentStep === 0 &&
     state.answers.goal === null && state.answers.level === null && state.answers.desiredOutcome === null &&
-    state.answers.experience === null && state.answers.interests.length === 0 && state.answers.knownSkills.length === 0);
+    state.answers.experience === null && state.answers.legacyContext === null && state.answers.interests.length === 0 && state.answers.knownSkills.length === 0);
   const [entryPhase, setEntryPhase] = useState<'idle' | 'preparing' | 'sliding'>('idle');
   const [started, setStarted] = useState(false);
   const entryFrame = useRef<number | null>(null);
@@ -257,7 +260,7 @@ export function QuestionnairePage() {
       clearQuestionnaireDraft();
       markPreferencesSaved();
       setSaveState({ status: 'success' });
-      navigate('/my-path', { replace: true });
+      navigate('/create-route/proposal', { replace: true });
     } catch (error) {
       setSaveState({ status: 'error', kind: error instanceof PreferencesError ? error.kind : 'http' });
     } finally {
@@ -271,10 +274,10 @@ export function QuestionnairePage() {
         <div className="learning-profile__reveal-stack" ref={stackRef}>
       {welcome && (
         <section className="learning-profile__welcome" aria-labelledby="welcome-title" ref={welcomeRef}>
-          <img className="learning-profile__mascot learning-profile__mascot--welcome" src={deviProgress} alt="" />
+          <img className="learning-profile__mascot learning-profile__mascot--welcome" src={routeExplorer} alt="" />
           <div className="learning-profile__welcome-content">
             <span className="learning-profile__eyebrow">{t('app.name')}</span>
-            <h1 id="welcome-title" ref={welcomeHeadingRef} tabIndex={-1}>{t('questionnaire.welcomeTitle')}</h1>
+            <h1 className="cq-journey-title" id="welcome-title" ref={welcomeHeadingRef} tabIndex={-1}>{t('questionnaire.welcomeTitle')}</h1>
             <p className="learning-profile__welcome-lead">{t('questionnaire.welcomeLead')}</p>
             <p>{t('questionnaire.welcomeDescription')}</p>
             <Button onClick={getStarted} disabled={entryPhase !== 'idle'}>{t('questionnaire.getStarted')}</Button>
@@ -283,29 +286,27 @@ export function QuestionnairePage() {
       )}
         <div className="learning-profile__flow" ref={flowRef} inert={welcome}>
           <header className="learning-profile__intro">
-            <h1>{t('questionnaire.title')}</h1>
+            <h1 className="cq-journey-title">{t('questionnaire.title')}</h1>
             <p>{t('questionnaire.description')}</p>
           </header>
           {result === null ? (
         <section className="learning-profile__step" data-question={question.id} aria-labelledby="question-title">
-          <p className="learning-profile__step-count">{t('questionnaire.stepCount', { current: currentStep + 1, total: questions.length })}</p>
-          <p className="learning-profile__step-name">{t(`questionnaire.stepNames.${question.id}`)}</p>
+          <div className="learning-profile__progress-heading">
+            <p className="learning-profile__step-name">{t(`questionnaire.stepNames.${question.id}`)}</p>
+            <p className="learning-profile__step-count">{t('questionnaire.stepCountCompact', { current: currentStep + 1, total: questions.length })}</p>
+          </div>
           <div className="learning-profile__progress-geometry">
-            <div className="learning-profile__progress" role="progressbar" aria-label={t('questionnaire.progressLabel')}
-              aria-valuemin={1} aria-valuemax={questions.length} aria-valuenow={currentStep + 1}>
-              <span style={{ width: `${progressPercent}%` }} />
-            </div>
+            <QuestProgress className="learning-profile__quest-progress" label={t('questionnaire.stepCount', { current: currentStep + 1, total: questions.length })} value={progressPercent} />
             <div className="learning-profile__milestones" aria-hidden="true">
               {questions.map((item, index) => (
                 <span key={item.id} className={index === currentStep ? 'is-current' : index < currentStep ? 'is-complete' : 'is-pending'}
                   style={{ left: `${questions.length > 1 ? (index / (questions.length - 1)) * 100 : 100}%` }} />
               ))}
             </div>
-          </div>
-          <div className={`learning-profile__question-content${hasNavigated ? ' learning-profile__question-content--animated' : ''}`} key={currentStep}>
+          </div>          <div className={`learning-profile__question-content${hasNavigated ? ' learning-profile__question-content--animated' : ''}`} key={currentStep}>
           <img className="learning-profile__mascot learning-profile__mascot--explore" src={showError ? deviNeedsAnswer : stepMascot} alt="" />
           <h2 id="question-title" ref={headingRef} tabIndex={-1}>{t(`questionnaire.questions.${question.id}`)}</h2>
-          <p className="learning-profile__question-hint"><span aria-hidden="true">✦</span>{t(`questionnaire.stepHints.${question.id}`)}</p>
+          <p className="learning-profile__question-helper"><Lightbulb size={16} aria-hidden="true" />{t(`questionnaire.stepHints.${question.id}`)}</p>
           {question.id === 'learningGoal' && (
               <fieldset className="learning-profile__options learning-profile__options--areas" aria-describedby={showError ? 'question-error' : undefined}>
                 <legend className="sr-only">{t('questionnaire.questions.learningGoal')}</legend>
@@ -346,7 +347,6 @@ export function QuestionnairePage() {
           {question.id === 'knownSkills' && (
             <fieldset className="learning-profile__options learning-profile__options--compact">
               <legend className="sr-only">{t('questionnaire.questions.knownSkills')}</legend>
-              <p className="learning-profile__hint">{t('questionnaire.knownSkillsHint')}</p>
               {technologies.map(item => (
                 <label className="learning-profile__option learning-profile__chip" key={item}>
                   <input type="checkbox" checked={answers.knownSkills.includes(item)}
@@ -369,16 +369,31 @@ export function QuestionnairePage() {
             </fieldset>
           )}
           {question.id === 'practicalExperience' && (
-            <fieldset className="learning-profile__options" aria-describedby={showError ? 'question-error' : undefined}>
-              <legend className="sr-only">{t('questionnaire.questions.practicalExperience')}</legend>
-              {practicalExperiences.map(experience => (
-                <label className="learning-profile__option" key={experience}>
-                  <input type="radio" name="practical-experience" checked={answers.experience === experience}
-                    onChange={() => setAnswers({ ...answers, experience })} />
-                  <span>{t(`questionnaire.experiences.${experience}`)}</span>
-                </label>
-              ))}
-            </fieldset>
+            <div className="learning-profile__final-step">
+              <fieldset className="learning-profile__options" aria-describedby={showError ? 'question-error' : undefined}>
+                <legend className="sr-only">{t('questionnaire.questions.practicalExperience')}</legend>
+                {practicalExperiences.map(experience => (
+                  <label className="learning-profile__option" key={experience}>
+                    <input type="radio" name="practical-experience" checked={answers.experience === experience}
+                      onChange={() => setAnswers({ ...answers, experience })} />
+                    <span>{t(`questionnaire.experiences.${experience}`)}</span>
+                  </label>
+                ))}
+              </fieldset>
+              <fieldset className="learning-profile__legacy-context">
+                <legend>{t('questionnaire.legacyQuestion')}</legend>
+                <p>{t('questionnaire.legacyHint')}</p>
+                <div className="learning-profile__legacy-options">
+                  {legacyContexts.map(legacyContext => (
+                    <label className="learning-profile__legacy-option" key={legacyContext}>
+                      <input type="radio" name="legacy-context" checked={answers.legacyContext === legacyContext}
+                        onChange={() => setAnswers({ ...answers, legacyContext })} />
+                      <span>{t(`questionnaire.legacyContexts.${legacyContext}`)}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
           )}
           {showError && <p id="question-error" className="learning-profile__error" role="alert">{t('questionnaire.requiredError')}</p>}
           </div>
@@ -408,6 +423,9 @@ export function QuestionnairePage() {
             <div><dt>{t('questionnaire.summaryExperience')}</dt><dd>{result.experience && t(`questionnaire.experiences.${result.experience}`)}</dd></div>
             <div><dt>{t('questionnaire.summaryInterests')}</dt><dd>{result.interests.length ? result.interests.map(item => t(`questionnaire.technologies.${item}`)).join(', ') : t('questionnaire.noneSelected')}</dd></div>
             <div><dt>{t('questionnaire.summarySkills')}</dt><dd>{result.knownSkills.length ? result.knownSkills.map(item => t(`questionnaire.technologies.${item}`)).join(', ') : t('questionnaire.noneSelected')}</dd></div>
+            {result.legacyContext && result.legacyContext !== 'none' && (
+              <div><dt>{t('questionnaire.summaryLegacy')}</dt><dd>{t(`questionnaire.legacyContexts.${result.legacyContext}`)}</dd></div>
+            )}
           </dl>
           <div className="learning-profile__complete-actions">
             <Button variant="secondary" onClick={editAnswers} disabled={saveState.status === 'saving'}>{t('questionnaire.editAnswers')}</Button>

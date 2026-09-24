@@ -5,11 +5,11 @@
 
 /* The access panel is the only card. */
 .login-card { position: relative; overflow: hidden; padding: clamp(var(--cq-space-8), 4vw, var(--cq-space-12)); border: 1px solid color-mix(in srgb, var(--cq-color-brand-primary) 26%, var(--cq-color-border-default)); border-radius: 1.5rem 1.5rem 1.5rem .5rem; background: color-mix(in srgb, var(--cq-color-bg-surface) 90%, transparent); box-shadow: 0 1.25rem 3rem var(--cq-color-illustration-shadow); }
-.login-card::before { position: absolute; top: 0; left: 0; width: .32rem; height: 5.5rem; content: ''; border-radius: 0 0 var(--cq-radius-pill) 0; background: linear-gradient(var(--cq-color-action-start), var(--cq-color-brand-lavender)); }
+.login-card::before { position: absolute; top: 0; left: 0; width: .32rem; height: 5.5rem; content: ''; border-radius: 0 0 var(--cq-radius-pill) 0; background: linear-gradient(var(--cq-color-accent-violet), var(--cq-color-accent-cyan)); }
 .login-card .landing-eyebrow { margin-bottom: var(--cq-space-4); }
 .login-card h1 { max-width: 14ch; margin: 0 0 var(--cq-space-4); font-family: var(--cq-font-display); font-size: clamp(2rem, 3vw, 2.65rem); font-weight: var(--cq-font-weight-display); line-height: 1.08; letter-spacing: -.055em; }
 .login-card__intro { max-width: 34ch; margin: 0 0 var(--cq-space-6); color: var(--cq-color-text-secondary); line-height: 1.65; }
-.login-card .welcome__cta { width: 100%; min-height: 3.5rem; box-shadow: 0 .8rem 1.6rem color-mix(in srgb, var(--cq-color-action-start) 22%, transparent); }
+.login-card .welcome__cta { width: 100%; min-height: 3.5rem; box-shadow: 0 .8rem 1.6rem color-mix(in srgb, var(--cq-color-button-primary) 22%, transparent); }
 .login-card__purpose { display: flex; align-items: flex-start; gap: var(--cq-space-2); margin: var(--cq-space-4) 0 0; color: var(--cq-color-text-secondary); font-size: var(--cq-font-size-caption); line-height: 1.55; }
 .login-card__purpose::before { flex: 0 0 auto; margin-top: .43em; width: .45rem; height: .45rem; content: ''; border-radius: 50%; background: var(--cq-color-brand-primary); }
 .login-card__flow { margin-top: var(--cq-space-6); padding-top: var(--cq-space-5); border-top: 1px solid var(--cq-color-border-default); }
@@ -21,12 +21,12 @@
 .login-feedback[data-error='true'] { color: var(--cq-color-error); }.login-feedback:empty { display: none; }
 
 /* This side is a scene, not a second banner. */
-.login-aside { position: relative; display: grid; align-items: start; min-height: 35rem; padding: clamp(var(--cq-space-8), 5vw, 4.5rem) clamp(var(--cq-space-4), 4vw, var(--cq-space-12)); overflow: hidden; }
-.login-aside::before { position: absolute; z-index: -2; top: 6%; right: -3%; width: min(34rem, 88%); aspect-ratio: 1; content: ''; border-radius: 52% 48% 44% 56%; background: radial-gradient(circle at 38% 38%, color-mix(in srgb, var(--cq-color-brand-warm) 92%, transparent), color-mix(in srgb, var(--cq-color-brand-lavender) 58%, transparent) 43%, color-mix(in srgb, var(--cq-color-brand-primary) 22%, transparent) 68%, transparent 70%); transform: rotate(-11deg); }
+.login-aside { position: relative; display: grid; align-items: start; min-height: 35rem; padding: clamp(var(--cq-space-8), 5vw, 4.5rem) clamp(var(--cq-space-4), 4vw, var(--cq-space-12)); overflow: hidden; isolation: isolate; }
+.login-aside::before { position: absolute; z-index: -2; top: 8%; right: -8%; width: min(29rem, 74%); aspect-ratio: 1; content: ''; border-radius: 52% 48% 44% 56%; background: radial-gradient(circle at 38% 38%, color-mix(in srgb, var(--cq-color-brand-warm) 92%, transparent), color-mix(in srgb, var(--cq-color-brand-lavender) 58%, transparent) 43%, color-mix(in srgb, var(--cq-color-brand-primary) 22%, transparent) 68%, transparent 70%); transform: rotate(-11deg); }
 .login-aside::after { position: absolute; z-index: -1; right: 2%; bottom: 2%; width: 18rem; aspect-ratio: 1; content: ''; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--cq-color-brand-warm) 36%, transparent), color-mix(in srgb, var(--cq-color-action-start) 8%, transparent) 45%, transparent 70%); }
 .login-aside__copy { position: relative; z-index: 2; max-width: 23rem; }
 .login-aside h2 { max-width: 12ch; margin: var(--cq-space-4) 0; color: var(--cq-color-brand-ink); font-family: var(--cq-font-display); font-size: clamp(2.35rem, 4.1vw, 3.85rem); font-weight: var(--cq-font-weight-display); line-height: 1.04; letter-spacing: -.06em; }
-.login-aside .text-accent { color: var(--cq-color-action-start); }.login-aside__copy > p { max-width: 30ch; margin: 0; color: var(--cq-color-contrast-muted); line-height: 1.65; }
+.login-aside .text-accent { color: var(--cq-color-accent-pink); }.login-aside__copy > p { max-width: 30ch; margin: 0; color: var(--cq-color-contrast-muted); line-height: 1.65; }
 .login-aside ul { display: grid; gap: var(--cq-space-3); padding: 0; margin: var(--cq-space-6) 0 0; list-style: none; }
 .login-aside li { display: flex; align-items: center; gap: var(--cq-space-3); color: var(--cq-color-contrast-text); font-size: var(--cq-font-size-label); font-weight: 600; }
 .login-aside li span { display: grid; flex: 0 0 1.7rem; height: 1.7rem; place-items: center; border-radius: 50%; color: var(--cq-color-action-start); background: color-mix(in srgb, var(--cq-color-brand-warm) 72%, transparent); }.login-aside__spark { display: inline-block; color: var(--cq-color-action-start); font-size: 2rem; }
@@ -34,6 +34,13 @@
 .login-aside__scene::before { position: absolute; inset: 17% 7% 13%; content: ''; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--cq-color-brand-warm) 50%, transparent), transparent 68%); }
 .login-aside__scene img { position: absolute; z-index: 1; bottom: 5%; left: 50%; width: min(15rem, 100%); height: auto; filter: drop-shadow(0 1.25rem 1.5rem var(--cq-color-illustration-shadow)); transform: translateX(-50%); }
 .login-aside__node { position: absolute; z-index: 2; width: .75rem; height: .75rem; border: 3px solid var(--cq-color-brand-warm); border-radius: 50%; background: var(--cq-color-action-start); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cq-color-action-start) 24%, transparent); }.login-aside__node--two { right: 17%; bottom: 25%; }
+
+/* The illustration remains decorative; copy keeps the contrast in the dark theme. */
+[data-theme='dark'] .login-aside h2 { color: var(--cq-color-text-primary); text-shadow: 0 .12rem .6rem rgb(0 0 0 / 28%); }
+[data-theme='dark'] .login-aside__copy > p { color: var(--cq-color-brand-mist); }
+[data-theme='dark'] .login-aside li { color: var(--cq-color-text-primary); }
+[data-theme='dark'] .login-aside li span { color: var(--cq-color-brand-lime); background: var(--cq-color-surface-muted); }
+[data-theme='dark'] .login-aside__spark { color: var(--cq-color-brand-lavender); }
 
 @media (max-width: 57rem) { .login-page { grid-template-columns: minmax(0, 1fr); max-width: 36rem; min-height: auto; gap: var(--cq-space-6); }.login-card-wrap { width: 100%; max-width: none; }.login-aside { display: none; } }
 @media (max-width: 30rem) { .login-page { padding-top: 0; }.login-card { padding: var(--cq-space-6) var(--cq-space-4); }.login-card h1 { font-size: var(--cq-font-size-h2); } }

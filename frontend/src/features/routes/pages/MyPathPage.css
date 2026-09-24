@@ -11,6 +11,9 @@
   --my-path-hero-copy: color-mix(in srgb, var(--cq-color-text-primary) 82%, var(--cq-color-brand-lavender));
   --my-path-hero-accent: var(--cq-color-brand-lavender);
   --my-path-hero-shadow: 0 2px 14px rgb(0 0 0 / 48%);
+  --my-path-route-glow: rgb(167 139 250 / 18%);
+  --my-path-route-dots: rgb(167 139 250 / 20%);
+  --my-path-route-stroke: rgb(34 211 238 / 32%);
   position: relative;
   isolation: isolate;
   width: 100%;
@@ -27,11 +30,30 @@
   left: 0;
   pointer-events: none;
   z-index: -2;
-  background-image: url('../../../assets/my-path/route-space-bg.jpeg');
-  background-color: var(--cq-color-bg-page);
-  background-position: top center;
-  background-repeat: no-repeat;
-  background-size: max(100%, 90rem) auto;
+  background:
+    radial-gradient(circle at 84% 7%, var(--my-path-route-glow), transparent 20rem),
+    radial-gradient(circle at 12% 27%, rgb(244 114 182 / 11%), transparent 22rem),
+    radial-gradient(circle, var(--my-path-route-dots) 1px, transparent 1.15px),
+    var(--cq-color-bg-page);
+  background-size: auto, auto, 1.7rem 1.7rem, auto;
+}
+
+/* A single soft orbit suggests a route without becoming an illustration behind the content. */
+.my-path-page::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 8rem;
+  left: 50%;
+  width: min(94vw, 84rem);
+  height: 34rem;
+  border: 1px dashed var(--my-path-route-stroke);
+  border-left-color: transparent;
+  border-radius: 50%;
+  box-shadow: 0 0 4rem color-mix(in srgb, var(--my-path-route-stroke) 22%, transparent);
+  opacity: .7;
+  pointer-events: none;
+  transform: translateX(-50%) rotate(-8deg);
 }
 
 html[data-theme='dark'] .my-path-page {
@@ -44,14 +66,13 @@ html[data-theme='dark'] .my-path-page {
 
 html[data-theme='light'] .my-path-page {
   --my-path-accent-text: var(--cq-color-brand-primary);
-  --my-path-hero-title: var(--cq-color-text-on-brand);
-  --my-path-hero-copy: var(--cq-color-brand-mist);
-  --my-path-hero-accent: var(--cq-color-panel-muted);
-  --my-path-hero-shadow: 0 2px 14px rgb(0 0 0 / 62%);
-}
-
-@media (min-width: 52.01rem) and (hover: hover) and (pointer: fine) {
-  .my-path-page::before { background-attachment: fixed; }
+  --my-path-hero-title: var(--cq-color-text-primary);
+  --my-path-hero-copy: var(--cq-color-text-secondary);
+  --my-path-hero-accent: var(--cq-color-brand-primary);
+  --my-path-hero-shadow: none;
+  --my-path-route-glow: rgb(34 211 238 / 14%);
+  --my-path-route-dots: rgb(109 93 245 / 14%);
+  --my-path-route-stroke: rgb(109 93 245 / 27%);
 }
 
 .my-path {
@@ -710,7 +731,6 @@ html[data-theme='light'] .my-path__delete-route { color: var(--cq-color-text-on-
 }
 
 @media (max-width: 64rem) {
-  .my-path-page::before { background-position: 58% top; }
   .my-path__hero { grid-template-columns: minmax(0, .8fr) minmax(25rem, 1.2fr); gap: var(--cq-space-6); }
   .my-path__hero-copy { padding-inline: 0; }
   .my-path__course-card { grid-template-columns: 3rem minmax(0, 1fr) auto; gap: var(--cq-space-3); }
@@ -718,12 +738,7 @@ html[data-theme='light'] .my-path__delete-route { color: var(--cq-color-text-on-
 }
 
 @media (max-width: 52rem) {
-  .my-path-page::before {
-    position: fixed;
-    inset: 0;
-    background-position: 72% center;
-    background-size: cover;
-  }
+  .my-path-page::after { top: 10rem; width: 125vw; height: 29rem; opacity: .42; }
   .my-path__hero { grid-template-columns: 1fr; }
   .my-path__hero-copy { padding-block: var(--cq-space-4); }
   .my-path__hero-orbit { right: var(--cq-space-4); }
@@ -737,9 +752,7 @@ html[data-theme='light'] .my-path__delete-route { color: var(--cq-color-text-on-
 }
 
 @media (max-width: 36rem) {
-  .my-path-page::before {
-    background-position: 78% center;
-  }
+  .my-path-page::after { top: 12rem; width: 145vw; height: 23rem; }
   .my-path { width: min(calc(100% - var(--cq-space-6)), 86rem); }
   .my-path__launch {
     grid-template-columns: 1fr;
@@ -780,7 +793,6 @@ html[data-theme='light'] .my-path__delete-route { color: var(--cq-color-text-on-
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .my-path-page::before { background-attachment: scroll; }
   .my-path__hero,
   .my-path__route-panel { animation: none; }
   .my-path__course-step,
@@ -791,4 +803,143 @@ html[data-theme='light'] .my-path__delete-route { color: var(--cq-color-text-on-
   .my-path__drag-preview {
     transform: translate3d(var(--my-path-drag-x), var(--my-path-drag-y), 0);
   }
+}
+
+.my-path__course-signals { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cq-space-2); margin-bottom: var(--cq-space-3); }
+.my-path__course-signals .cq-quest-metric { min-height: 1.75rem; }
+.my-path__course-signals .cq-quest-metric__value { min-width: auto; height: auto; padding: 0; border-radius: 0; background: transparent; color: var(--cq-color-text-primary); }
+.my-path__saved-card-copy > .cq-quest-sticker { margin-bottom: var(--cq-space-3); }
+/* The SVG guide lives behind the list, so it cannot change the layout or hide cards. */
+.my-path__course-track { position: relative; }
+.my-path__race-track { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.my-path__race-line { fill: none; stroke: var(--cq-color-route-line); stroke-width: 2.25; stroke-dasharray: 5 7; stroke-linecap: round; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--cq-color-brand-primary) 32%, transparent)); }
+.my-path__course-list { z-index: 1; }
+.my-path__course-step { z-index: 1; }
+.my-path__course-list::before { display: none; }
+
+.my-path--collection { padding-block: clamp(var(--cq-space-8), 8vw, var(--cq-space-16)); }
+.my-path__saved--notebook { position: relative; isolation: isolate; overflow: hidden; margin-top: 0; background: linear-gradient(145deg, color-mix(in srgb, var(--cq-color-bg-elevated) 94%, var(--cq-color-brand-lavender)), var(--cq-color-bg-surface)); }
+.my-path__saved--notebook::before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: .3; pointer-events: none; background: repeating-linear-gradient(0deg, transparent 0 2.85rem, color-mix(in srgb, var(--cq-color-brand-primary) 14%, transparent) 2.85rem 2.92rem); }
+.my-path__saved-heading { position: relative; align-items: center; }
+.my-path__saved-intro { max-width: 42rem; }
+.my-path__saved-intro > p:not(.my-path__eyebrow) { max-width: 54ch; margin: 0 0 var(--cq-space-5); color: var(--cq-color-text-secondary); }
+.my-path__saved-heading .cq-quest-metric { margin-left: auto; }
+.my-path__saved-mascot { width: clamp(6rem, 12vw, 9rem); max-height: 8rem; object-fit: contain; filter: drop-shadow(0 .75rem 1rem var(--cq-color-illustration-shadow)); }
+.my-path__saved-doodle { position: absolute; z-index: -1; right: 11rem; bottom: -1rem; width: 10rem; color: var(--cq-color-brand-primary); opacity: .28; transform: rotate(-8deg); }
+.my-path__saved-create { width: fit-content; }
+
+@media (max-width: 44rem) {
+  .my-path__saved-heading { align-items: flex-start; flex-direction: column; }
+  .my-path__saved-heading .cq-quest-metric { margin-left: 0; }
+  .my-path__saved-mascot { position: absolute; right: var(--cq-space-2); top: var(--cq-space-2); width: 5.5rem; }
+  .my-path__saved-intro { padding-right: 5.5rem; }
+}
+/* Desktop route timeline: course cards alternate around one connected path. */
+@media (min-width: 52.01rem) {
+  .my-path__course-list {
+    grid-template-columns: minmax(0, 1fr) 4.5rem minmax(0, 1fr);
+    align-items: center;
+    row-gap: clamp(var(--cq-space-5), 3vw, var(--cq-space-8));
+  }
+  .my-path__course-step {
+    grid-column: 1 / 2;
+    grid-template-columns: minmax(0, 1fr) 2.75rem;
+    grid-template-areas: 'card marker';
+    align-items: center;
+    gap: var(--cq-space-4);
+  }
+  .my-path__course-step:nth-child(even) {
+    grid-column: 3 / 4;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    grid-template-areas: 'marker card';
+  }
+  .my-path__step-marker { grid-area: marker; justify-self: center; }
+  .my-path__course-card { grid-area: card; }
+}
+
+@media (max-width: 52rem) {
+  .my-path__course-list { grid-template-columns: 1fr; }
+  .my-path__course-step,
+  .my-path__course-step:nth-child(even) {
+    grid-column: auto;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    grid-template-areas: 'marker card';
+  }
+  .my-path__race-track { display: none; }
+  .my-path__course-list::before { display: block; }
+}
+
+/* The route needs breathing room: every stop reads as an individual, solid-color milestone. */
+.my-path__course-track { padding-block: var(--cq-space-4) var(--cq-space-8); }
+
+html[data-theme='light'] .my-path__course-step:nth-child(3n + 1) .my-path__course-card { border-color: #14b8a6; background: #dcfdf5; }
+html[data-theme='light'] .my-path__course-step:nth-child(3n + 2) .my-path__course-card { border-color: #f59e0b; background: #fff1bd; }
+html[data-theme='light'] .my-path__course-step:nth-child(3n) .my-path__course-card { border-color: #38bdf8; background: #e0f5ff; }
+html[data-theme='light'] .my-path__course-step:nth-child(3n + 1) .my-path__course-visual { border-color: #0f766e; background: #99f6e4; color: #115e59; }
+html[data-theme='light'] .my-path__course-step:nth-child(3n + 2) .my-path__course-visual { border-color: #d97706; background: #fcd34d; color: #78350f; }
+html[data-theme='light'] .my-path__course-step:nth-child(3n) .my-path__course-visual { border-color: #0284c7; background: #bae6fd; color: #075985; }
+html[data-theme='light'] .my-path__course-step:nth-child(3n + 1) .my-path__step-marker { border-color: #14b8a6; background: #dcfdf5; color: #0f766e; }
+html[data-theme='light'] .my-path__course-step:nth-child(3n + 2) .my-path__step-marker { border-color: #f59e0b; background: #fff1bd; color: #92400e; }
+html[data-theme='light'] .my-path__course-step:nth-child(3n) .my-path__step-marker { border-color: #38bdf8; background: #e0f5ff; color: #0369a1; }
+
+html[data-theme='dark'] .my-path__course-step:nth-child(3n + 1) .my-path__course-card { border-color: #2dd4bf; background: #134e4a; }
+html[data-theme='dark'] .my-path__course-step:nth-child(3n + 2) .my-path__course-card { border-color: #fbbf24; background: #5b3709; }
+html[data-theme='dark'] .my-path__course-step:nth-child(3n) .my-path__course-card { border-color: #38bdf8; background: #164e74; }
+html[data-theme='dark'] .my-path__course-step:nth-child(3n + 1) .my-path__course-visual { border-color: #5eead4; background: #0f3835; color: #99f6e4; }
+html[data-theme='dark'] .my-path__course-step:nth-child(3n + 2) .my-path__course-visual { border-color: #fde047; background: #432804; color: #fde68a; }
+html[data-theme='dark'] .my-path__course-step:nth-child(3n) .my-path__course-visual { border-color: #7dd3fc; background: #103b5a; color: #bae6fd; }
+html[data-theme='dark'] .my-path__course-step:nth-child(3n + 1) .my-path__step-marker { border-color: #2dd4bf; background: #134e4a; color: #99f6e4; }
+html[data-theme='dark'] .my-path__course-step:nth-child(3n + 2) .my-path__step-marker { border-color: #fbbf24; background: #5b3709; color: #fde68a; }
+html[data-theme='dark'] .my-path__course-step:nth-child(3n) .my-path__step-marker { border-color: #38bdf8; background: #164e74; color: #bae6fd; }
+html[data-theme='dark'] .my-path__course-card .my-path__course-reason { color: #e9e5ff; }
+html[data-theme='dark'] .my-path__course-card .cq-quest-tab--paper {
+  border-color: rgb(255 255 255 / 32%);
+  background: rgb(255 255 255 / 16%);
+  color: #fff;
+}
+
+@media (min-width: 52.01rem) {
+  .my-path__course-list {
+    column-gap: clamp(var(--cq-space-8), 6vw, var(--cq-space-16));
+    row-gap: clamp(var(--cq-space-8), 5vw, 4.75rem);
+  }
+  .my-path__course-card { min-height: 8.5rem; }
+}
+
+@media (max-width: 52rem) {
+  .my-path__course-list { gap: var(--cq-space-6); }
+}
+
+/* Saved-route paper: quiet notebook rules stay behind the roadmap and course cards. */
+.my-path--saved-detail .my-path__route-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--cq-color-error) 18%, transparent) 0 1px, transparent 1px),
+    repeating-linear-gradient(0deg, transparent 0 2.7rem, color-mix(in srgb, var(--cq-color-brand-primary) 11%, transparent) 2.7rem 2.76rem),
+    var(--cq-color-bg-surface);
+  background-position: 2.35rem 0, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, repeat;
+}
+
+.my-path--saved-detail .my-path__route-panel-header,
+.my-path--saved-detail .my-path__course-track,
+.my-path--saved-detail .my-path__completion,
+.my-path--saved-detail .my-path__feedback {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-theme='dark'] .my-path--saved-detail .my-path__route-panel {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--cq-color-accent-pink) 25%, transparent) 0 1px, transparent 1px),
+    repeating-linear-gradient(0deg, transparent 0 2.7rem, color-mix(in srgb, var(--cq-color-brand-lavender) 13%, transparent) 2.7rem 2.76rem),
+    var(--cq-color-bg-surface);
+  background-position: 2.35rem 0, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, repeat;
+}
+
+@media (max-width: 36rem) {
+  .my-path--saved-detail .my-path__route-panel { background-position: 1.45rem 0, 0 0, 0 0; }
 }

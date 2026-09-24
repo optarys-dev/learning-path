@@ -3,7 +3,7 @@ import type { AreaId, QuestionnaireAnswers, QuestionnaireState } from './types';
 
 export const initialQuestionnaireState: QuestionnaireState = {
   currentStep: 0,
-  answers: { goal: null, interests: [], level: null, knownSkills: [], desiredOutcome: null, experience: null },
+  answers: { goal: null, interests: [], level: null, knownSkills: [], desiredOutcome: null, experience: null, legacyContext: null },
 };
 
 export function selectArea(answers: QuestionnaireAnswers, goal: AreaId): QuestionnaireAnswers {
