@@ -493,8 +493,7 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 }
 
 @media (min-width: 38.001rem) {
-  .learning-profile__question-content > h2 { padding-inline-end: clamp(8rem, 16vw, 11rem); }
-  .learning-profile__question-hint { max-width: calc(100% - clamp(8rem, 16vw, 11rem)); }
+  .learning-profile__question-hint { max-width: 62ch; }
 }
 
 
@@ -596,9 +595,28 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
   line-height: var(--cq-line-height-body);
 }
 .learning-profile__question-helper svg { flex: none; margin-top: .15em; color: var(--cq-color-brand-primary); }
+.learning-profile__question-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(7.25rem, 12vw, 9.5rem);
+  align-items: center;
+  gap: clamp(var(--cq-space-4), 4vw, var(--cq-space-8));
+  margin: 0 0 var(--cq-space-6);
+}
+.learning-profile__question-copy { min-width: 0; }
+.learning-profile__question-intro h2 {
+  margin: 0 0 var(--cq-space-3);
+}
+.learning-profile__question-intro .learning-profile__question-helper {
+  max-width: 62ch;
+  margin: 0;
+}
 .learning-profile__mascot--explore {
-  width: clamp(8rem, 18vw, 12.5rem);
-  max-height: 12.5rem;
+  position: static;
+  justify-self: end;
+  width: min(100%, 9.5rem);
+  max-height: 8.75rem;
+  margin: 0;
+  object-fit: contain;
 }
 .learning-profile__final-step { display: grid; gap: var(--cq-space-8); }
 .learning-profile__legacy-context {
@@ -634,12 +652,17 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__legacy-option input { flex: none; width: 1.125rem; height: 1.125rem; margin-top: .1rem; }
 
 @media (min-width: 38.001rem) {
-  .learning-profile__question-content > h2 { padding-inline-end: clamp(10rem, 19vw, 13.5rem); }
-  .learning-profile__question-helper { max-width: calc(100% - clamp(10rem, 19vw, 13.5rem)); }
+  .learning-profile__question-helper { max-width: 62ch; }
 }
 
 @media (max-width: 38rem) {
   .learning-profile__progress-heading { align-items: center; }
+  .learning-profile__question-intro {
+    grid-template-columns: minmax(0, 1fr) 4.75rem;
+    align-items: start;
+    gap: var(--cq-space-3);
+    margin-bottom: var(--cq-space-5);
+  }
   .learning-profile__mascot--explore { width: 4.75rem; max-height: 4.75rem; }
   .learning-profile__legacy-context { padding: var(--cq-space-4); }
   .learning-profile__legacy-options { grid-template-columns: 1fr; gap: var(--cq-space-1); }

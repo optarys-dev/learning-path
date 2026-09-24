@@ -303,10 +303,15 @@ export function QuestionnairePage() {
                   style={{ left: `${questions.length > 1 ? (index / (questions.length - 1)) * 100 : 100}%` }} />
               ))}
             </div>
-          </div>          <div className={`learning-profile__question-content${hasNavigated ? ' learning-profile__question-content--animated' : ''}`} key={currentStep}>
-          <img className="learning-profile__mascot learning-profile__mascot--explore" src={showError ? deviNeedsAnswer : stepMascot} alt="" />
-          <h2 id="question-title" ref={headingRef} tabIndex={-1}>{t(`questionnaire.questions.${question.id}`)}</h2>
-          <p className="learning-profile__question-helper"><Lightbulb size={16} aria-hidden="true" />{t(`questionnaire.stepHints.${question.id}`)}</p>
+          </div>
+          <div className={`learning-profile__question-content${hasNavigated ? ' learning-profile__question-content--animated' : ''}`} key={currentStep}>
+          <header className="learning-profile__question-intro">
+            <div className="learning-profile__question-copy">
+              <h2 id="question-title" ref={headingRef} tabIndex={-1}>{t(`questionnaire.questions.${question.id}`)}</h2>
+              <p className="learning-profile__question-helper"><Lightbulb size={16} aria-hidden="true" />{t(`questionnaire.stepHints.${question.id}`)}</p>
+            </div>
+            <img className="learning-profile__mascot learning-profile__mascot--explore" src={showError ? deviNeedsAnswer : stepMascot} alt="" />
+          </header>
           {question.id === 'learningGoal' && (
               <fieldset className="learning-profile__options learning-profile__options--areas" aria-describedby={showError ? 'question-error' : undefined}>
                 <legend className="sr-only">{t('questionnaire.questions.learningGoal')}</legend>
