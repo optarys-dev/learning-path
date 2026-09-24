@@ -172,8 +172,8 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 
 .learning-profile__progress-geometry {
   position: relative;
-  /* Half the milestone diameter plus its 3px current-state ring. */
-  margin-inline: calc(.375rem + 3px);
+  margin: 0 .55rem var(--cq-space-8);
+  padding-block: .6rem;
 }
 .learning-profile__progress { width: 100%; }
 .learning-profile__milestones {
@@ -186,21 +186,57 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__milestones span {
   position: absolute;
   top: 50%;
-  width: .75rem;
-  height: .75rem;
+  display: grid;
+  width: 1rem;
+  height: 1rem;
+  place-items: center;
   transform: translate(-50%, -50%);
-  border: 1px solid var(--cq-color-border-default);
+  border: 2px solid var(--cq-color-border-default);
+  border-radius: 50%;
   background: var(--cq-color-bg-surface);
-  transition: background-color var(--cq-transition-base), box-shadow var(--cq-transition-base);
+  box-shadow: 0 0 0 .2rem var(--cq-color-bg-surface);
+  transition: border-color var(--cq-transition-base), background-color var(--cq-transition-base), box-shadow var(--cq-transition-base), transform var(--cq-transition-base);
 }
-.learning-profile__milestones span.is-complete { border-color: var(--cq-color-brand-primary); background: var(--cq-color-brand-primary); }
-.learning-profile__milestones span.is-current {
+.learning-profile__milestones span::after {
+  display: block;
+  color: var(--cq-color-text-secondary);
+  font-size: .58rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.learning-profile__milestones span.is-pending::after {
+  width: .2rem;
+  height: .2rem;
+  border-radius: 50%;
+  background: var(--cq-color-text-secondary);
+  content: '';
+}
+.learning-profile__milestones span.is-complete {
   border-color: var(--cq-color-brand-primary);
   background: var(--cq-color-brand-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cq-color-brand-primary) 24%, transparent);
+  color: var(--cq-color-text-on-brand);
+}
+.learning-profile__milestones span.is-complete::after {
+  content: '✓';
+  color: currentColor;
+}
+.learning-profile__milestones span.is-current {
+  border-color: var(--cq-color-brand-primary);
+  background: var(--cq-color-bg-surface);
+  box-shadow:
+    0 0 0 .2rem var(--cq-color-bg-surface),
+    0 0 0 .34rem var(--cq-color-brand-primary),
+    0 0 0 .58rem color-mix(in srgb, var(--cq-color-brand-primary) 16%, transparent);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+.learning-profile__milestones span.is-current::after {
+  width: .38rem;
+  height: .38rem;
+  border-radius: 50%;
+  background: var(--cq-color-brand-primary);
+  content: '';
 }
 .learning-profile__progress span { transition: width 180ms ease-out; }
-.learning-profile__milestones span.is-complete { display: grid; place-items: center; color: var(--cq-color-text-on-brand); font-size: .48rem; font-weight: 800; }
 .learning-profile__question-content { position: relative; }
 .learning-profile__question-hint { display: flex; align-items: flex-start; gap: var(--cq-space-3); max-width: 62ch; margin: calc(var(--cq-space-2) * -1) 0 var(--cq-space-6); padding: var(--cq-space-3) var(--cq-space-4); border: 1px solid color-mix(in srgb, var(--cq-color-brand-primary) 32%, var(--cq-color-border-default)); border-radius: var(--cq-radius-sm); background: color-mix(in srgb, var(--cq-color-brand-primary) 9%, transparent); color: var(--cq-color-text-secondary); line-height: var(--cq-line-height-body); }
 .learning-profile__question-hint span { display: grid; flex: none; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: color-mix(in srgb, var(--cq-color-brand-lavender) 18%, transparent); color: var(--profile-accent-text); }
@@ -488,8 +524,22 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
   }
 }
 
-.learning-profile__quest-progress { width: 100%; }
-.learning-profile__quest-progress .cq-quest-progress__track { height: .62rem; }
+.learning-profile__quest-progress {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+.learning-profile__quest-progress .cq-quest-progress__track {
+  display: block;
+  height: .28rem;
+  border: 0;
+  background: color-mix(in srgb, var(--cq-color-brand-primary) 13%, var(--cq-color-border-default));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cq-color-brand-primary) 8%, transparent);
+}
+.learning-profile__quest-progress .cq-quest-progress__track > span {
+  background: linear-gradient(90deg, var(--cq-color-brand-primary), var(--cq-color-accent-cyan));
+  box-shadow: 0 0 .6rem color-mix(in srgb, var(--cq-color-brand-primary) 32%, transparent);
+}
 .learning-profile__quest-progress .cq-quest-progress__value { display: none; }
 .learning-profile__question-note { margin: calc(var(--cq-space-2) * -1) 0 var(--cq-space-6); }
 .learning-profile__question-hint { display: none; }
@@ -508,10 +558,10 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 .learning-profile__step { padding: clamp(var(--cq-space-8), 4vw, var(--cq-space-12)); }
 .learning-profile__progress-heading {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--cq-space-4);
-  margin-bottom: var(--cq-space-3);
+  margin-bottom: var(--cq-space-2);
 }
 .learning-profile__progress-heading .learning-profile__step-name,
 .learning-profile__progress-heading .learning-profile__step-count {
@@ -526,8 +576,14 @@ html:has(.learning-profile) { scrollbar-gutter: stable; }
 }
 .learning-profile__progress-heading .learning-profile__step-name::before { content: none; }
 .learning-profile__progress-heading .learning-profile__step-count {
-  color: var(--cq-color-text-secondary);
+  padding: .28rem .65rem;
+  border: 1px solid color-mix(in srgb, var(--cq-color-brand-primary) 25%, var(--cq-color-border-default));
+  border-radius: var(--cq-radius-pill);
+  background: color-mix(in srgb, var(--cq-color-brand-primary) 8%, var(--cq-color-bg-surface));
+  color: var(--cq-color-text-primary);
   font-size: var(--cq-font-size-label);
+  font-weight: 800;
+  line-height: 1;
   white-space: nowrap;
 }
 .learning-profile__question-helper {
