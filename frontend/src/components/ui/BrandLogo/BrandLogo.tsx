@@ -1,5 +1,4 @@
-import logoOnDark from '../../../assets/brand/codequest-logo-dark.png';
-import logoOnLight from '../../../assets/brand/codequest-logo-light.png';
+import logoOnDark from '../../../assets/brand/codequest-2026-mission.png';
 import isologoB from '../../../assets/brand/isologo-b.svg';
 import isologoN from '../../../assets/brand/isologo-n.svg';
 import './BrandLogo.css';
@@ -21,7 +20,7 @@ export function BrandLogo({
   size = 'full',
 }: BrandLogoProps) {
   const darkAsset = size === 'compact' ? isologoB : logoOnDark;
-  const lightAsset = size === 'compact' ? isologoN : logoOnLight;
+  const lightAsset = size === 'compact' ? isologoN : logoOnDark;
 
   if (background !== 'auto') {
     return <img className={`${className ?? ''}${size === 'full' ? ' brand-logo__image' : ''}`} src={background === 'dark' ? darkAsset : lightAsset} alt={alt} />;

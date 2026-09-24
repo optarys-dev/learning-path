@@ -3,8 +3,7 @@
 }
 
 .brand-logo--full {
-  aspect-ratio: 753 / 205;
-  overflow: hidden;
+  aspect-ratio: 830 / 380;
 }
 
 .brand-logo img {
@@ -14,18 +13,17 @@
 }
 
 .brand-logo--full img {
-  height: auto;
-  aspect-ratio: 753 / 331;
+  height: 100%;
+  object-fit: contain;
 }
 
 .brand-logo__image {
-  aspect-ratio: 753 / 205;
-  object-fit: cover;
-  object-position: center top;
+  aspect-ratio: 830 / 380;
+  object-fit: contain;
 }
 
 .brand-logo--full .brand-logo__on-dark {
-  filter: brightness(0) invert(1);
+  mix-blend-mode: lighten;
 }
 
 .brand-logo__on-light {
