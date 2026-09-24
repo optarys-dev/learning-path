@@ -12,8 +12,12 @@ import { RouteCourseItem } from '../components/RouteCourseItem';
 import { RouteRaceTrack } from '../components/RouteRaceTrack';
 import { SavedRoutesSection } from '../components/SavedRoutesSection';
 import { buildSaveRouteRequest, createDraftRoute } from '../model/draftRoute';
-import type { DraftRoute, DraftRouteCourse } from '../model/types';
-import { ApiError, isApiError } from '../../../lib/api';
+import {
+  RouteRequestError,
+  type DraftRoute,
+  type DraftRouteCourse,
+  type RouteRequestErrorKind,
+} from '../model/types';
 import { useNotifications } from '../../../components/notifications';
 import './MyPathPage.css';
 
@@ -47,7 +51,6 @@ function replaceCourseOrder(route: DraftRoute, courses: DraftRouteCourse[]): Dra
 
 export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
   const { t } = useTranslation();
-  const { user, isLoading: isSessionLoading } = useAuthSession();
   const { notify } = useNotifications();
   const { user, isLoading: isSessionLoading, refresh: refreshSession } = useAuthSession();
   const location = useLocation();
@@ -73,18 +76,6 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
     document.title = `${t('myPath.pageTitle')} · CODE QUEST 2026`;
   }, [t]);
 
-  function fallbackError(error: ApiError): string {
-    if (error.isUnauthenticated) return t('myPath.errors.unauthorized');
-    if (error.isForbidden) return t('myPath.errors.forbidden');
-    if (error.kind === 'network') return t('myPath.errors.network');
-    if (error.kind === 'invalid-response') return t('myPath.errors.invalidResponse');
-    if (error.status === 400) return t('myPath.errors.validation');
-    if (error.status !== null && error.status >= 500) return t('myPath.errors.server');
-    return t('myPath.errors.http');
-  }
-
-  function errorMessage(error: unknown): string {
-    return isApiError(error) ? fallbackError(error) : t('myPath.errors.http');
   useLayoutEffect(() => {
     const previousRects = reorderRects.current;
     reorderRects.current = null;
@@ -105,18 +96,28 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
 
   function fallbackError(kind: RouteRequestErrorKind): string {
     switch (kind) {
-      case 'unauthorized': return t('myPath.errors.unauthorized');
-      case 'validation': return t('myPath.errors.validation');
-      case 'not-found': return t('myPath.errors.notFound');
-      case 'server': return t('myPath.errors.server');
-      case 'network': return t('myPath.errors.network');
-      case 'invalid-response': return t('myPath.errors.invalidResponse');
-      case 'http': return t('myPath.errors.http');
+      case 'unauthorized':
+        return t('myPath.errors.unauthorized');
+      case 'validation':
+        return t('myPath.errors.validation');
+      case 'not-found':
+        return t('myPath.errors.notFound');
+      case 'server':
+        return t('myPath.errors.server');
+      case 'network':
+        return t('myPath.errors.network');
+      case 'invalid-response':
+        return t('myPath.errors.invalidResponse');
+      case 'http':
+        return t('myPath.errors.http');
     }
   }
 
   function errorMessage(error: unknown): string {
-    if (error instanceof RouteRequestError && error.kind === 'unauthorized') void refreshSession();
+    if (error instanceof RouteRequestError && error.kind === 'unauthorized') {
+      void refreshSession();
+    }
+
     return error instanceof RouteRequestError
       ? error.apiMessage ?? fallbackError(error.kind)
       : t('myPath.errors.http');

@@ -11,7 +11,7 @@ import deviReady from '../../../assets/assessment/08_perfil_completado.svg';
 import routeExplorer from '../../../assets/codequest/characters/04_mascota_astronauta_con_mapa_del_tesoro.png';
 import { Button } from '../../../components/ui/Button/Button';
 import { QuestProgress } from '../../../components/ui';
-import { savePreferences, PreferencesError, type PreferencesErrorKind } from '../api/preferences';
+import { savePreferences } from '../api/preferences';
 import { areas, desiredOutcomes, legacyContexts, levels, practicalExperiences, questions } from '../model/config';
 import { clearQuestionnaireDraft, loadQuestionnaireDraft, saveQuestionnaireDraft } from '../model/draft';
 import { mapPreferences } from '../model/preferencesMapping';
@@ -274,7 +274,6 @@ export function QuestionnairePage() {
       markPreferencesSaved();
       setSaveState({ status: 'success' });
       notify({ tone: 'success', title: t('questionnaire.preferences.success') });
-      navigate('/my-path', { replace: true });
       navigate('/create-route/proposal', { replace: true });
     } catch (error) {
       const kind = preferenceErrorKind(error);
