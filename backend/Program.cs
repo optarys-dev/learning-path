@@ -10,17 +10,16 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => options.Filters.Add<ApiErrorResponseFilter>());
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
-        var message = string.Join(" ", context.ModelState.Values
-            .SelectMany(value => value.Errors)
-            .Select(error => error.ErrorMessage)
-            .Where(error => !string.IsNullOrWhiteSpace(error)));
-        return new BadRequestObjectResult(new ApiErrorDto("validation_error",
-            string.IsNullOrWhiteSpace(message) ? "Los datos de la solicitud son inválidos." : message));
+        var problem = ApiProblemDetailsFactory.CreateValidation(context.HttpContext, context.ModelState);
+        return new BadRequestObjectResult(problem)
+        {
+            ContentTypes = { "application/problem+json" }
+        };
     };
 });
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();

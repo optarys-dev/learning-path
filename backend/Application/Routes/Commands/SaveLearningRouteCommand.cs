@@ -1,3 +1,4 @@
+using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Infrastructure.DataSource.Context;
 using CodeQuest2026.Server.Infrastructure.DataSource.Entities;
 using MediatR;
@@ -23,7 +24,7 @@ public sealed class SaveLearningRouteCommandHandler(AppDbContext db)
             || request.Courses is null || request.Courses.Count is < 1 or > 30
             || request.Courses.Any(x => x is null || x.CourseId <= 0 || x.Reason?.Length > 1000)
             || request.Courses.Select(x => x.CourseId).Distinct().Count() != request.Courses.Count)
-            throw new ArgumentException("invalid_route");
+            throw new DomainValidationException(ApiErrorCodes.InvalidRoute);
 
         var preference = await db.UserPreferences.AsNoTracking()
             .SingleOrDefaultAsync(x => x.User.DiscordId == command.DiscordId, cancellationToken);

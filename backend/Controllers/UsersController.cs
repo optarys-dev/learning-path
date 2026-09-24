@@ -81,17 +81,10 @@ public class UsersController(ISender sender) : ControllerBase
         var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(discordId))
             return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
-        try
-        {
-            var preference = await sender.Send(
-                new SaveUserPreferencesCommand(discordId, request), cancellationToken);
-            return preference is null
-                ? Unauthorized(new ApiErrorDto("user_not_registered", "Inicia sesión nuevamente con Discord."))
-                : Ok(preference);
-        }
-        catch (ArgumentException exception) when (exception.Message == "invalid_preferences")
-        {
-            return BadRequest(new ApiErrorDto("invalid_preferences", "Revisa el objetivo, intereses y habilidades enviados."));
-        }
+        var preference = await sender.Send(
+            new SaveUserPreferencesCommand(discordId, request), cancellationToken);
+        return preference is null
+            ? Unauthorized(new ApiErrorDto("user_not_registered", "Inicia sesión nuevamente con Discord."))
+            : Ok(preference);
     }
 }

@@ -9,6 +9,7 @@ import { LanguageSelector } from '../ui/LanguageSelector/LanguageSelector';
 import { ThemeToggle } from '../ui/ThemeToggle/ThemeToggle';
 import { ContentBoundary } from './ContentBoundary';
 import { PageState } from '../ui/PageState/PageState';
+import { useNotifications } from '../notifications';
 import { useAuthSession } from '../../features/auth/hooks/useAuthSession';
 
 import './AppLayout.css';
@@ -22,6 +23,7 @@ export function AppLayout({
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { notify } = useNotifications();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -86,8 +88,11 @@ export function AppLayout({
     try {
       await logout();
       setMenuOpen(false);
+      notify({ tone: 'success', title: t('auth.logoutSuccess') });
       setProfileMenuOpen(false);
       navigate('/', { replace: true });
+    } catch {
+      notify({ tone: 'error', title: t('auth.logoutError') });
     } finally {
       setIsLoggingOut(false);
     }

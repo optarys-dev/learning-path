@@ -12,7 +12,9 @@ import { RouteCourseItem } from '../components/RouteCourseItem';
 import { RouteRaceTrack } from '../components/RouteRaceTrack';
 import { SavedRoutesSection } from '../components/SavedRoutesSection';
 import { buildSaveRouteRequest, createDraftRoute } from '../model/draftRoute';
-import { RouteRequestError, type DraftRoute, type DraftRouteCourse, type RouteRequestErrorKind } from '../model/types';
+import type { DraftRoute, DraftRouteCourse } from '../model/types';
+import { ApiError, isApiError } from '../../../lib/api';
+import { useNotifications } from '../../../components/notifications';
 import './MyPathPage.css';
 
 interface MyPathPageProps {
@@ -45,6 +47,8 @@ function replaceCourseOrder(route: DraftRoute, courses: DraftRouteCourse[]): Dra
 
 export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
   const { t } = useTranslation();
+  const { user, isLoading: isSessionLoading } = useAuthSession();
+  const { notify } = useNotifications();
   const { user, isLoading: isSessionLoading, refresh: refreshSession } = useAuthSession();
   const location = useLocation();
   const [state, setState] = useState<MyPathState>({ status: 'idle' });
@@ -69,6 +73,18 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
     document.title = `${t('myPath.pageTitle')} · CODE QUEST 2026`;
   }, [t]);
 
+  function fallbackError(error: ApiError): string {
+    if (error.isUnauthenticated) return t('myPath.errors.unauthorized');
+    if (error.isForbidden) return t('myPath.errors.forbidden');
+    if (error.kind === 'network') return t('myPath.errors.network');
+    if (error.kind === 'invalid-response') return t('myPath.errors.invalidResponse');
+    if (error.status === 400) return t('myPath.errors.validation');
+    if (error.status !== null && error.status >= 500) return t('myPath.errors.server');
+    return t('myPath.errors.http');
+  }
+
+  function errorMessage(error: unknown): string {
+    return isApiError(error) ? fallbackError(error) : t('myPath.errors.http');
   useLayoutEffect(() => {
     const previousRects = reorderRects.current;
     reorderRects.current = null;
@@ -133,6 +149,7 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
       setAnnouncement(t('myPath.generatedAnnouncement', { count: route.courses.length }));
     } catch (error) {
       const message = errorMessage(error);
+      notify({ tone: 'error', title: t('myPath.generationErrorTitle'), message });
       if (currentProposal) {
         setState({ ...currentProposal, operation: 'idle', generationError: message });
       } else {
@@ -182,8 +199,11 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
         savedRouteId: saved.routeId });
       setSavedRoutesVersion(version => version + 1);
       setAnnouncement(t('myPath.saveSuccess'));
+      notify({ tone: 'success', title: t('myPath.saveSuccess') });
     } catch (error) {
-      setState({ ...currentProposal, operation: 'idle', saveStatus: 'error', saveError: errorMessage(error) });
+      const message = errorMessage(error);
+      setState({ ...currentProposal, operation: 'idle', saveStatus: 'error', saveError: message });
+      notify({ tone: 'error', title: t('myPath.errors.http'), message });
     } finally {
       saveInFlight.current = false;
     }

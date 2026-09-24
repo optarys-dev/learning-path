@@ -47,6 +47,43 @@ a {
   box-shadow: var(--cq-focus-ring);
 }
 
+.cq-notifications {
+  position: fixed;
+  z-index: 1000;
+  right: var(--cq-space-6);
+  bottom: var(--cq-space-6);
+  display: grid;
+  width: min(25rem, calc(100vw - 2rem));
+  gap: var(--cq-space-3);
+  pointer-events: none;
+}
+
+.cq-notification {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--cq-space-3);
+  padding: var(--cq-space-4);
+  border: var(--cq-border-width) solid var(--cq-color-border-default);
+  border-radius: var(--cq-radius-card);
+  background: color-mix(in srgb, var(--cq-color-bg-surface) 94%, transparent);
+  box-shadow: var(--cq-shadow-card);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.cq-notification--success { border-color: color-mix(in srgb, var(--cq-color-success) 45%, var(--cq-color-border-default)); }
+.cq-notification--error { border-color: color-mix(in srgb, var(--cq-color-error) 48%, var(--cq-color-border-default)); }
+.cq-notification--info { border-color: color-mix(in srgb, var(--cq-color-info) 42%, var(--cq-color-border-default)); }
+.cq-notification--success > svg { color: var(--cq-color-success); }
+.cq-notification--error > svg { color: var(--cq-color-error); }
+.cq-notification--info > svg { color: var(--cq-color-info); }
+.cq-notification strong { display: block; font-family: var(--cq-font-heading); font-size: var(--cq-font-size-label); }
+.cq-notification p { margin: var(--cq-space-1) 0 0; color: var(--cq-color-text-secondary); font-size: var(--cq-font-size-label); }
+.cq-notification button { display: grid; place-items: center; padding: 0; border: 0; color: var(--cq-color-text-secondary); background: transparent; cursor: pointer; }
+
+@media (max-width: 40rem) {
+  .cq-notifications { right: var(--cq-space-4); bottom: var(--cq-space-4); }
 ::selection {
   color: var(--cq-color-text-on-brand);
   background: var(--cq-color-accent-violet);

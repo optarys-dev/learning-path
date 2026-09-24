@@ -52,8 +52,8 @@ export const en = {
   auth: {
     profile: 'My profile',
     signedInAs: 'Signed in as {{name}}',
-    logout: 'Sign out',
-    signingOut: 'Signing out…',
+    logout: 'Sign out', signingOut: 'Signing out…',
+    logoutSuccess: 'You signed out successfully.', logoutError: 'We could not sign you out. Please try again.',
   },
   language: {
     label: 'Language',
@@ -238,6 +238,7 @@ export const en = {
     actionDescription: 'Save this path and start whenever you are ready.',
     errors: {
       unauthorized: 'Your session expired. Sign in again to continue.',
+      forbidden: 'Your session is active, but you do not have permission to perform this action.',
       validation: 'The request could not be validated. Review the proposal and try again.',
       server: 'The server could not complete the request. Please try again.',
       http: 'We could not complete the request. Please try again.',
@@ -256,5 +257,8 @@ export const en = {
   },
   errors: {
     apiBaseUrlMissing: 'The API URL is missing. Check frontend/.env.example.',
+    sessionUnavailable: 'We could not check your session',
+    sessionUnavailableDescription: 'Check your connection and try again.',
   },
+  notifications: { label: 'Notifications', dismiss: 'Dismiss notification' },
 } satisfies TranslationSchema;
