@@ -2,10 +2,26 @@
   display: block;
 }
 
+.brand-logo--full {
+  aspect-ratio: 753 / 205;
+  overflow: hidden;
+}
+
 .brand-logo img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.brand-logo--full img {
+  height: auto;
+  aspect-ratio: 753 / 331;
+}
+
+.brand-logo__image {
+  aspect-ratio: 753 / 205;
+  object-fit: cover;
+  object-position: center top;
 }
 
 .brand-logo__on-light {
