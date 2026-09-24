@@ -263,6 +263,91 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.LearningRoute", b =>
+                {
+                    b.Property<Guid>("RouteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("route_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Explanation")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("explanation");
+
+                    b.Property<string>("Goal")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("goal");
+
+                    b.Property<string>("PreferencesSnapshot")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("preferences_snapshot");
+
+                    b.Property<string>("RecommendationMethod")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("recommendation_method");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("RouteId");
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.ToTable("learning_routes", (string)null);
+                });
+
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.LearningRouteCourse", b =>
+                {
+                    b.Property<Guid>("RouteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("route_id");
+
+                    b.Property<long>("CourseId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("course_id");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.Property<int>("ProgressPercentage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("progress_percentage");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("reason");
+
+                    b.HasKey("RouteId", "CourseId");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("RouteId", "Position")
+                        .IsUnique();
+
+                    b.ToTable("learning_route_courses", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_learning_route_courses_position", "position > 0");
+
+                            t.HasCheckConstraint("ck_learning_route_courses_progress", "progress_percentage BETWEEN 0 AND 100");
+                        });
+                });
+
             modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.Tag", b =>
                 {
                     b.Property<long>("TagId")
@@ -341,6 +426,55 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.UserPreference", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.PrimitiveCollection<string[]>("ExistingSkills")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("existing_skills");
+
+                    b.Property<string>("ExperienceLevel")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("experience_level");
+
+                    b.Property<string>("Goal")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("goal");
+
+                    b.PrimitiveCollection<string[]>("Interests")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("interests");
+
+                    b.Property<int?>("MinutesPerWeek")
+                        .HasColumnType("integer")
+                        .HasColumnName("minutes_per_week");
+
+                    b.Property<string>("PreferredLanguage")
+                        .HasMaxLength(35)
+                        .HasColumnType("character varying(35)")
+                        .HasColumnName("preferred_language");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("user_preferences", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_user_preferences_minutes_per_week", "minutes_per_week IS NULL OR minutes_per_week > 0");
+                        });
+                });
+
             modelBuilder.Entity("CourseCategory", b =>
                 {
                     b.Property<long>("course_id")
@@ -386,6 +520,47 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.LearningRoute", b =>
+                {
+                    b.HasOne("CodeQuest2026.Server.Infrastructure.DataSource.Entities.User", "User")
+                        .WithMany("Routes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.LearningRouteCourse", b =>
+                {
+                    b.HasOne("CodeQuest2026.Server.Infrastructure.DataSource.Entities.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CodeQuest2026.Server.Infrastructure.DataSource.Entities.LearningRoute", "Route")
+                        .WithMany("Courses")
+                        .HasForeignKey("RouteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Route");
+                });
+
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.UserPreference", b =>
+                {
+                    b.HasOne("CodeQuest2026.Server.Infrastructure.DataSource.Entities.User", "User")
+                        .WithOne("Preferences")
+                        .HasForeignKey("CodeQuest2026.Server.Infrastructure.DataSource.Entities.UserPreference", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CourseCategory", b =>
                 {
                     b.HasOne("CodeQuest2026.Server.Infrastructure.DataSource.Entities.Category", null)
@@ -419,6 +594,18 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
             modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.Course", b =>
                 {
                     b.Navigation("Embedding");
+                });
+
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.LearningRoute", b =>
+                {
+                    b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.User", b =>
+                {
+                    b.Navigation("Preferences");
+
+                    b.Navigation("Routes");
                 });
 #pragma warning restore 612, 618
         }

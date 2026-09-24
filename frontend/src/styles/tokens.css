@@ -1,23 +1,12 @@
 :root {
-  /* Color */
-  --cq-color-bg-page: #171027;
-  --cq-color-bg-surface: #1c1829;
-  --cq-color-text-primary: #ffffff;
-  --cq-color-text-secondary: #c0b9fc;
-  --cq-color-border-default: #4b435f;
-  --cq-color-brand-primary: #7e70f9;
-  --cq-color-action-start: #3a14c4;
-  --cq-color-action-end: #5a16c1;
-  --cq-color-action-hover: #6d28d9;
-  --cq-color-focus: #c0b9fc;
-  --cq-color-success: #a7f3d0;
-  --cq-color-warning: #fde68a;
-  --cq-color-error: #fda4af;
-  --cq-color-info: #93c5fd;
-
   /* Typography */
+  --cq-font-display: "Sora", "Space Grotesk", "Segoe UI", sans-serif;
   --cq-font-heading: "Space Grotesk", "Segoe UI", sans-serif;
   --cq-font-body: "DM Sans", "Segoe UI", sans-serif;
+
+  --cq-font-weight-display: 800;
+  --cq-font-weight-heading: 700;
+
   --cq-font-size-caption: 0.75rem;
   --cq-font-size-label: 0.875rem;
   --cq-font-size-body: 1rem;
@@ -25,13 +14,14 @@
   --cq-font-size-h2: 1.5rem;
   --cq-font-size-h1: 2rem;
   --cq-font-size-display: 3rem;
+
   --cq-line-height-caption: 1.5;
   --cq-line-height-label: 1.43;
   --cq-line-height-body: 1.5;
   --cq-line-height-card-title: 1.4;
   --cq-line-height-h2: 1.333;
   --cq-line-height-h1: 1.25;
-  --cq-line-height-display: 1.167;
+  --cq-line-height-display: 1.04;
 
   /* Spacing */
   --cq-space-1: 0.25rem;
@@ -43,12 +33,144 @@
   --cq-space-12: 3rem;
   --cq-space-16: 4rem;
 
-  /* Geometry and effects */
+  /* Geometry */
   --cq-radius-sm: 0.5rem;
   --cq-radius-card: 1.125rem;
   --cq-radius-pill: 999px;
+
   --cq-border-width: 1px;
-  --cq-shadow-card: 0 8px 24px rgb(0 0 0 / 16%);
-  --cq-focus-ring: 0 0 0 3px var(--cq-color-focus);
   --cq-transition-base: 160ms ease;
+}
+
+/* ==============================
+   DARK THEME
+   ============================== */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --cq-color-bg-page: #171027;
+  --cq-color-bg-surface: #1c1829;
+  --cq-color-bg-elevated: #100a1e;
+  --cq-color-surface-muted: #282039;
+  --cq-color-surface-tint: rgb(126 112 249 / 14%);
+  --cq-color-brand-mist: #eee9ff;
+  --cq-color-overlay-strong: rgb(23 16 39 / 82%);
+  --cq-color-route-line: rgb(126 112 249 / 42%);
+  --cq-color-illustration-shadow: rgb(10 7 20 / 25%);
+
+  --cq-color-text-primary: #ffffff;
+  --cq-color-text-secondary: #c0b9fc;
+
+  --cq-color-border-default: #4b435f;
+
+  --cq-color-brand-primary: #7e70f9;
+  --cq-color-brand-ink: #171027;
+  --cq-color-brand-lavender: #c7b5ff;
+  --cq-color-brand-warm: #fbf9ff;
+  --cq-color-brand-lime: #bef264;
+  --cq-color-accent-violet: #a78bfa;
+  --cq-color-accent-cyan: #22d3ee;
+  --cq-color-accent-pink: #f472b6;
+  --cq-color-accent-amber: #fbbf24;
+  --cq-color-accent-lime: #bef264;
+  --cq-color-text-on-brand: #ffffff;
+  --cq-color-contrast-surface: #eee9ff;
+  --cq-color-contrast-text: #171027;
+  --cq-color-contrast-muted: #5e5570;
+  --cq-color-panel-dark: #171027;
+  --cq-color-panel-muted: #c7b5ff;
+
+  --cq-color-action-start: #3a14c4;
+  --cq-color-action-end: #5a16c1;
+  --cq-color-action-hover: #6d28d9;
+
+  /* Action hierarchy: violet guides the interface; amber confirms the next step. */
+  --cq-color-button-primary: #facc15;
+  --cq-color-button-primary-hover: #fde047;
+  --cq-color-button-primary-foreground: #211934;
+  --cq-color-button-secondary: #facc15;
+  --cq-color-button-secondary-surface: rgb(250 204 21 / 14%);
+  --cq-color-button-ghost: #fbf9ff;
+  --cq-color-button-ghost-surface: rgb(251 249 255 / 10%);
+
+  --cq-color-focus: #c0b9fc;
+
+  --cq-color-success: #5eead4;
+  --cq-color-warning: #facc15;
+  --cq-color-error: #fb7185;
+  --cq-color-info: #38bdf8;
+
+  --cq-shadow-card: 0 8px 24px rgb(0 0 0 / 16%);
+
+  --cq-focus-ring: 0 0 0 3px var(--cq-color-focus);
+}
+
+/* ==============================
+   LIGHT THEME
+   ============================== */
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --cq-color-bg-page: #f8f7ff;
+  --cq-color-bg-surface: #ffffff;
+  --cq-color-bg-elevated: #eee9ff;
+  --cq-color-surface-muted: #f0edfa;
+  --cq-color-surface-tint: rgb(109 93 245 / 12%);
+  --cq-color-brand-mist: #eee9ff;
+  --cq-color-overlay-strong: rgb(255 253 249 / 84%);
+  --cq-color-route-line: rgb(109 93 245 / 38%);
+  --cq-color-illustration-shadow: rgb(42 30 70 / 16%);
+
+  --cq-color-text-primary: #211934;
+  --cq-color-text-secondary: #625a78;
+
+  --cq-color-border-default: #ddd8eb;
+
+  --cq-color-brand-primary: #6d5df5;
+  --cq-color-brand-ink: #211934;
+  --cq-color-brand-lavender: #9f86ed;
+  --cq-color-brand-warm: #fffdf9;
+  --cq-color-brand-lime: #4d7c0f;
+  --cq-color-accent-violet: #6d28d9;
+  --cq-color-accent-cyan: #0e7490;
+  --cq-color-accent-pink: #be185d;
+  --cq-color-accent-amber: #a16207;
+  --cq-color-accent-lime: #4d7c0f;
+  --cq-color-text-on-brand: #ffffff;
+  --cq-color-contrast-surface: #eee9ff;
+  --cq-color-contrast-text: #211934;
+  --cq-color-contrast-muted: #625a78;
+  --cq-color-panel-dark: #211934;
+  --cq-color-panel-muted: #d9ccff;
+
+  --cq-color-action-start: #5a46e8;
+  --cq-color-action-end: #795cf2;
+  --cq-color-action-hover: #5945df;
+
+  --cq-color-button-primary: #211934;
+  --cq-color-button-primary-hover: #33294a;
+  --cq-color-button-primary-foreground: #fffdf9;
+  --cq-color-button-secondary: #211934;
+  --cq-color-button-secondary-surface: rgb(33 25 52 / 8%);
+  --cq-color-button-ghost: #211934;
+  --cq-color-button-ghost-surface: rgb(33 25 52 / 8%);
+
+  --cq-color-focus: #6d5df5;
+
+  --cq-color-success: #047857;
+  --cq-color-warning: #a16207;
+  --cq-color-error: #be123c;
+  --cq-color-info: #0369a1;
+
+  --cq-shadow-card: 0 8px 24px rgb(42 30 70 / 10%);
+
+  --cq-focus-ring: 0 0 0 3px
+    color-mix(
+      in srgb,
+      var(--cq-color-focus) 35%,
+      transparent
+    );
 }

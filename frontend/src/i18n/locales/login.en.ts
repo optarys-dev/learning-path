@@ -7,7 +7,6 @@ export const loginEn = {
   asideTitle: 'Your learning deserves <accent>continuity.</accent>',
   asideDescription: 'One account to connect your goals, your paths and every step you choose to take.',
   benefitOne: 'Save different learning paths', benefitTwo: 'Mark your progress', benefitThree: 'Pick up where you left off',
-  sceneStart: 'Start', sceneGoal: 'Your path',
   flowTitle: 'WHEN YOU CONTINUE', flowOne: 'Sign in with your Discord account.', flowTwo: 'Return to your journey with your session ready.',
   privacy: 'Discord will identify your account to keep your paths and progress.',
 } satisfies { [K in keyof typeof loginEs]: string };

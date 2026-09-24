@@ -1,4 +1,5 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { useAuthSession } from './features/auth/hooks/useAuthSession';
 import { AppLayout } from './components/layout/AppLayout';
 import { SectionPage } from './pages/SectionPage';
 import { WelcomePage } from './pages/WelcomePage';
@@ -9,8 +10,19 @@ import { lazy } from 'react';
 const WelcomePreviewPage = import.meta.env.DEV
   ? lazy(() => import('./pages/WelcomePreviewPage'))
   : null;
+import { QuestionnairePage } from './features/questionnaire/pages/QuestionnairePage';
+import { MyPathPage } from './features/routes/pages/MyPathPage';
+import { SavedRouteDetailPage } from './features/routes/pages/SavedRouteDetailPage';
+import { CatalogPage } from './features/catalog/pages/CatalogPage';
+import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
 
 function App() {
+  const { user, isLoading } = useAuthSession();
+  const { pathname } = useLocation();
+  if (!isLoading && user?.isNewUser === true && pathname !== '/learning-profile') {
+    return <Navigate to="/learning-profile" replace />;
+  }
+
   return (
     <Routes>
       <Route element={<AppLayout variant="welcome" />}>
@@ -20,9 +32,17 @@ function App() {
         {WelcomePreviewPage && <Route path="dev/welcome" element={<WelcomePreviewPage />} />}
       </Route>
       <Route element={<AppLayout />}>
-        <Route path="catalog" element={<SectionPage section="catalog" />} />
-        <Route path="my-path" element={<SectionPage section="myPath" />} />
+        <Route path="catalog" element={<CatalogPage />} />
         <Route path="*" element={<SectionPage section="notFound" />} />
+      </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="create-route" element={<QuestionnairePage />} />
+          <Route path="create-route/proposal" element={<MyPathPage mode="proposal" autoGenerate />} />
+          <Route path="my-path" element={<MyPathPage mode="collection" />} />
+          <Route path="my-path/:routeId" element={<SavedRouteDetailPage />} />
+          <Route path="learning-profile" element={<QuestionnairePage />} />
+        </Route>
       </Route>
     </Routes>
   );

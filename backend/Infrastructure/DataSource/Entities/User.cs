@@ -9,5 +9,7 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Entities
         public string? Avatar { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset LastLoginAt { get; set; }
+        public UserPreference? Preferences { get; set; }
+        public ICollection<LearningRoute> Routes { get; set; } = new List<LearningRoute>();
     }
 }

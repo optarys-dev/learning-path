@@ -1,13 +1,30 @@
+using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Oauth2.Discord;
 using CodeQuest2026.Server.Extensions;
+using CodeQuest2026.Server.Infrastructure;
 using CodeQuest2026.Server.Infrastructure.OpenApi;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var message = string.Join(" ", context.ModelState.Values
+            .SelectMany(value => value.Errors)
+            .Select(error => error.ErrorMessage)
+            .Where(error => !string.IsNullOrWhiteSpace(error)));
+        return new BadRequestObjectResult(new ApiErrorDto("validation_error",
+            string.IsNullOrWhiteSpace(message) ? "Los datos de la solicitud son inválidos." : message));
+    };
+});
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -50,28 +67,20 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+
 app.UseDiscordHttpsCallback(builder.Configuration, app.Environment.IsDevelopment());
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "CodeQuest2026 API v1");
-        options.RoutePrefix = "swagger";
-        options.DocumentTitle = "CodeQuest2026 API";
-        options.DocExpansion(DocExpansion.List);
-        options.DisplayRequestDuration();
-        options.EnableTryItOutByDefault();
-    });
+    UseSwaggerAndOpenApi();
 }
-else if (File.Exists(Path.Combine(app.Environment.WebRootPath
-    ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot"), "index.html")))
+
+if (app.Environment.IsStaging() ||
+    File.Exists(Path.Combine(app.Environment.WebRootPath
+        ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot"), "index.html")))
 {
-    app.UseDefaultFiles();
-    app.MapStaticAssets();
-    app.MapFallbackToFile("/index.html");
+    UseStaticFiles();
 }
 
 if (!app.Environment.IsDevelopment())
@@ -96,3 +105,25 @@ app.MapHealthChecks("/health/db", new HealthCheckOptions
 });
 
 app.Run();
+
+void UseSwaggerAndOpenApi()
+{
+    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "CodeQuest2026 API v1");
+        options.RoutePrefix = "swagger";
+        options.DocumentTitle = "CodeQuest2026 API";
+        options.DocExpansion(DocExpansion.List);
+        options.DisplayRequestDuration();
+        options.EnableTryItOutByDefault();
+    });
+}
+
+void UseStaticFiles()
+{
+    app.UseDefaultFiles();
+    app.MapStaticAssets();
+    app.MapFallbackToFile("/index.html");
+}

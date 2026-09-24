@@ -5,7 +5,7 @@ type Translate<T> = { [K in keyof T]: T[K] extends string ? string : Translate<T
 export const landingEn = {
   navigation: 'Explore CODE QUEST', howLink: 'How it works', insideLink: 'Your experience', faqLink: 'Questions',
   heroDescription: 'A clear path to learn at your own pace.',
-  heroMission: 'MISSION 01',
+  heroMission: 'Your next learning step',
   discover: 'Discover how it works', heroDetail: 'Your starting point, your next step.',
   createRoute: 'Create my path',
   promiseTitle: 'Learning is a journey. <accent>Choose your direction.</accent>',
@@ -43,6 +43,8 @@ export const landingEn = {
     eyebrow: 'AN EXAMPLE OF THE RESULT', title: 'A path designed <accent>from where you are.</accent>', description: 'You do not get a random list. Every course has a reason and prepares you for the next step.',
     goal: 'Example goal: build frontend applications with React', guide: 'Let’s find a good place to start.', listLabel: 'Conceptual example of a learning path', example: 'VISUAL EXAMPLE',
     openCourse: 'View on DevTalles', linkUnavailable: 'The link will be available when a real path is generated',
+    course: 'DevTalles course',
+    steps: { start: 'Start here', build: 'Master JavaScript', practice: 'Build with React', next: 'Level up' },
     foundations: { title: 'Foundations', level: 'Foundation', reason: 'We start with the concepts you need to move forward with confidence.', state: 'Starting point' },
     javascript: { title: 'JavaScript', level: 'Intermediate', reason: 'Build the foundations you will use when creating interfaces.', state: 'Next step' },
     react: { title: 'React', level: 'Intermediate', reason: 'Recommended for your goal once you have the required foundations.', state: 'Main goal' },

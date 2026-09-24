@@ -1,5 +1,37 @@
 @CodeQuest2026.Server_HostAddress = http://localhost:5107
 @DiscordCallbackPath = /auth/discord/callback
+@RouteId = 00000000-0000-0000-0000-000000000000
+
+### Listar cursos activos paginados (público)
+GET {{CodeQuest2026.Server_HostAddress}}/courses?page=1&pageSize=20
+Accept: application/json
+
+### Consultar los datos básicos de un curso activo (público)
+GET {{CodeQuest2026.Server_HostAddress}}/courses/1
+Accept: application/json
+
+### Editar una ruta propia (requiere cookie de sesión)
+# Sustituir RouteId y los IDs de cursos por valores existentes.
+PUT {{CodeQuest2026.Server_HostAddress}}/routes/{{RouteId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "goal": "Aprender backend con Python",
+  "explanation": "Ruta ajustada a mis prioridades",
+  "courses": [
+    { "courseId": 2, "reason": "Empezar con este curso" },
+    { "courseId": 1, "reason": "Continuar con este curso" }
+  ]
+}
+
+### Eliminar permanentemente una ruta propia (requiere cookie de sesión)
+DELETE {{CodeQuest2026.Server_HostAddress}}/routes/{{RouteId}}
+
+### Recomendación semántica V2 con IA (requiere cookie de sesión y preferencias)
+# Configurar Groq__ApiKey en el backend. Ver docs/SEMANTIC_V2.md.
+GET {{CodeQuest2026.Server_HostAddress}}/routes/recommendation/semantic/v2
+Accept: application/json
 
 ### Estado general (API y base de datos)
 GET {{CodeQuest2026.Server_HostAddress}}/health
@@ -13,11 +45,11 @@ Accept: text/plain
 GET {{CodeQuest2026.Server_HostAddress}}/health/db
 Accept: text/plain
 
-### Documento OpenAPI (solo en Development)
+### Documento OpenAPI (Development y Staging)
 GET {{CodeQuest2026.Server_HostAddress}}/openapi/v1.json
 Accept: application/json
 
-### Documento Swagger/OpenAPI (solo en Development)
+### Documento Swagger/OpenAPI (Development y Staging)
 GET {{CodeQuest2026.Server_HostAddress}}/swagger/v1/swagger.json
 Accept: application/json
 
