@@ -1,0 +1,128 @@
+.landing > .landing-intro {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: clamp(1.5rem, 5vw, 4rem);
+  pointer-events: none;
+  color: #fff;
+  background:
+    radial-gradient(ellipse at 52% 49%, rgb(111 76 229 / 30%), transparent 47%),
+    radial-gradient(circle at 12% 82%, rgb(83 36 173 / 25%), transparent 28%),
+    #150f25;
+  animation: landing-intro-reveal 2800ms ease-in-out both;
+}
+
+.landing-intro__orbit {
+  position: absolute;
+  width: min(88vw, 62rem);
+  height: auto;
+  overflow: visible;
+  opacity: .8;
+  transform: rotate(-7deg);
+}
+
+.landing-intro__orbit path {
+  fill: none;
+  stroke: #b6a2ff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 10 13;
+  stroke-dashoffset: 600;
+  filter: drop-shadow(0 0 .5rem rgb(177 143 255 / 80%));
+  animation: landing-intro-trace 2100ms cubic-bezier(.25, .75, .25, 1) 150ms both;
+}
+
+.landing-intro__star {
+  position: absolute;
+  width: .35rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 .8rem .2rem #ad90ff;
+  animation: landing-intro-twinkle 1800ms ease-in-out infinite alternate;
+}
+.landing-intro__star--one { top: 19%; left: 17%; }
+.landing-intro__star--two { top: 27%; right: 14%; animation-delay: 360ms; }
+.landing-intro__star--three { bottom: 22%; right: 24%; animation-delay: 720ms; }
+
+.landing-intro__mission-mark {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  width: min(100%, 37rem);
+  padding: clamp(1rem, 4vw, 2.5rem);
+  text-align: center;
+  animation: landing-intro-arrive 1400ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.landing-intro__mission-mark::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -2rem;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(125 85 248 / 36%), transparent 68%);
+  filter: blur(1.5rem);
+}
+
+.landing-intro__mission-mark img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: .65rem;
+  filter: drop-shadow(0 1.2rem 2.5rem rgb(0 0 0 / 30%));
+}
+
+.landing-intro__caption {
+  color: #e9e2ff;
+  font-family: var(--cq-font-heading);
+  font-size: clamp(.8rem, 1.7vw, 1rem);
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.landing-intro__progress {
+  width: min(100%, 14rem);
+  height: .2rem;
+  overflow: hidden;
+  border-radius: var(--cq-radius-pill);
+  background: rgb(255 255 255 / 18%);
+}
+.landing-intro__progress::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a98aff, #ebddff);
+  box-shadow: 0 0 1rem #b995ff;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: landing-intro-progress 2100ms cubic-bezier(.25, .65, .25, 1) 240ms both;
+}
+
+@keyframes landing-intro-reveal {
+  0%, 72% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes landing-intro-arrive {
+  from { opacity: 0; transform: translateY(1.5rem) scale(.9); filter: blur(.6rem); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes landing-intro-trace { to { stroke-dashoffset: 0; } }
+@keyframes landing-intro-twinkle { to { opacity: .35; transform: scale(.6); } }
+@keyframes landing-intro-progress { to { transform: scaleX(1); } }
+
+@media (max-width: 38rem) {
+  .landing-intro__orbit { width: 135vw; }
+  .landing-intro__caption { letter-spacing: .1em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing > .landing-intro { display: none; }
+}

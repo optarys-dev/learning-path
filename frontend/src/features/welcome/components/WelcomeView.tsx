@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { LearningJourney } from './LearningJourney';
 import { JourneyExplainer } from './JourneyExplainer';
 import { LandingDetails } from './LandingDetails';
+import { LandingIntro } from './LandingIntro';
 import { PageTrail } from './PageTrail';
 import { ArrowRight, BookOpen, Compass, Map, type LucideIcon } from 'lucide-react';
 import { useAuthSession } from '../../auth/hooks/useAuthSession';
 import '../styles/welcome.css';
 import '../styles/landing.css';
+import '../styles/intro.css';
 
 export function WelcomeView() {
   const { t } = useTranslation();
@@ -16,8 +18,9 @@ export function WelcomeView() {
 
   return (
     <div className="landing">
-    <PageTrail />
-    <section className="welcome welcome--landing" aria-labelledby="welcome-title">
+      <LandingIntro />
+      <PageTrail />
+      <section className="welcome welcome--landing" aria-labelledby="welcome-title">
       <div className="welcome__content">
         <p className="welcome__eyebrow">
           <span className="welcome__status-dot" aria-hidden="true" />
@@ -31,8 +34,8 @@ export function WelcomeView() {
         <p className="welcome__signature">{t('welcome.signature')}</p>
       </div>
       <LearningJourney />
-    </section>
-    <section className="landing-promises" aria-labelledby="promise-title">
+      </section>
+      <section className="landing-promises" aria-labelledby="promise-title">
       <h2 id="promise-title"><Trans i18nKey="landing.promiseTitle" components={{ accent: <span className="text-accent" /> }} /></h2>
       <div className="landing-promises__grid">
         {(['goal', 'catalog', 'pace'] as const).map((value, index) => {
@@ -40,9 +43,9 @@ export function WelcomeView() {
           return <div key={value}><span aria-hidden="true"><Icon size={18} /></span><div><h3>{t(`landing.promises.${value}.title`)}</h3><p>{t(`landing.promises.${value}.text`)}</p></div></div>;
         })}
       </div>
-    </section>
-    <JourneyExplainer />
-    <LandingDetails />
+      </section>
+      <JourneyExplainer />
+      <LandingDetails />
     </div>
   );
 }
