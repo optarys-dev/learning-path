@@ -1062,7 +1062,7 @@ html[data-theme='dark'] .my-path--saved-detail .my-path__route-panel {
 
 .route-replace-dialog__filters {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 11rem auto;
+  grid-template-columns: minmax(16rem, 36rem) auto;
   align-items: center;
 }
 
@@ -1169,7 +1169,7 @@ html[data-theme='dark'] .route-replace-dialog__list button:hover { border-color:
 }
 
 @media (max-width: 52rem) {
-  .route-replace-dialog__filters { grid-template-columns: minmax(0, 1fr) 10rem; }
+  .route-replace-dialog__filters { grid-template-columns: minmax(0, 1fr) auto; }
   .route-replace-dialog__filters button { justify-self: start; }
   .route-replace-dialog__list { grid-template-columns: 1fr; }
 }
