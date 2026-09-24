@@ -1,11 +1,11 @@
 import { useRef, type DragEvent, type PointerEvent } from 'react';
-import { ArrowDown, ArrowUp, Clock3, Code2, ExternalLink, GripVertical, Trash2 } from 'lucide-react';
+import { Code2, ExternalLink, GripVertical, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { QuestMetric, QuestTab } from '../../../components/ui';
 import type { EditableRouteCourse } from '../model/types';
 
 interface RouteCourseItemProps {
   course: EditableRouteCourse;
-  courseCount: number;
   dropPosition: 'before' | 'after' | null;
   dragging: boolean;
   elementRef: (element: HTMLElement | null) => void;
@@ -14,7 +14,6 @@ interface RouteCourseItemProps {
   onDragOver: (event: DragEvent<HTMLElement>) => void;
   onDragStart: (event: DragEvent<HTMLElement>) => void;
   onDrop: (event: DragEvent<HTMLElement>) => void;
-  onMove: (offset: -1 | 1) => void;
   onRemove: () => void;
   position: number;
   showControls?: boolean;
@@ -47,7 +46,6 @@ function courseMark(title: string): string | null {
 
 export function RouteCourseItem({
   course,
-  courseCount,
   dropPosition,
   dragging,
   elementRef,
@@ -56,7 +54,6 @@ export function RouteCourseItem({
   onDragOver,
   onDragStart,
   onDrop,
-  onMove,
   onRemove,
   position,
   showControls = true,
@@ -65,6 +62,7 @@ export function RouteCourseItem({
   const weeks = positiveWeeks(course.estimatedWeeks);
   const mark = courseMark(course.title);
   const courseUrl = safeCourseUrl(course.courseUrl);
+  const courseImage = safeCourseUrl(course.imageUrl);
   const dragBlocked = useRef(false);
   const dragPreview = useRef<HTMLElement | null>(null);
   const dragGhost = useRef<HTMLCanvasElement | null>(null);
@@ -165,18 +163,15 @@ export function RouteCourseItem({
         onPointerUpCapture={() => { dragBlocked.current = false; }}
         onDragStart={handleDragStart} onDrag={handleDrag} onDragEnd={handleDragEnd}>
         <div className="my-path__course-visual" aria-hidden="true">
-          {mark ?? <Code2 size={24} />}
+          {courseImage ? <img src={courseImage} alt="" /> : mark ?? <Code2 size={24} />}
         </div>
         <div className="my-path__course-copy">
-          <p className="my-path__course-position">{t('myPath.stepLabel', { position: position + 1 })}</p>
+          <div className="my-path__course-signals">
+            <QuestTab tone="paper">{t('myPath.stepLabel', { position: position + 1 })}</QuestTab>
+            {weeks !== null && <QuestMetric value={t(weeks === 1 ? 'myPath.durationWeek' : 'myPath.durationWeeks', { count: weeks })} label={t('myPath.durationLabel')} />}
+          </div>
           <h2>{course.title}</h2>
           {course.reason && <p className="my-path__course-reason">{course.reason}</p>}
-          {weeks !== null && (
-            <p className="my-path__course-duration">
-              <Clock3 size={16} aria-hidden="true" />
-              {t(weeks === 1 ? 'myPath.durationWeek' : 'myPath.durationWeeks', { count: weeks })}
-            </p>
-          )}
           {!showControls && courseUrl && (
             <a className="my-path__course-link" href={courseUrl} target="_blank" rel="noreferrer">
               {t('myPath.viewCourse')}<ExternalLink size={15} aria-hidden="true" />
@@ -191,16 +186,6 @@ export function RouteCourseItem({
               <GripVertical size={20} aria-hidden="true" />
             </span>
           )}
-          <button type="button" onClick={() => onMove(-1)} disabled={locked || position === 0}
-            aria-label={t('myPath.moveUp', { title: course.title })}
-            title={t('myPath.moveUp', { title: course.title })}>
-            <ArrowUp size={18} aria-hidden="true" />
-          </button>
-          <button type="button" onClick={() => onMove(1)} disabled={locked || position === courseCount - 1}
-            aria-label={t('myPath.moveDown', { title: course.title })}
-            title={t('myPath.moveDown', { title: course.title })}>
-            <ArrowDown size={18} aria-hidden="true" />
-          </button>
           <button type="button" className="my-path__remove-course" onClick={onRemove} disabled={locked}
             aria-label={t('myPath.removeCourse', { title: course.title })}
             title={t('myPath.removeCourse', { title: course.title })}>

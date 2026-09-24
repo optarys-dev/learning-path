@@ -7,6 +7,7 @@ import { PageState } from '../../../components/ui/PageState/PageState';
 import { useAuthSession } from '../../auth/hooks/useAuthSession';
 import { deleteRoute, getSavedRoute, updateRoute } from '../api/routes';
 import { RouteCourseItem } from '../components/RouteCourseItem';
+import { RouteRaceTrack } from '../components/RouteRaceTrack';
 import { buildUpdateRouteRequest, createSavedRouteDraft } from '../model/draftRoute';
 import { RouteRequestError, type DraftSavedRoute, type DraftSavedRouteCourse, type RouteRequestErrorKind } from '../model/types';
 import './MyPathPage.css';
@@ -50,7 +51,8 @@ export function SavedRouteDetailPage() {
   useEffect(() => {
     if (isSessionLoading || !user || user.isNewUser || !routeId) return;
     let active = true;
-    getSavedRoute(routeId).then(savedRoute => {
+    const savedRouteRequest = getSavedRoute(routeId);
+    savedRouteRequest.then(savedRoute => {
       if (!active) return;
       const next = createSavedRouteDraft(savedRoute);
       setRoute(next);
@@ -120,17 +122,6 @@ export function SavedRouteDetailPage() {
     setAnnouncement(message);
   }
 
-  function moveCourse(sourceKey: string, targetKey: string) {
-    if (!editing || !draft || locked) return;
-    const sourceIndex = draft.courses.findIndex(course => course.uiKey === sourceKey);
-    const targetIndex = draft.courses.findIndex(course => course.uiKey === targetKey);
-    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return;
-    const courses = [...draft.courses];
-    const [course] = courses.splice(sourceIndex, 1);
-    courses.splice(targetIndex, 0, course);
-    setCourses(courses, t('myPath.movedAnnouncement', { title: course.title, position: targetIndex + 1 }));
-  }
-
   function removeCourse(courseKey: string) {
     if (!editing || !draft || locked) return;
     const index = draft.courses.findIndex(course => course.uiKey === courseKey);
@@ -187,8 +178,8 @@ export function SavedRouteDetailPage() {
   }
 
   return (
-    <div className="my-path-page">
-      <div className="my-path" aria-busy={locked}>
+    <div className="my-path-page my-path-page--saved-detail">
+      <div className="my-path my-path--saved-detail" aria-busy={locked}>
         <Link className="my-path__back-link" to="/my-path"><ArrowLeft size={17} aria-hidden="true" />{t('myPath.backToRoutes')}</Link>
         <header className="my-path__hero">
           <div className="my-path__hero-copy">
@@ -209,8 +200,8 @@ export function SavedRouteDetailPage() {
             <div className="my-path__route-panel-title"><span aria-hidden="true"><MapIcon size={20} /></span>
               <h2 id="saved-route-panel-title">{t(editing ? 'myPath.editingRoute' : 'myPath.savedRoute')}</h2>
               {modified && <span className="my-path__modified">{t('myPath.unsavedChanges')}</span>}
+              <div className="my-path__route-overview"><p>{t('myPath.routeSummary', { count: currentRoute.courses.length })}</p></div>
             </div>
-            <div className="my-path__route-overview"><p>{t('myPath.routeSummary', { count: currentRoute.courses.length })}</p></div>
           </div>
 
           {displayedCourses.length === 0 ? (
@@ -218,16 +209,14 @@ export function SavedRouteDetailPage() {
               <h2>{t('myPath.emptySavedTitle')}</h2><p>{t('myPath.emptySavedDescription')}</p>
             </div>
           ) : (
-            <ol className="my-path__course-list" aria-label={t('myPath.courseListLabel')}>
+            <div className="my-path__course-track">
+              <RouteRaceTrack courseKeys={displayedCourses.map(course => course.uiKey)} />
+              <ol className="my-path__course-list" aria-label={t('myPath.courseListLabel')}>
               {displayedCourses.map((course, position) => (
-                <RouteCourseItem key={course.uiKey} course={course} position={position} courseCount={displayedCourses.length}
+                <RouteCourseItem key={course.uiKey} course={course} position={position}
                   showControls={editing} locked={locked} dragging={draggingCourse === course.uiKey}
                   dropPosition={dropTarget?.courseKey === course.uiKey ? dropTarget.position : null}
                   elementRef={element => element ? courseElements.current.set(course.uiKey, element) : courseElements.current.delete(course.uiKey)}
-                  onMove={offset => {
-                    const target = displayedCourses[position + offset];
-                    if (target) moveCourse(course.uiKey, target.uiKey);
-                  }}
                   onRemove={() => removeCourse(course.uiKey)}
                   onDragStart={(event: DragEvent<HTMLElement>) => {
                     draggedCourse.current = course.uiKey;
@@ -275,6 +264,7 @@ export function SavedRouteDetailPage() {
                   }} />
               ))}
             </ol>
+            </div>
           )}
 
           {actionError && <p className="my-path__feedback my-path__feedback--error" role="alert">{actionError}</p>}

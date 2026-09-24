@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LogOut } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, X } from 'lucide-react';
 
 import { BrandLogo } from '../ui/BrandLogo/BrandLogo';
 import { Button } from '../ui/Button/Button';
@@ -24,6 +24,7 @@ export function AppLayout({
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const {
@@ -33,6 +34,8 @@ export function AppLayout({
   } = useAuthSession();
 
   const menuButton = useRef<HTMLButtonElement>(null);
+  const profileMenu = useRef<HTMLDivElement>(null);
+  const profileButton = useRef<HTMLButtonElement>(null);
   const main = useRef<HTMLElement>(null);
   const previousPath = useRef(pathname);
 
@@ -42,8 +45,30 @@ export function AppLayout({
       window.scrollTo(0, 0);
       previousPath.current = pathname;
       setMenuOpen(false);
+      setProfileMenuOpen(false);
     }
   }, [pathname]);
+
+  useEffect(() => {
+    if (!profileMenuOpen) return;
+
+    function dismissProfileMenu(event: MouseEvent | KeyboardEvent) {
+      if (event instanceof KeyboardEvent && event.key === 'Escape') {
+        setProfileMenuOpen(false);
+        profileButton.current?.focus();
+      }
+      if (event instanceof MouseEvent && !profileMenu.current?.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', dismissProfileMenu);
+    document.addEventListener('keydown', dismissProfileMenu);
+    return () => {
+      document.removeEventListener('mousedown', dismissProfileMenu);
+      document.removeEventListener('keydown', dismissProfileMenu);
+    };
+  }, [profileMenuOpen]);
 
   const displayName =
     user?.displayName || user?.username;
@@ -54,42 +79,6 @@ export function AppLayout({
       )}/${encodeURIComponent(user.avatar)}.png?size=80`
     : null;
 
-  const profileLink =
-    user && displayName ? (
-      <NavLink
-        className="session-identity"
-        to="/my-path"
-        aria-label={t('auth.signedInAs', {
-          name: displayName,
-        })}
-      >
-        <span
-          className="session-identity__avatar"
-          aria-hidden="true"
-        >
-          <span>
-            {displayName
-              .slice(0, 1)
-              .toUpperCase()}
-          </span>
-
-          {avatarUrl && (
-            <img
-              src={avatarUrl}
-              alt=""
-              onError={(event) => {
-                event.currentTarget.hidden = true;
-              }}
-            />
-          )}
-        </span>
-
-        <span className="session-identity__name">
-          {displayName}
-        </span>
-      </NavLink>
-    ) : null;
-
   async function handleLogout() {
     if (isLoggingOut) return;
 
@@ -97,11 +86,58 @@ export function AppLayout({
     try {
       await logout();
       setMenuOpen(false);
+      setProfileMenuOpen(false);
       navigate('/', { replace: true });
     } finally {
       setIsLoggingOut(false);
     }
   }
+
+  const profileMenuContent =
+    user && displayName ? (
+      <div className="profile-menu" ref={profileMenu}>
+        <button
+          ref={profileButton}
+          className="session-identity"
+          type="button"
+          aria-label={t('auth.signedInAs', { name: displayName })}
+          aria-haspopup="menu"
+          aria-expanded={profileMenuOpen}
+          aria-controls="profile-menu"
+          onClick={() => setProfileMenuOpen(open => !open)}
+        >
+          <span className="session-identity__avatar" aria-hidden="true">
+            <span>{displayName.slice(0, 1).toUpperCase()}</span>
+
+            {avatarUrl && (
+              <img
+                src={avatarUrl}
+                alt=""
+                onError={(event) => { event.currentTarget.hidden = true; }}
+              />
+            )}
+          </span>
+
+          <span className="session-identity__name">{displayName}</span>
+          <ChevronDown className="session-identity__chevron" size={16} aria-hidden="true" />
+        </button>
+
+        {profileMenuOpen && (
+          <div className="profile-menu__panel" id="profile-menu" role="menu" aria-label={t('auth.profile')}>
+            <p className="profile-menu__heading">{displayName}</p>
+            <div className="profile-menu__separator" role="separator" />
+            <NavLink to="/my-path" role="menuitem" onClick={() => { setProfileMenuOpen(false); setMenuOpen(false); }}>
+              {t('layout.myPaths')}
+            </NavLink>
+            <div className="profile-menu__separator" role="separator" />
+            <button type="button" role="menuitem" disabled={isLoggingOut} onClick={() => void handleLogout()}>
+              <LogOut size={17} aria-hidden="true" />
+              {isLoggingOut ? t('auth.signingOut') : t('auth.logout')}
+            </button>
+          </div>
+        )}
+      </div>
+    ) : null;
 
   return (
     <div
@@ -122,7 +158,6 @@ export function AppLayout({
             onClick={() => setMenuOpen(false)}
           >
             <BrandLogo className="app-brand__logo" />
-            <span>{t('app.name')}</span>
           </Link>
 
           {isSessionLoading ? (
@@ -141,17 +176,12 @@ export function AppLayout({
                 ref={menuButton}
                 variant="secondary"
                 className="menu-toggle"
+                aria-label={t(menuOpen ? 'layout.closeMenu' : 'layout.openMenu')}
                 aria-expanded={menuOpen}
                 aria-controls="primary-navigation"
-                onClick={() =>
-                  setMenuOpen(!menuOpen)
-                }
+                onClick={() => setMenuOpen(!menuOpen)}
               >
-                {t(
-                  menuOpen
-                    ? 'layout.closeMenu'
-                    : 'layout.openMenu',
-                )}
+                {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
               </Button>
 
               <div
@@ -184,7 +214,7 @@ export function AppLayout({
                   </NavLink>
 
                   <NavLink
-                    to="/learning-profile"
+                    to="/create-route"
                     onClick={() =>
                       setMenuOpen(false)
                     }
@@ -213,17 +243,7 @@ export function AppLayout({
 
                 <ThemeToggle />
                 <LanguageSelector />
-                {profileLink}
-                <Button
-                  className="session-logout"
-                  variant="ghost"
-                  isLoading={isLoggingOut}
-                  loadingLabel={t('auth.signingOut')}
-                  onClick={() => void handleLogout()}
-                >
-                  <LogOut size={17} aria-hidden="true" />
-                  {t('auth.logout')}
-                </Button>
+                {profileMenuContent}
               </div>
             </>
           ) : (

@@ -30,29 +30,30 @@
 }
 
 .cq-button--primary {
-  background: linear-gradient(135deg, var(--cq-color-action-start), var(--cq-color-action-end));
-  color: var(--cq-color-text-on-brand);
+  background: var(--cq-color-button-primary);
+  box-shadow: 0 .55rem 1.15rem color-mix(in srgb, var(--cq-color-button-primary) 24%, transparent);
+  color: var(--cq-color-button-primary-foreground);
 }
 
 .cq-button--primary:hover:not(:disabled) {
-  background: var(--cq-color-action-hover);
+  background: var(--cq-color-button-primary-hover);
 }
 
 .cq-button--secondary {
-  border-color: var(--cq-color-action-start);
+  border-color: var(--cq-color-button-secondary);
   background: transparent;
-  color: var(--cq-color-action-start);
+  color: var(--cq-color-button-secondary);
 }
 
 .cq-button--secondary:hover:not(:disabled) {
-  background: rgb(126 112 249 / 14%);
+  background: var(--cq-color-button-secondary-surface);
 }
 
 .cq-button--ghost {
   background: transparent;
-  color: var(--cq-color-brand-primary);
+  color: var(--cq-color-button-ghost);
 }
 
 .cq-button--ghost:hover:not(:disabled) {
-  background: rgb(192 185 252 / 12%);
+  background: var(--cq-color-button-ghost-surface);
 }

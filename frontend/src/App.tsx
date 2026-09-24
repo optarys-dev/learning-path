@@ -37,7 +37,9 @@ function App() {
       </Route>
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="my-path" element={<MyPathPage />} />
+          <Route path="create-route" element={<QuestionnairePage />} />
+          <Route path="create-route/proposal" element={<MyPathPage mode="proposal" autoGenerate />} />
+          <Route path="my-path" element={<MyPathPage mode="collection" />} />
           <Route path="my-path/:routeId" element={<SavedRouteDetailPage />} />
           <Route path="learning-profile" element={<QuestionnairePage />} />
         </Route>

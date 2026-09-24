@@ -47,4 +47,20 @@ a {
   box-shadow: var(--cq-focus-ring);
 }
 
+::selection {
+  color: var(--cq-color-text-on-brand);
+  background: var(--cq-color-accent-violet);
+}
+
+/* Shared visual voice for the two route journeys. */
+.cq-journey-title {
+  margin: 0;
+  font-family: var(--cq-font-display);
+  font-size: clamp(2.35rem, 5vw, 4.5rem);
+  font-weight: var(--cq-font-weight-display);
+  line-height: .98;
+  letter-spacing: -.06em;
+  text-wrap: balance;
+}
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }

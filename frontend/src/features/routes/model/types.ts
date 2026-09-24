@@ -74,6 +74,7 @@ export interface EditableRouteCourse {
   title: string;
   reason: string | null;
   estimatedWeeks?: number | null;
+  imageUrl?: string | null;
   courseUrl?: string | null;
 }
 

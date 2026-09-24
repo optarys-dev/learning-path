@@ -15,7 +15,7 @@ interface BrandLogoProps {
 }
 
 export function BrandLogo({
-  alt = 'DevTalles',
+  alt = 'Code Quest 2026',
   background = 'auto',
   className,
   size = 'full',
