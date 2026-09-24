@@ -24,6 +24,10 @@
   object-position: center top;
 }
 
+.brand-logo--full .brand-logo__on-dark {
+  filter: brightness(0) invert(1);
+}
+
 .brand-logo__on-light {
   display: none !important;
 }
