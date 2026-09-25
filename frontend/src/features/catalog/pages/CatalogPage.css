@@ -1,6 +1,5 @@
 .catalog-page { display: grid; gap: clamp(4rem, 8vw, 7rem); padding-bottom: var(--cq-space-12); }
 .catalog-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, .7fr); align-items: center; min-height: 22rem; overflow: hidden; padding: clamp(var(--cq-space-8), 5vw, 4.5rem); border: 1px solid var(--cq-color-border-default); border-radius: 2rem; background: radial-gradient(circle at 82% 22%, color-mix(in srgb, var(--cq-color-accent-cyan) 28%, transparent), transparent 19rem), var(--cq-color-bg-surface); }
-.catalog-hero::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(90deg, transparent 0 1.5rem, color-mix(in srgb, var(--cq-color-brand-lavender) 11%, transparent) 1.5rem 1.55rem); opacity: .6; }
 .catalog-hero__copy { position: relative; z-index: 1; max-width: 42rem; }
 .catalog-eyebrow { display: inline-flex; align-items: center; gap: var(--cq-space-2); margin: 0 0 var(--cq-space-4); color: var(--cq-color-accent-cyan); font-family: var(--cq-font-heading); font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .catalog-hero h1, .catalog-results h2, .catalog-cta h2 { margin: 0; font-family: var(--cq-font-display); font-weight: var(--cq-font-weight-display); letter-spacing: -.05em; line-height: 1.04; }
@@ -109,7 +108,6 @@
   padding: clamp(var(--cq-space-8), 5vw, var(--cq-space-12));
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--cq-color-brand-primary) 7%, transparent), transparent 48%),
-    repeating-linear-gradient(90deg, transparent 0 2rem, color-mix(in srgb, var(--cq-color-brand-primary) 6%, transparent) 2rem 2.06rem),
     var(--cq-color-bg-surface);
 }
 .catalog-mission-kit__copy { gap: var(--cq-space-4); }

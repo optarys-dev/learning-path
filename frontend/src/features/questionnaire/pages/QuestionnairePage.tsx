@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type TransitionEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Lightbulb } from 'lucide-react';
 import { useAuthSession } from '../../auth/hooks/useAuthSession';
 import deviLaptop from '../../../assets/assessment/04_aprendiendo_con_laptop.svg';
@@ -11,9 +11,11 @@ import deviReady from '../../../assets/assessment/08_perfil_completado.svg';
 import routeExplorer from '../../../assets/codequest/characters/04_mascota_astronauta_con_mapa_del_tesoro.png';
 import { Button } from '../../../components/ui/Button/Button';
 import { QuestProgress } from '../../../components/ui';
+import { MyPathPage } from '../../routes/pages/MyPathPage';
+import { clearPendingRoute, loadPendingRoute } from '../../routes/model/draftRoute';
 import { savePreferences } from '../api/preferences';
 import { areas, desiredOutcomes, legacyContexts, levels, practicalExperiences, questions } from '../model/config';
-import { clearQuestionnaireDraft, loadQuestionnaireDraft, saveQuestionnaireDraft } from '../model/draft';
+import { loadQuestionnaireDraft, saveQuestionnaireDraft } from '../model/draft';
 import { mapPreferences } from '../model/preferencesMapping';
 import { selectArea } from '../model/state';
 import type { AreaId, QuestionnaireAnswers, QuestionnaireState, TechnologyId } from '../model/types';
@@ -50,8 +52,7 @@ function preferenceErrorKind(error: unknown): PreferencesErrorKind {
 
 export function QuestionnairePage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { markPreferencesSaved } = useAuthSession();
+  const { user, markPreferencesSaved } = useAuthSession();
   const { notify } = useNotifications();
   const [state, setState] = useState<QuestionnaireState>(loadQuestionnaireDraft);
   const [welcome, setWelcome] = useState(() => state.currentStep === 0 &&
@@ -70,13 +71,16 @@ export function QuestionnairePage() {
   const welcomeHeadingRef = useRef<HTMLHeadingElement>(null);
   const [showError, setShowError] = useState(false);
   const [hasNavigated, setHasNavigated] = useState(false);
-  const [result, setResult] = useState<QuestionnaireAnswers | null>(null);
+  const [result, setResult] = useState<QuestionnaireAnswers | null>(() =>
+    user && loadPendingRoute(user.id) && questions.every((_, index) => isStepComplete(index, state.answers))
+      ? state.answers : null);
   const [saveState, setSaveState] = useState<
     { status: 'idle' | 'saving' | 'success' } | { status: 'error'; kind: PreferencesErrorKind }
-  >({ status: 'idle' });
+  >(() => ({ status: result ? 'success' : 'idle' }));
   const savingRef = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const completeRef = useRef<HTMLElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const pendingProfileScroll = useRef<'start' | 'step' | 'complete' | null>(null);
   const { answers, currentStep } = state;
   const question = questions[currentStep];
@@ -93,6 +97,14 @@ export function QuestionnairePage() {
 
   useEffect(() => { if (result === null) saveQuestionnaireDraft(state); }, [state, result]);
   useEffect(() => { document.title = `${t('questionnaire.title')} · CODE QUEST 2026`; }, [t]);
+  useEffect(() => {
+    if (saveState.status !== 'success') return;
+    const frame = requestAnimationFrame(() => previewRef.current?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start',
+    }));
+    return () => cancelAnimationFrame(frame);
+  }, [saveState.status]);
   useEffect(() => {
     if (welcome) welcomeHeadingRef.current?.focus();
     else headingRef.current?.focus({ preventScroll: true });
@@ -270,11 +282,9 @@ export function QuestionnairePage() {
     setSaveState({ status: 'saving' });
     try {
       await savePreferences(mapPreferences(result));
-      clearQuestionnaireDraft();
+      clearPendingRoute();
       markPreferencesSaved();
       setSaveState({ status: 'success' });
-      notify({ tone: 'success', title: t('questionnaire.preferences.success') });
-      navigate('/create-route/proposal', { replace: true });
     } catch (error) {
       const kind = preferenceErrorKind(error);
       setSaveState({ status: 'error', kind });
@@ -286,6 +296,10 @@ export function QuestionnairePage() {
 
   return (
     <div ref={profileRef} onTransitionEnd={finishEntry} className={`learning-profile${welcome ? ' learning-profile--welcome' : ''}${entryPhase !== 'idle' ? ' learning-profile--entering' : ''}${entryPhase === 'sliding' ? ' learning-profile--sliding' : ''}${started ? ' learning-profile--started' : ''}`}>
+      <nav className="learning-profile__creation-options" aria-label={t('manualRoute.methodLabel')}>
+        <Link to="/create-route">{t('manualRoute.manualOption')}</Link>
+        <span aria-current="page">{t('manualRoute.recommendedOption')}</span>
+      </nav>
       <div className="learning-profile__reveal-viewport" ref={viewportRef}>
         <div className="learning-profile__reveal-stack" ref={stackRef}>
       {welcome && (
@@ -427,7 +441,7 @@ export function QuestionnairePage() {
             <Button onClick={continueFlow}>{t(currentStep === questions.length - 1 ? 'questionnaire.finish' : 'questionnaire.continue')}</Button>
           </div>
         </section>
-      ) : (
+      ) : (<>
         <section ref={completeRef} className="learning-profile__step learning-profile__complete" role="status">
           <header className="learning-profile__complete-hero">
             <img className="learning-profile__mascot learning-profile__mascot--ready" src={deviReady} alt="" />
@@ -448,22 +462,28 @@ export function QuestionnairePage() {
               <div><dt>{t('questionnaire.summaryLegacy')}</dt><dd>{t(`questionnaire.legacyContexts.${result.legacyContext}`)}</dd></div>
             )}
           </dl>
+          {saveState.status === 'success' && <div className="learning-profile__saved-confirmation" role="status">
+            <strong>{t('questionnaire.preferences.success')}</strong>
+            <span>{t('questionnaire.preferences.previewHint')}</span>
+          </div>}
           <div className="learning-profile__complete-actions">
             <Button variant="secondary" onClick={editAnswers} disabled={saveState.status === 'saving'}>{t('questionnaire.editAnswers')}</Button>
-            <Button onClick={submitPreferences} isLoading={saveState.status === 'saving'}
-              loadingLabel={t('questionnaire.preferences.saving')} disabled={saveState.status === 'success'}>
+            {saveState.status !== 'success' && <Button onClick={submitPreferences}
+              isLoading={saveState.status === 'saving'} loadingLabel={t('questionnaire.preferences.saving')}>
               {t(saveState.status === 'error' ? 'layout.retry' : 'questionnaire.preferences.save')}
-            </Button>
+            </Button>}
           </div>
           <p role="status" aria-live="polite" aria-atomic="true">
             {saveState.status === 'saving' && t('questionnaire.preferences.saving')}
-            {saveState.status === 'success' && t('questionnaire.preferences.success')}
           </p>
           <p role="alert" aria-atomic="true">
             {saveState.status === 'error' && t(`questionnaire.preferences.errors.${saveState.kind}`)}
           </p>
         </section>
-          )}
+        {saveState.status === 'success' && <div className="learning-profile__path-preview" ref={previewRef}>
+          <MyPathPage mode="proposal" autoGenerate embedded />
+        </div>}
+          </>)}
         </div>
         </div>
       </div>

@@ -14,7 +14,7 @@ export function CatalogPage() {
   const { t } = useTranslation();
   const { user } = useAuthSession();
   const { data, error, isLoading, page, reload, setPage } = useCatalogCourses();
-  const createPathTarget = user ? '/create-route/proposal' : '/login';
+  const createPathTarget = user ? '/learning-profile' : '/login';
 
   useEffect(() => {
     document.title = `${t('catalog.pageTitle')} · CODE QUEST 2026`;

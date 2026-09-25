@@ -37,6 +37,8 @@ public sealed record LearningRouteDto(Guid RouteId, string Goal, string Recommen
 /// <summary>Resultado de un análisis de recomendación listo para guardar.</summary>
 public sealed class SaveLearningRouteRequest
 {
+    /// <summary>Nombre u objetivo de la ruta. Si se omite, se conserva el objetivo del perfil.</summary>
+    [StringLength(1000)] public string? Goal { get; set; }
     /// <summary>Nombre y versión del método que generó la ruta.</summary>
     [Required, StringLength(80, MinimumLength = 1)]
     public string RecommendationMethod { get; set; } = string.Empty;

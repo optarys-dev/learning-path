@@ -25,6 +25,7 @@ export interface DraftRoute extends Omit<RouteRecommendation, 'courses'> {
 }
 
 export interface CreateRouteDto {
+  goal?: string | null;
   recommendationMethod: string;
   courses: Array<{
     courseId: string;

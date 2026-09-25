@@ -219,7 +219,7 @@ export function AppLayout({
                   </NavLink>
 
                   <NavLink
-                    to="/create-route/proposal"
+                    to="/create-route"
                     onClick={() =>
                       setMenuOpen(false)
                     }

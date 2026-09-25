@@ -35,6 +35,11 @@ export default defineConfig({
         changeOrigin: false,
       },
 
+      '/routes': {
+        target: 'http://localhost:5107',
+        changeOrigin: false,
+      },
+
     },
   },
 });

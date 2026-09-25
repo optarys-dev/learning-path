@@ -12,9 +12,10 @@ import roadmapMascot from '../../../assets/codequest/characters/05_mascota_astro
 
 interface SavedRoutesSectionProps {
   refreshKey?: number;
+  highlightedRouteId?: string;
 }
 
-export function SavedRoutesSection({ refreshKey = 0 }: SavedRoutesSectionProps) {
+export function SavedRoutesSection({ refreshKey = 0, highlightedRouteId }: SavedRoutesSectionProps) {
   const { i18n, t } = useTranslation();
   const { refresh: refreshSession } = useAuthSession();
   const [state, setState] = useState<
@@ -46,13 +47,13 @@ export function SavedRoutesSection({ refreshKey = 0 }: SavedRoutesSectionProps) 
   }, [refreshKey, refreshSession, retryVersion, t]);
 
   return (
-    <section className="my-path__saved my-path__saved--notebook" aria-labelledby="saved-routes-title">
+    <section className="my-path__saved my-path__saved--surface" aria-labelledby="saved-routes-title">
       <div className="my-path__saved-heading">
         <div className="my-path__saved-intro">
           <p className="my-path__eyebrow"><RouteIcon size={16} aria-hidden="true" />{t('myPath.savedEyebrow')}</p>
           <h1 className="cq-journey-title" id="saved-routes-title">{t('myPath.collectionTitle')}</h1>
           <p>{t('myPath.collectionDescription')}</p>
-          <Link className="cq-button cq-button--primary my-path__saved-create" to="/create-route/proposal">{t('myPath.createAnotherRoute')}</Link>
+          <div className="my-path__saved-create-actions"><Link className="cq-button cq-button--primary my-path__saved-create" to="/create-route">{t('manualRoute.createManual')}</Link><Link className="cq-button cq-button--secondary" to="/learning-profile">{t('manualRoute.createPersonalized')}</Link></div>
         </div>
         <img className="my-path__saved-mascot" src={roadmapMascot} alt="" />
         <QuestDoodle kind="arrow" className="my-path__saved-doodle" />
@@ -75,10 +76,10 @@ export function SavedRoutesSection({ refreshKey = 0 }: SavedRoutesSectionProps) 
       )}
       {state.status === 'ready' && state.routes.length > 0 && (
         <ul className="my-path__saved-list">
-          {state.routes.map(route => {
+          {[...state.routes].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).map(route => {
             const stats = routeStats(route, readRouteCourseLocalState());
             return (
-            <li key={route.routeId}>
+            <li key={route.routeId} className={route.routeId === highlightedRouteId ? 'is-new' : undefined}>
               <div className="my-path__saved-card-copy">
                 <QuestSticker tone="completed">{t('myPath.savedRoute')}</QuestSticker>
                 <h3>{route.goal}</h3>

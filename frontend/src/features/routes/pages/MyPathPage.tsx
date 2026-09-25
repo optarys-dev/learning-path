@@ -1,17 +1,17 @@
 import { useEffect, useLayoutEffect, useRef, useState, type DragEvent } from 'react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Map as MapIcon, Rocket, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import deviProgress from '../../../assets/assessment/07_progreso_de_la_ruta.svg';
 import { Button } from '../../../components/ui/Button/Button';
 import { PageState } from '../../../components/ui/PageState/PageState';
-import { QuestDoodle, QuestSticker } from '../../../components/ui';
+import { QuestSticker } from '../../../components/ui';
 import { useAuthSession } from '../../auth/hooks/useAuthSession';
 import { generateRouteRecommendation, saveRoute } from '../api/routes';
 import { RouteCourseItem } from '../components/RouteCourseItem';
 import { RouteRaceTrack } from '../components/RouteRaceTrack';
 import { SavedRoutesSection } from '../components/SavedRoutesSection';
-import { buildSaveRouteRequest, createDraftRoute } from '../model/draftRoute';
+import { buildSaveRouteRequest, clearPendingRoute, createDraftRoute, loadPendingRoute, savePendingRoute } from '../model/draftRoute';
 import {
   RouteRequestError,
   type DraftRoute,
@@ -19,15 +19,17 @@ import {
   type RouteRequestErrorKind,
 } from '../model/types';
 import { useNotifications } from '../../../components/notifications';
+import { clearQuestionnaireDraft } from '../../questionnaire/model/draft';
 import './MyPathPage.css';
 
 interface MyPathPageProps {
   mode: 'proposal' | 'collection';
   autoGenerate?: boolean;
+  embedded?: boolean;
 }
 
 type ProposalOperation = 'idle' | 'regenerating' | 'saving';
-type SaveStatus = 'idle' | 'error' | 'saved';
+type SaveStatus = 'idle' | 'error';
 type DropTarget = { courseKey: string; position: 'before' | 'after' } | null;
 
 type MyPathState =
@@ -42,24 +44,27 @@ type MyPathState =
       generationError: string | null;
       saveStatus: SaveStatus;
       saveError: string | null;
-      savedRouteId: string | null;
     };
 
 function replaceCourseOrder(route: DraftRoute, courses: DraftRouteCourse[]): DraftRoute {
   return { ...route, courses };
 }
 
-export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
+export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyPathPageProps) {
   const { t } = useTranslation();
   const { notify } = useNotifications();
   const { user, isLoading: isSessionLoading, refresh: refreshSession } = useAuthSession();
   const location = useLocation();
-  const [state, setState] = useState<MyPathState>({ status: 'idle' });
+  const navigate = useNavigate();
+  const [state, setState] = useState<MyPathState>(() => {
+    const pending = mode === 'proposal' && user ? loadPendingRoute(user.id) : null;
+    return pending ? { status: 'proposal', ...pending, operation: 'idle', generationError: null,
+      saveStatus: 'idle', saveError: null } : { status: 'idle' };
+  });
   const [announcement, setAnnouncement] = useState('');
-  const [savedRoutesVersion, setSavedRoutesVersion] = useState(0);
-  const routeNotice = (location.state as { routeDeleted?: boolean } | null)?.routeDeleted
-    ? t('myPath.routeDeleted')
-    : null;
+  const routeState = location.state as { routeDeleted?: boolean; routeCreated?: boolean; routeId?: string } | null;
+  const routeNotice = routeState?.routeDeleted ? t('myPath.routeDeleted')
+    : routeState?.routeCreated ? t('myPath.saveSuccess') : null;
   const generationInFlight = useRef(false);
   const saveInFlight = useRef(false);
   const draggedCourse = useRef<string | null>(null);
@@ -75,6 +80,12 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
   useEffect(() => {
     document.title = `${t('myPath.pageTitle')} · CODE QUEST 2026`;
   }, [t]);
+
+  useEffect(() => {
+    if (mode === 'proposal' && user && state.status === 'proposal') {
+      savePendingRoute(user.id, state.route, state.modified);
+    }
+  }, [mode, user, state]);
 
   useLayoutEffect(() => {
     const previousRects = reorderRects.current;
@@ -136,7 +147,16 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
     }
 
     try {
-      const route = createDraftRoute(await generateRouteRecommendation());
+      const excludedCourseIds = regenerating && currentProposal
+        ? currentProposal.route.courses.slice(-1).map(course => course.courseId)
+        : [];
+      const route = createDraftRoute(await generateRouteRecommendation(excludedCourseIds));
+      if (regenerating && currentProposal && (route.courses.length === 0 ||
+        route.courses.map(course => course.courseId).sort().join(',') ===
+        currentProposal.route.courses.map(course => course.courseId).sort().join(','))) {
+        setState({ ...currentProposal, operation: 'idle', generationError: t('myPath.noAlternative') });
+        return;
+      }
       setState({
         status: 'proposal',
         route,
@@ -145,7 +165,6 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
         generationError: null,
         saveStatus: 'idle',
         saveError: null,
-        savedRouteId: null,
       });
       setAnnouncement(t('myPath.generatedAnnouncement', { count: route.courses.length }));
     } catch (error) {
@@ -174,7 +193,7 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
   }
 
   function removeCourse(courseKey: string) {
-    if (state.status !== 'proposal' || state.operation !== 'idle' || state.saveStatus === 'saved') return;
+    if (state.status !== 'proposal' || state.operation !== 'idle') return;
     const index = state.route.courses.findIndex(course => course.uiKey === courseKey);
     if (index < 0) return;
     const removed = state.route.courses[index];
@@ -189,18 +208,16 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
 
   async function saveCurrentRoute() {
     if (state.status !== 'proposal' || state.route.courses.length === 0 ||
-      state.operation !== 'idle' || state.saveStatus === 'saved' || saveInFlight.current) return;
+      state.operation !== 'idle' || saveInFlight.current) return;
     const currentProposal = state;
     saveInFlight.current = true;
     setState({ ...currentProposal, operation: 'saving', saveStatus: 'idle', saveError: null });
 
     try {
       const saved = await saveRoute(buildSaveRouteRequest(currentProposal.route));
-      setState({ ...currentProposal, modified: false, operation: 'idle', saveStatus: 'saved', saveError: null,
-        savedRouteId: saved.routeId });
-      setSavedRoutesVersion(version => version + 1);
-      setAnnouncement(t('myPath.saveSuccess'));
-      notify({ tone: 'success', title: t('myPath.saveSuccess') });
+      clearPendingRoute();
+      clearQuestionnaireDraft();
+      navigate('/my-path', { replace: true, state: { routeCreated: true, routeId: saved.routeId } });
     } catch (error) {
       const message = errorMessage(error);
       setState({ ...currentProposal, operation: 'idle', saveStatus: 'error', saveError: message });
@@ -211,27 +228,29 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
   }
 
   useEffect(() => {
-    if (mode === 'proposal' && autoGenerate && state.status === 'idle') {
+    if (mode === 'proposal' && autoGenerate && !isSessionLoading && user && !user.isNewUser && state.status === 'idle') {
       const generationTimer = window.setTimeout(() => { void generateRoute(false); }, 0);
       return () => window.clearTimeout(generationTimer);
     }
     return undefined;
     // The route request is deliberately deferred so navigation can render its loading state first.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoGenerate, mode, state.status]);
+  }, [autoGenerate, isSessionLoading, mode, state.status, user]);
 
   if (isSessionLoading) {
     return <PageState kind="loading" title={t('myPath.sessionLoading')} />;
   }
   if (user === null) return <Navigate to="/login" replace />;
-  if (user.isNewUser) return <Navigate to="/learning-profile" replace />;
+  if (user.isNewUser) return embedded
+    ? <PageState kind="loading" title={t('myPath.sessionLoading')} />
+    : <Navigate to="/learning-profile" replace />;
 
   if (mode === 'collection') {
     return (
       <div className="my-path-page my-path-page--collection">
         <div className="my-path my-path--collection">
           {routeNotice && <p className="my-path__feedback my-path__feedback--success" role="status">{routeNotice}</p>}
-          <SavedRoutesSection refreshKey={savedRoutesVersion} />
+          <SavedRoutesSection highlightedRouteId={routeState?.routeCreated ? routeState.routeId : undefined} />
         </div>
       </div>
     );
@@ -239,7 +258,7 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
 
   if (state.status === 'generation-error') {
     return (
-      <div className="my-path-page my-path-page--proposal">
+      <div className={`my-path-page my-path-page--proposal${embedded ? ' my-path-page--embedded' : ''}`}>
         <div className="my-path my-path--proposal">
           <header className="my-path__page-heading">
             <p>{t('myPath.eyebrow')}</p>
@@ -254,19 +273,20 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
   }
 
   if (state.status === 'idle' || state.status === 'generating') {
-    const generating = state.status === 'generating';
+    const generating = state.status === 'generating' || autoGenerate;
     return (
-      <div className="my-path-page my-path-page--proposal">
+      <div className={`my-path-page my-path-page--proposal${embedded ? ' my-path-page--embedded' : ''}`}>
         <div className="my-path my-path--proposal">
-          <section className="my-path__launch" aria-busy={generating}>
+          <section className={`my-path__launch${generating ? ' my-path__launch--generating' : ''}`} aria-busy={generating}>
             <div className="my-path__launch-copy">
               <p className="my-path__eyebrow"><Sparkles size={16} aria-hidden="true" />{t('myPath.eyebrow')}</p>
-              <h1 className="cq-journey-title">{t('myPath.initialTitle')}</h1>
-              <p>{t('myPath.initialDescription')}</p>
-              <Button onClick={() => { void generateRoute(false); }} isLoading={generating}
-                loadingLabel={t('myPath.generating')}>
-                {t('myPath.generate')}
-              </Button>
+              <h1 className="cq-journey-title">{t(generating ? 'myPath.generatingTitle' : 'myPath.initialTitle')}</h1>
+              <p>{t(generating ? 'myPath.generatingDescription' : 'myPath.initialDescription')}</p>
+              {generating ? <ol className="my-path__generation-steps" role="status">
+                <li>{t('myPath.generationStepProfile')}</li>
+                <li>{t('myPath.generationStepCourses')}</li>
+                <li>{t('myPath.generationStepOrder')}</li>
+              </ol> : <Button onClick={() => { void generateRoute(false); }}>{t('myPath.generate')}</Button>}
             </div>
             <img src={deviProgress} alt="" className="my-path__launch-mascot" />
           </section>
@@ -276,19 +296,23 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
     );
   }
 
-  const { route, modified, operation, generationError, saveStatus, saveError, savedRouteId } = state;
-  const locked = operation !== 'idle' || saveStatus === 'saved';
+  const { route, modified, operation, generationError, saveStatus, saveError } = state;
+  const locked = operation !== 'idle';
   const empty = route.courses.length === 0;
   const displayedCourses = dragCourses ?? route.courses;
 
   return (
-    <div className="my-path-page my-path-page--proposal">
+    <div className={`my-path-page my-path-page--proposal${embedded ? ' my-path-page--embedded' : ''}`}>
       <div className="my-path my-path--proposal" aria-busy={operation !== 'idle'}>
       <header className="my-path__hero">
         <div className="my-path__hero-copy">
           <p className="my-path__eyebrow"><Sparkles size={16} aria-hidden="true" />{t('myPath.routeEyebrow')}</p>
           <h1 className="cq-journey-title">{t('myPath.routeTitle')}</h1>
           <p>{t('myPath.routeDescription')}</p>
+          {!embedded && <nav className="my-path__creation-options" aria-label={t('manualRoute.methodLabel')}>
+            <Link to="/create-route">{t('manualRoute.manualOption')}</Link>
+            <span aria-current="page">{t('manualRoute.recommendedOption')}</span>
+          </nav>}
           <span className="my-path__hero-orbit" aria-hidden="true"><Rocket size={18} /></span>
         </div>
         <section className="my-path__recommendation" aria-labelledby="recommendation-goal">
@@ -304,7 +328,6 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
       {generationError && <div className="my-path__feedback my-path__feedback--error" role="alert">{generationError}</div>}
 
       <section className="my-path__route-panel" aria-labelledby="route-panel-title">
-        <QuestDoodle kind="route" className="my-path__route-doodle" />
         <div className="my-path__route-panel-header">
           <div className="my-path__route-panel-title">
             <span aria-hidden="true"><MapIcon size={20} /></span>
@@ -332,7 +355,7 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
             <ol className="my-path__course-list" aria-label={t('myPath.courseListLabel')}>
             {displayedCourses.map((course, position) => (
               <RouteCourseItem key={course.uiKey} course={course} position={position}
-                locked={locked} dragging={draggingCourse === course.uiKey}
+                canReorder locked={locked} dragging={draggingCourse === course.uiKey}
                 dropPosition={dropTarget?.courseKey === course.uiKey ? dropTarget.position : null}
                 elementRef={element => {
                   if (element) courseElements.current.set(course.uiKey, element);
@@ -413,9 +436,6 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
         <div className="my-path__feedback-stack">
           {empty && <p className="my-path__feedback my-path__feedback--error" role="alert">{t('myPath.emptySaveError')}</p>}
           {saveStatus === 'error' && <p className="my-path__feedback my-path__feedback--error" role="alert">{saveError}</p>}
-          {saveStatus === 'saved' && <p className="my-path__feedback my-path__feedback--success" role="status">
-            {t('myPath.saveSuccess')}{savedRouteId && <> <Link to={`/my-path/${encodeURIComponent(savedRouteId)}`}>{t('myPath.viewSavedRoute')}</Link></>}
-          </p>}
         </div>
 
         <footer className="my-path__completion">
@@ -427,6 +447,11 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
             </div>
           </div>
           <div className="my-path__primary-actions">
+            <Button variant="ghost" onClick={() => {
+              if (!window.confirm(t('myPath.confirmDiscardProposal'))) return;
+              clearPendingRoute();
+              navigate('/my-path');
+            }} disabled={operation !== 'idle'}>{t('myPath.cancelProposal')}</Button>
             <Button variant="secondary" onClick={() => { void generateRoute(true); }}
               isLoading={operation === 'regenerating'} loadingLabel={t('myPath.regenerating')}
               disabled={operation === 'saving'}>
@@ -434,7 +459,7 @@ export function MyPathPage({ mode, autoGenerate = false }: MyPathPageProps) {
             </Button>
             <Button onClick={() => { void saveCurrentRoute(); }} isLoading={operation === 'saving'}
               loadingLabel={t('myPath.saving')}
-              disabled={empty || operation === 'regenerating' || saveStatus === 'saved'}>
+              disabled={empty || operation === 'regenerating'}>
               {t(saveStatus === 'error' ? 'myPath.retrySave' : 'myPath.save')}
             </Button>
           </div>

@@ -1,4 +1,4 @@
-import { useRef, useState, type DragEvent, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type DragEvent, type PointerEvent } from 'react';
 import { CheckCircle2, Code2, ExternalLink, FileText, GripVertical, MoreHorizontal, Repeat2, RotateCcw, Star, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { QuestMetric, QuestTab } from '../../../components/ui';
@@ -85,7 +85,28 @@ export function RouteCourseItem({
   const dragMoveListener = useRef<((event: globalThis.DragEvent) => void) | null>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const dragFrame = useRef<number | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [optionsOpen, setOptionsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!optionsOpen) return;
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!menuRef.current?.contains(target) && !menuButtonRef.current?.contains(target)) setOptionsOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setOptionsOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    document.addEventListener('click', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('click', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [optionsOpen]);
 
   function handlePointerDown(event: PointerEvent<HTMLElement>) {
     const target = event.target;
@@ -213,15 +234,15 @@ export function RouteCourseItem({
             aria-label={t(completed ? 'myPath.markNotStarted' : 'myPath.markCompleted')} title={t(completed ? 'myPath.markNotStarted' : 'myPath.markCompleted')}>
             {completed ? <RotateCcw size={18} aria-hidden="true" /> : <CheckCircle2 size={18} aria-hidden="true" />}
           </button>}
-          <div className="my-path__course-menu-wrap"><button type="button" className="my-path__more-actions" onClick={() => setOptionsOpen(open => !open)} disabled={locked}
+          <div className="my-path__course-menu-wrap"><button ref={menuButtonRef} type="button" className="my-path__more-actions" onClick={() => setOptionsOpen(open => !open)} disabled={locked}
             aria-expanded={optionsOpen} aria-label={t('myPath.moreCourseActions')} title={t('myPath.moreCourseActions')}><MoreHorizontal size={19} aria-hidden="true" /></button>
-            {optionsOpen && <div className="my-path__course-menu">
-              {onNote && <button type="button" onClick={() => { setOptionsOpen(false); onNote(); }}><FileText size={16} aria-hidden="true" />{t(hasNote ? 'myPath.editNote' : 'myPath.addNote')}</button>}
-              {onPriorityChange && <label><span><Star size={15} aria-hidden="true" />{t('myPath.priority.label')}</span><select value={priority} onChange={event => onPriorityChange(event.target.value as CoursePriority)}><option value="normal">{t('myPath.priority.normal')}</option><option value="medium">{t('myPath.priority.medium')}</option><option value="high">{t('myPath.priority.high')}</option></select></label>}
-              {onReplace && <button type="button" onClick={() => { setOptionsOpen(false); onReplace(); }}><Repeat2 size={16} aria-hidden="true" />{t('myPath.replaceCourse')}</button>}
-              {canReorder && <button type="button" className="my-path__course-menu-delete" onClick={() => { setOptionsOpen(false); onRemove(); }}><Trash2 size={16} aria-hidden="true" />{t('myPath.removeCourse', { title: course.title })}</button>}
-            </div>}
           </div>
+        </div>}
+        {showControls && optionsOpen && <div className="my-path__course-menu" ref={menuRef}>
+              {onNote && <button type="button" className="my-path__course-menu-action" onClick={() => { setOptionsOpen(false); onNote(); }}><FileText size={17} aria-hidden="true" /><span>{t(hasNote ? 'myPath.editNote' : 'myPath.addNote')}</span></button>}
+              {onPriorityChange && <label className="my-path__course-menu-priority"><Star size={17} aria-hidden="true" /><span className="my-path__sr-only">{t('myPath.priority.label')}</span><select aria-label={t('myPath.priority.label')} value={priority} onChange={event => onPriorityChange(event.target.value as CoursePriority)}><option value="normal">{t('myPath.priority.normal')}</option><option value="medium">{t('myPath.priority.medium')}</option><option value="high">{t('myPath.priority.high')}</option></select></label>}
+              {onReplace && <button type="button" className="my-path__course-menu-action" onClick={() => { setOptionsOpen(false); onReplace(); }}><Repeat2 size={17} aria-hidden="true" /><span>{t('myPath.replaceCourse')}</span></button>}
+              {canReorder && <button type="button" className="my-path__course-menu-action my-path__course-menu-delete" onClick={() => { setOptionsOpen(false); onRemove(); }}><Trash2 size={17} aria-hidden="true" /><span>{t('myPath.removeCourse', { title: course.title })}</span></button>}
         </div>}
       </article>
     </li>

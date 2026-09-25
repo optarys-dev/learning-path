@@ -41,7 +41,8 @@ public sealed class GetSemanticRecommendationQueryHandler(
 
     public async Task<SemanticRecommendationResult> RecommendAsync(
         CodeQuest2026.Server.Infrastructure.DataSource.Entities.UserPreference preference,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        IReadOnlyList<long>? excludedCourseIds = null)
     {
         // El vector representa objetivo, intereses y nivel; las habilidades existentes se usan después
         // para evaluar preparación y ordenar la ruta, no para generar el embedding de consulta.
@@ -94,8 +95,9 @@ public sealed class GetSemanticRecommendationQueryHandler(
             .AsSplitQuery()
             .ToDictionaryAsync(x => x.CourseId, cancellationToken);
 
+        var excluded = excludedCourseIds?.ToHashSet();
         var candidates = matches
-            .Where(x => courses.ContainsKey(x.CourseId))
+            .Where(x => courses.ContainsKey(x.CourseId) && (excluded is null || !excluded.Contains(x.CourseId)))
             .Select(x => new SemanticCourseCandidate(courses[x.CourseId], x.Similarity))
             .ToArray();
 

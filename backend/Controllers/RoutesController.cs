@@ -92,7 +92,9 @@ public class RoutesController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status409Conflict)]
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status502BadGateway)]
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status503ServiceUnavailable)]
-    public async Task<ActionResult<SemanticRecommendationV2Dto>> PreviewSemanticRecommendationV2(CancellationToken cancellationToken)
+    public async Task<ActionResult<SemanticRecommendationV2Dto>> PreviewSemanticRecommendationV2(
+        [FromQuery] long[]? excludeCourseIds,
+        CancellationToken cancellationToken)
     {
         var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(discordId))
@@ -100,7 +102,7 @@ public class RoutesController(ISender sender) : ControllerBase
         SemanticRecommendationV2Result result;
         try
         {
-            result = await sender.Send(new GetSemanticRecommendationV2Query(discordId), cancellationToken);
+            result = await sender.Send(new GetSemanticRecommendationV2Query(discordId, excludeCourseIds), cancellationToken);
         }
         catch (HttpRequestException exception) when (exception.StatusCode is not null
             && exception.StatusCode != System.Net.HttpStatusCode.ServiceUnavailable)
@@ -125,7 +127,8 @@ public class RoutesController(ISender sender) : ControllerBase
 
     /// <summary>Guarda una ruta de aprendizaje ya analizada para el usuario autenticado.</summary>
     /// <remarks>
-    /// Requiere preferencias previas y la cookie CodeQuest.Session. El orden del arreglo Courses
+    /// Requiere la cookie CodeQuest.Session. Las rutas recomendadas requieren preferencias previas.
+    /// Goal permite nombrar una ruta manual; si se omite en una recomendación, se usa el objetivo del perfil. El orden del arreglo Courses
     /// define la posición de cada curso. Acepta entre 1 y 30 cursos activos, sin repetidos.
     /// Guarda una copia de las preferencias utilizadas y devuelve la ruta creada.
     /// </remarks>

@@ -76,6 +76,27 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ManualRouteUsesProvidedGoalAndCourseOrder()
+    {
+        var response = await Controller("123").Save(new SaveLearningRouteRequest
+        {
+            Goal = " Backend desde cero ",
+            RecommendationMethod = "manual-v1",
+            Explanation = " Ruta elegida manualmente ",
+            Courses =
+            [
+                new() { CourseId = 2 },
+                new() { CourseId = 1 }
+            ]
+        }, default);
+
+        var route = Assert.IsType<LearningRouteDto>(Assert.IsType<CreatedAtActionResult>(response.Result).Value);
+        Assert.Equal("Backend desde cero", route.Goal);
+        Assert.Equal("manual-v1", route.RecommendationMethod);
+        Assert.Equal(new long[] { 2, 1 }, route.Courses.Select(course => course.CourseId));
+    }
+
+    [Fact]
     public async Task UpdateSwapsPositionsAndPreservesProvenance()
     {
         var response = await Controller("123").Update(routeId, Request(2, 1), default);

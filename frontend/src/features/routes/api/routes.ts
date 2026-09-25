@@ -65,9 +65,9 @@ function parseSavedRouteCourse(value: unknown): SavedRouteCourse | null {
   if (!isRecord(value) || typeof value.title !== 'string') return null;
   const courseId = normalizeCourseId(value.courseId);
   const position = normalizeNumber(value.position);
-  const reason = nullableString(value.reason);
-  const imageUrl = optionalUrl(value.imageUrl);
-  const courseUrl = optionalUrl(value.courseUrl);
+  const reason = value.reason === undefined ? null : nullableString(value.reason);
+  const imageUrl = value.imageUrl === undefined ? null : optionalUrl(value.imageUrl);
+  const courseUrl = value.courseUrl === undefined ? null : optionalUrl(value.courseUrl);
   const progressPercentage = normalizeNumber(value.progressPercentage) ?? 0;
   if (courseId === null || position === null || reason === undefined || imageUrl === undefined || courseUrl === undefined || progressPercentage < 0 || progressPercentage > 100) return null;
   return { courseId, position, title: value.title, reason, imageUrl, courseUrl, progressPercentage };
@@ -78,7 +78,7 @@ export function parseSavedRoute(value: unknown): SavedRoute | null {
     typeof value.goal !== 'string' || typeof value.recommendationMethod !== 'string' ||
     typeof value.createdAt !== 'string' || Number.isNaN(Date.parse(value.createdAt)) ||
     !Array.isArray(value.courses)) return null;
-  const explanation = nullableString(value.explanation);
+  const explanation = value.explanation === undefined ? null : nullableString(value.explanation);
   const courses = value.courses.map(parseSavedRouteCourse);
   if (explanation === undefined || courses.some(course => course === null)) return null;
   return {
@@ -128,9 +128,11 @@ async function readJson(response: Response): Promise<unknown> {
   }
 }
 
-export async function generateRouteRecommendation(): Promise<RouteRecommendation> {
+export async function generateRouteRecommendation(excludedCourseIds: string[] = []): Promise<RouteRecommendation> {
+  const query = new URLSearchParams();
+  excludedCourseIds.forEach(courseId => query.append('excludeCourseIds', courseId));
   const recommendation = parseRouteRecommendation(await readJson(
-    await request('/routes/recommendation/semantic/v2'),
+    await request(`/routes/recommendation/semantic/v2${query.size ? `?${query}` : ''}`),
   ));
   if (!recommendation) throw new RouteRequestError('invalid-response');
   return recommendation;

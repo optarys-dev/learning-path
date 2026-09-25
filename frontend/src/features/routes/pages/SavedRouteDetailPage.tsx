@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type DragEvent } from 'react';
-import { ArrowLeft, FileText, Map as MapIcon, Share2, Sparkles, Star } from 'lucide-react';
+import { FileText, Map as MapIcon, Plus, Share2, Sparkles, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button/Button';
 import { PageState } from '../../../components/ui/PageState/PageState';
 import { useAuthSession } from '../../auth/hooks/useAuthSession';
+import type { CatalogCourse } from '../../catalog/types';
 import { deleteRoute, getSavedRoute, updateCourseProgress, updateRoute } from '../api/routes';
 import { RouteCourseItem } from '../components/RouteCourseItem';
 import { RouteRaceTrack } from '../components/RouteRaceTrack';
 import { RouteNoteDialog } from '../components/RouteNoteDialog';
 import { RouteReplaceDialog } from '../components/RouteReplaceDialog';
 import { RouteShareDialog } from '../components/RouteShareDialog';
+import { RouteCoursePickerDialog } from '../components/RouteCoursePickerDialog';
 import { buildUpdateRouteRequest, createSavedRouteDraft } from '../model/draftRoute';
 import { getCourseNote, getCoursePriority, readRouteCourseLocalState, removeCourseNote, routeStats, saveCourseNote, setCoursePriority } from '../model/routeLocalState';
 import { RouteRequestError, type DraftSavedRoute, type DraftSavedRouteCourse, type RouteCourseLocalState, type RouteRequestErrorKind } from '../model/types';
@@ -24,6 +26,7 @@ export function SavedRouteDetailPage() {
   const { t } = useTranslation();
   const { routeId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isLoading: isSessionLoading, refresh: refreshSession } = useAuthSession();
   const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' });
   const [route, setRoute] = useState<DraftSavedRoute | null>(null);
@@ -42,6 +45,7 @@ export function SavedRouteDetailPage() {
   const [noteCourse, setNoteCourse] = useState<DraftSavedRouteCourse | null>(null);
   const [replacementCourse, setReplacementCourse] = useState<DraftSavedRouteCourse | null>(null);
   const [shareOpen, setShareOpen] = useState(() => window.location.hash === '#share');
+  const [coursePickerOpen, setCoursePickerOpen] = useState(false);
   const draggedCourse = useRef<string | null>(null);
   const dragCoursesRef = useRef<DraftSavedRouteCourse[] | null>(null);
   const lastDragTarget = useRef<string | null>(null);
@@ -142,6 +146,21 @@ export function SavedRouteDetailPage() {
     requestAnimationFrame(() => focusKey ? courseElements.current.get(focusKey)?.focus() : emptyStateRef.current?.focus());
   }
 
+  function addCourse(course: CatalogCourse) {
+    if (!editing || !draft || draft.courses.length >= 30 || draft.courses.some(item => item.courseId === String(course.courseId))) return;
+    setCourses([...draft.courses, {
+      courseId: String(course.courseId),
+      uiKey: `${course.courseId}:${crypto.randomUUID()}`,
+      position: draft.courses.length + 1,
+      title: course.title,
+      reason: null,
+      imageUrl: course.imageUrl,
+      courseUrl: course.courseUrl,
+      progressPercentage: 0,
+    }], t('manualRoute.addedAnnouncement', { title: course.title }));
+    setCoursePickerOpen(false);
+  }
+
   async function changeCourseStatus(course: DraftSavedRouteCourse) {
     if (!route || locked) return;
     const completed = course.progressPercentage !== 100;
@@ -225,7 +244,8 @@ export function SavedRouteDetailPage() {
   return (
     <div className="my-path-page my-path-page--saved-detail">
       <div className="my-path my-path--saved-detail" aria-busy={locked}>
-        <Link className="my-path__back-link" to="/my-path"><ArrowLeft size={17} aria-hidden="true" />{t('myPath.backToRoutes')}</Link>
+        {(location.state as { routeCreated?: boolean } | null)?.routeCreated &&
+          <p className="my-path__feedback my-path__feedback--success" role="status">{t('myPath.saveSuccess')}</p>}
         <header className="my-path__hero">
           <div className="my-path__hero-copy">
             <p className="my-path__eyebrow"><Sparkles size={16} aria-hidden="true" />{t('myPath.savedRouteEyebrow')}</p>
@@ -235,8 +255,7 @@ export function SavedRouteDetailPage() {
           <section className="my-path__recommendation" aria-labelledby="saved-route-goal">
             <div className="my-path__recommendation-heading"><p>{t('myPath.goalLabel')}</p>
               <p className="my-path__course-count">{t('myPath.courseCount', { count: currentRoute.courses.length })}</p></div>
-            <h2 id="saved-route-goal">{currentRoute.goal}</h2>
-            {currentRoute.explanation && <p>{currentRoute.explanation}</p>}
+            {editing ? <div className="my-path__route-fields"><input aria-label={t('manualRoute.nameLabel')} value={draft.goal} maxLength={1000} onChange={event => { setDraft({ ...draft, goal: event.target.value }); setModified(true); }} /><textarea aria-label={t('manualRoute.descriptionLabel')} value={draft.explanation ?? ''} maxLength={4000} onChange={event => { setDraft({ ...draft, explanation: event.target.value }); setModified(true); }} placeholder={t('manualRoute.descriptionPlaceholder')} /></div> : <><h2 id="saved-route-goal">{currentRoute.goal}</h2>{currentRoute.explanation && <p>{currentRoute.explanation}</p>}</>}
             <div className="my-path__route-summary"><span><strong>{Math.round(stats.percentage)}%</strong>{t('myPath.progressLabel')}</span><span>✓ {stats.completed} {t('myPath.completed')}</span><span>○ {stats.notStarted} {t('myPath.notStarted')}</span><span><FileText size={14} aria-hidden="true" />{t('myPath.notesCount', { count: stats.notes })}</span><span><Star size={14} aria-hidden="true" />{t('myPath.priorityCount', { count: stats.priorities })}</span></div>
             <div className="my-path__route-progress"><i style={{ width: `${stats.percentage}%` }} /></div>
           </section>
@@ -249,6 +268,7 @@ export function SavedRouteDetailPage() {
               {modified && <span className="my-path__modified">{t('myPath.unsavedChanges')}</span>}
               <div className="my-path__route-overview"><p>{t('myPath.routeSummary', { count: currentRoute.courses.length })}</p></div>
             </div>
+            {editing && <div className="my-path__route-panel-actions"><Button variant="secondary" onClick={() => setCoursePickerOpen(true)} disabled={locked || currentRoute.courses.length >= 30}><Plus size={16} aria-hidden="true" />{t('manualRoute.addCourse')}</Button></div>}
           </div>
 
           {displayedCourses.length === 0 ? (
@@ -329,7 +349,7 @@ export function SavedRouteDetailPage() {
               {editing ? <>
                 <Button variant="secondary" onClick={cancelEditing} disabled={locked}>{t('myPath.cancel')}</Button>
                 <Button onClick={() => { void saveChanges(); }} isLoading={operation === 'saving'}
-                  loadingLabel={t('myPath.savingChanges')} disabled={!modified || currentRoute.courses.length === 0 || operation === 'deleting'}>
+                  loadingLabel={t('myPath.savingChanges')} disabled={!modified || !currentRoute.goal.trim() || currentRoute.courses.length === 0 || operation === 'deleting'}>
                   {t('myPath.saveChanges')}
                 </Button>
               </> : <>
@@ -345,6 +365,7 @@ export function SavedRouteDetailPage() {
         {noteCourse && <RouteNoteDialog courseTitle={noteCourse.title} note={getCourseNote(localState, currentRoute.routeId, noteCourse.courseId)} onClose={() => setNoteCourse(null)} onSave={content => setLocalState(saveCourseNote(currentRoute.routeId, noteCourse.courseId, content))} onDelete={() => setLocalState(removeCourseNote(currentRoute.routeId, noteCourse.courseId))} />}
         {replacementCourse && <RouteReplaceDialog course={replacementCourse} routeCourseIds={currentRoute.courses.map(course => course.courseId)} onClose={() => setReplacementCourse(null)} onReplace={alternative => { void replaceCourse(replacementCourse, alternative); }} />}
         {shareOpen && <RouteShareDialog route={currentRoute} localState={localState} onClose={() => setShareOpen(false)} />}
+        {coursePickerOpen && <RouteCoursePickerDialog excludedCourseIds={currentRoute.courses.map(course => course.courseId)} onClose={() => setCoursePickerOpen(false)} onAdd={addCourse} />}
       </div>
     </div>
   );
