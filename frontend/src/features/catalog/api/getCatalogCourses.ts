@@ -3,8 +3,12 @@ import type { CatalogCourse, CatalogPageResult } from '../types';
 
 export const catalogPageSize = 12;
 
-export async function getCatalogCourses(page: number, signal?: AbortSignal, pageSize = catalogPageSize): Promise<CatalogPageResult> {
+export async function getCatalogCourses(page: number, signal?: AbortSignal, pageSize = catalogPageSize, search?: string): Promise<CatalogPageResult> {
   const parameters = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  
+  const normalizedSearch = search?.trim();
+  if (normalizedSearch) parameters.set('search', normalizedSearch);
+  
   const response = await fetch(`${apiUrl}/courses?${parameters}`, { headers: { Accept: 'application/json' }, signal });
 
   if (!response.ok) throw new Error(`Unable to load catalog: ${response.status}`);

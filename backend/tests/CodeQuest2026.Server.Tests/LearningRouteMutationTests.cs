@@ -44,9 +44,12 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
                 CourseId = 1,
                 Title = "Python",
                 Slug = "python",
+                Description = "Build reliable data pipelines",
                 ImageUrl = "https://example.test/python.png",
                 ImageAlt = "Python",
-                CourseUrl = "https://example.test/python"
+                CourseUrl = "https://example.test/python",
+                Categories = [new Category { CategoryId = 1, Name = "Web services", Slug = "web-services" }],
+                Tags = [new Tag { TagId = 1, Name = "Django", Slug = "django" }]
             },
             new Course
             {
@@ -339,6 +342,70 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.False(page.HasNextPage);
     }
 
+    [Theory]
+    [InlineData("Python")]
+    [InlineData("yth")]
+    [InlineData("PYTHON")]
+    [InlineData("  Python  ")]
+    public async Task CatalogSearchMatchesCompletePartialCaseInsensitiveAndTrimmedTitles(string search)
+    {
+        var page = await Catalog(search);
+
+        Assert.Equal(new long[] { 1 }, page.Items.Select(course => course.CourseId));
+        Assert.Equal(1, page.TotalCount);
+        Assert.Equal(1, page.TotalPages);
+    }
+
+    [Theory]
+    [InlineData("pipelines")]
+    [InlineData("web services")]
+    [InlineData("django")]
+    public async Task CatalogSearchMatchesDescriptionCategoryAndTag(string search)
+    {
+        var page = await Catalog(search);
+
+        Assert.Equal(new long[] { 1 }, page.Items.Select(course => course.CourseId));
+        Assert.Equal(1, page.TotalCount);
+    }
+
+    [Fact]
+    public async Task CatalogSearchTreatsWhitespaceAsNoSearch()
+    {
+        var page = await Catalog("   ");
+
+        Assert.Equal(3, page.TotalCount);
+        Assert.Equal(new long[] { 2, 1, 3 }, page.Items.Select(course => course.CourseId));
+    }
+
+    [Fact]
+    public async Task CatalogSearchReturnsCoherentEmptyPageWhenNothingMatches()
+    {
+        var page = await Catalog("does-not-exist");
+
+        Assert.Empty(page.Items);
+        Assert.Equal(0, page.TotalCount);
+        Assert.Equal(0, page.TotalPages);
+        Assert.False(page.HasPreviousPage);
+        Assert.False(page.HasNextPage);
+    }
+
+    [Fact]
+    public async Task CatalogSearchPaginatesTheFilteredSet()
+    {
+        var courses = await Db.Courses.Where(course => course.IsActive).ToListAsync();
+        foreach (var course in courses) course.Title += " Course";
+        await Db.SaveChangesAsync();
+        Db.ChangeTracker.Clear();
+
+        var page = await Catalog("course", page: 2, pageSize: 2);
+
+        Assert.Equal(new long[] { 3 }, page.Items.Select(course => course.CourseId));
+        Assert.Equal(3, page.TotalCount);
+        Assert.Equal(2, page.TotalPages);
+        Assert.True(page.HasPreviousPage);
+        Assert.False(page.HasNextPage);
+    }
+
     [Fact]
     public void CatalogAllowsAnonymousAccess()
     {
@@ -414,6 +481,14 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Courses = ids.Select(id => new SaveRouteCourseRequest { CourseId = id, Reason = " Updated reason " }).ToList()
     };
 
+    private async Task<PagedResultDto<CourseDto>> Catalog(string? search, int page = 1, int pageSize = 20)
+    {
+        var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
+        var response = await controller.List(page, pageSize, search, default);
+        return Assert.IsType<PagedResultDto<CourseDto>>(
+            Assert.IsType<OkObjectResult>(response.Result).Value);
+    }
+
     private RoutesController Controller(string? discordId)
     {
         var context = new DefaultHttpContext();
@@ -442,8 +517,6 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         {
             modelBuilder.Ignore<UserPreference>();
             modelBuilder.Ignore<CourseEmbedding>();
-            modelBuilder.Ignore<Category>();
-            modelBuilder.Ignore<Tag>();
             new UserConfiguration().Configure(modelBuilder.Entity<User>());
             modelBuilder.Entity<User>().Ignore(user => user.Preferences);
             new LearningRouteConfiguration().Configure(modelBuilder.Entity<LearningRoute>());
@@ -457,13 +530,24 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
                 if (property.Name is not (
                     nameof(Course.CourseId) or nameof(Course.Title) or nameof(Course.IsActive)
                     or nameof(Course.Slug) or nameof(Course.Level) or nameof(Course.ImageUrl)
-                    or nameof(Course.ImageAlt) or nameof(Course.CourseUrl)))
+                    or nameof(Course.ImageAlt) or nameof(Course.CourseUrl) or nameof(Course.Description)
+                    or nameof(Course.Categories) or nameof(Course.Tags)))
                 {
                     course.Ignore(property.Name);
                 }
             }
             course.HasKey(course => course.CourseId);
             course.Property(course => course.CourseId).ValueGeneratedNever();
+            var category = modelBuilder.Entity<Category>();
+            category.HasKey(item => item.CategoryId);
+            category.Property(item => item.CategoryId).ValueGeneratedNever();
+            category.Ignore(item => item.Slug);
+            var tag = modelBuilder.Entity<Tag>();
+            tag.HasKey(item => item.TagId);
+            tag.Property(item => item.TagId).ValueGeneratedNever();
+            tag.Ignore(item => item.Slug);
+            course.HasMany(item => item.Categories).WithMany(item => item.Courses);
+            course.HasMany(item => item.Tags).WithMany(item => item.Courses);
         }
     }
 }

@@ -44,6 +44,8 @@ export const en = {
     missionRecommended: 'Recommended to explore', missionProgressLabel: 'Catalog available', missionNoteLabel: 'Devi tip',
     missionNote: 'Open a course, compare it, and come back whenever you want: your path is built from your decisions.',
     resultsEyebrow: 'Explore on your own', resultsTitle: 'Available courses', totalCourses: '{{count}} courses available', courseCountLabel: 'courses available', listLabel: 'Available DevTalles courses',
+    searchLabel: 'Search the course catalog', searchPlaceholder: 'Search courses by name, technology, or topic…', clearSearch: 'Clear search',
+    noResultsTitle: 'We could not find courses for "{{query}}"', noResultsDescription: 'Try another name, technology, or topic.',
     paginationLabel: 'Catalog pagination', previousPage: 'Previous', nextPage: 'Next', pageStatus: 'Page {{page}} of {{total}}',
     openCourse: 'View on DevTalles', errorTitle: 'We could not load the catalog', errorDescription: 'Please try again in a moment.', retry: 'Retry',
     emptyTitle: 'There are no courses available yet', emptyDescription: 'Please come back later.',

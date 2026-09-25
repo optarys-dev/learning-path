@@ -44,6 +44,8 @@ export const es = {
     missionRecommended: 'Recomendado para explorar', missionProgressLabel: 'Catálogo disponible', missionNoteLabel: 'Pista de Devi',
     missionNote: 'Podés abrir un curso, compararlo y volver cuando quieras: tu ruta se construye con tus decisiones.',
     resultsEyebrow: 'Explorar por tu cuenta', resultsTitle: 'Cursos disponibles', totalCourses: '{{count}} cursos disponibles', courseCountLabel: 'cursos disponibles', listLabel: 'Cursos disponibles en DevTalles',
+    searchLabel: 'Buscar en el catálogo de cursos', searchPlaceholder: 'Buscar cursos por nombre, tecnología o tema…', clearSearch: 'Limpiar búsqueda',
+    noResultsTitle: 'No encontramos cursos para "{{query}}"', noResultsDescription: 'Probá con otro nombre, tecnología o tema.',
     paginationLabel: 'Paginación del catálogo', previousPage: 'Anterior', nextPage: 'Siguiente', pageStatus: 'Página {{page}} de {{total}}',
     openCourse: 'Ver en DevTalles', errorTitle: 'No pudimos cargar el catálogo', errorDescription: 'Intentá nuevamente en unos instantes.', retry: 'Reintentar',
     emptyTitle: 'Aún no hay cursos disponibles', emptyDescription: 'Volvé a intentarlo más tarde.',

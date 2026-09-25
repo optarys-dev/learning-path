@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Check, CircleDot, Compass, Flag, Lightbulb, RefreshCw, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, CircleDot, Compass, Flag, Lightbulb, RefreshCw, Search, Sparkles, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { QuestDivider, QuestDoodle, QuestMetric, QuestSticker, QuestTab } from '../../../components/ui';
 import { useAuthSession } from '../../auth/hooks/useAuthSession';
@@ -13,12 +13,30 @@ import './CatalogPage.css';
 export function CatalogPage() {
   const { t } = useTranslation();
   const { user } = useAuthSession();
-  const { data, error, isLoading, page, reload, setPage } = useCatalogCourses();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const { data, error, isLoading, page, reload, setPage } = useCatalogCourses(debouncedSearchQuery);
   const createPathTarget = user ? '/learning-profile' : '/login';
 
   useEffect(() => {
     document.title = `${t('catalog.pageTitle')} · CODE QUEST 2026`;
   }, [t]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedSearchQuery(searchQuery.trim()), 300);
+    return () => window.clearTimeout(timeout);
+  }, [searchQuery]);
+
+  function updateSearchQuery(value: string) {
+    setSearchQuery(value);
+    setPage(1);
+  }
+
+  function clearSearch() {
+    updateSearchQuery('');
+    searchInputRef.current?.focus();
+  }
 
   return (
     <div className="catalog-page">
@@ -70,6 +88,23 @@ export function CatalogPage() {
       <QuestDivider className="catalog-mission-divider" label={t('catalog.resultsEyebrow')} />
 
       <section className="catalog-results" aria-labelledby="catalog-results-title">
+        <div className="catalog-search">
+          <Search size={20} aria-hidden="true" />
+          <input
+            ref={searchInputRef}
+            type="search"
+            value={searchQuery}
+            onChange={event => updateSearchQuery(event.target.value)}
+            aria-label={t('catalog.searchLabel')}
+            placeholder={t('catalog.searchPlaceholder')}
+          />
+          {searchQuery && (
+            <button type="button" onClick={clearSearch} aria-label={t('catalog.clearSearch')}>
+              <X size={18} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+
         <div className="catalog-results__header">
           <div>
             <p className="catalog-eyebrow">{t('catalog.resultsEyebrow')}</p>
@@ -90,11 +125,11 @@ export function CatalogPage() {
         )}
 
         {!isLoading && !error && data && (
-          data.items.length === 0 ? (
-            <section className="catalog-state" aria-live="polite">
+          data.totalCount === 0 ? (
+            <section className={debouncedSearchQuery ? 'catalog-state catalog-state--search' : 'catalog-state'} aria-live="polite">
               <BookOpen size={30} aria-hidden="true" />
-              <h2>{t('catalog.emptyTitle')}</h2>
-              <p>{t('catalog.emptyDescription')}</p>
+              <h2>{debouncedSearchQuery ? t('catalog.noResultsTitle', { query: debouncedSearchQuery }) : t('catalog.emptyTitle')}</h2>
+              <p>{debouncedSearchQuery ? t('catalog.noResultsDescription') : t('catalog.emptyDescription')}</p>
             </section>
           ) : (
             <>
