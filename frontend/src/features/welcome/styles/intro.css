@@ -73,7 +73,6 @@
   display: block;
   width: 100%;
   height: auto;
-  border-radius: .65rem;
   filter: drop-shadow(0 1.2rem 2.5rem rgb(0 0 0 / 30%));
 }
 

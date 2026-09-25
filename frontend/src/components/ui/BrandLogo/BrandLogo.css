@@ -3,7 +3,13 @@
 }
 
 .brand-logo--full {
-  aspect-ratio: 830 / 380;
+  display: inline-flex;
+  align-items: center;
+  padding: .3rem .55rem;
+  border: 1px solid rgb(184 158 255 / 34%);
+  border-radius: .72rem;
+  background: #211438;
+  box-shadow: 0 .5rem 1.25rem rgb(27 15 52 / 20%);
 }
 
 .brand-logo img {
@@ -13,17 +19,8 @@
 }
 
 .brand-logo--full img {
-  height: 100%;
-  object-fit: contain;
-}
-
-.brand-logo__image {
-  aspect-ratio: 830 / 380;
-  object-fit: contain;
-}
-
-.brand-logo--full .brand-logo__on-dark {
-  mix-blend-mode: lighten;
+  width: 100%;
+  height: auto;
 }
 
 .brand-logo__on-light {

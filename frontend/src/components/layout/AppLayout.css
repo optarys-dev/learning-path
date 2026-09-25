@@ -8,7 +8,7 @@
   text-decoration: none;
 }
 .app-brand__logo {
-  width: clamp(8.75rem, 10vw, 10.5rem);
+  width: clamp(9.5rem, 11vw, 12rem);
 }
 .app-navigation, .app-navigation nav { display: flex; align-items: center; gap: var(--cq-space-4); }
 .app-navigation nav a { position: relative; display: flex; align-items: center; min-height: 3rem; padding: var(--cq-space-3); color: var(--cq-color-text-secondary); text-decoration: none; }
@@ -86,7 +86,7 @@
 .skip-link { position: fixed; top: var(--cq-space-4); left: var(--cq-space-4); z-index: 10; padding: var(--cq-space-4); background: var(--cq-color-bg-surface); transform: translateY(-200%); }
 .skip-link:focus { transform: translateY(0); }
 @media (max-width: 52rem) {
-  .app-brand__logo { width: 8rem; }
+  .app-brand__logo { width: 8.75rem; }
   .menu-toggle { display: inline-flex; }
   .app-navigation { display: none; width: 100%; align-items: stretch; flex-direction: column; }
   .app-navigation[data-open='true'] { display: flex; }
