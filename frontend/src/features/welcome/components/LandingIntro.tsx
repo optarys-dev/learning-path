@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import missionLogo from '../../../assets/brand/codequest-2026-mission.png';
+import codeQuestLogo from '../../../assets/brand/codequest-logo.svg';
 
 const introSessionKey = 'codequest.landing-intro.seen';
 const introDuration = 2800;
@@ -56,7 +56,7 @@ export function LandingIntro() {
       <span className="landing-intro__star landing-intro__star--two" />
       <span className="landing-intro__star landing-intro__star--three" />
       <div className="landing-intro__mission-mark">
-        <img src={missionLogo} alt="" />
+        <img src={codeQuestLogo} alt="" />
         <span className="landing-intro__caption">{t('landing.heroMission')}</span>
         <span className="landing-intro__progress" />
       </div>
