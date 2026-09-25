@@ -227,7 +227,7 @@ export const es = {
     collectionTitle: 'Tus rutas, a tu ritmo.',
     collectionDescription: 'Elegí una ruta para retomar tu próxima clase o creá una nueva meta cuando estés listo.',
     createAnotherRoute: 'Crear una nueva ruta',
-    savedCount: '{{count}} rutas guardadas',
+    savedCount: 'rutas guardadas',
     loadingSaved: 'Cargando tus rutas guardadas…',
     noSavedRoutes: 'Aún no tienes rutas guardadas',
     noSavedRoutesDescription: 'Genera una propuesta y guárdala para verla aquí.',

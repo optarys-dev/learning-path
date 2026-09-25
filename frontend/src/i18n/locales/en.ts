@@ -227,7 +227,7 @@ export const en = {
     collectionTitle: 'Your paths, at your pace.',
     collectionDescription: 'Choose a path to resume your next lesson or create a new goal when you are ready.',
     createAnotherRoute: 'Create a new path',
-    savedCount: '{{count}} saved paths',
+    savedCount: 'saved paths',
     loadingSaved: 'Loading your saved paths…',
     noSavedRoutes: 'You do not have any saved paths yet',
     noSavedRoutesDescription: 'Generate and save a proposal to see it here.',

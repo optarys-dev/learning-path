@@ -4,6 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { QuestMetric, QuestTab } from '../../../components/ui';
 import type { CoursePriority, EditableRouteCourse } from '../model/types';
 
+const desktopRouteMinWidthRem = 64;
+
+function usesDesktopRouteLayout(element: HTMLElement): boolean {
+  const styles = getComputedStyle(element);
+  const contentWidth = element.clientWidth
+    - Number.parseFloat(styles.paddingLeft)
+    - Number.parseFloat(styles.paddingRight);
+  const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+  return contentWidth >= desktopRouteMinWidthRem * rootFontSize;
+}
+
 interface RouteCourseItemProps {
   course: EditableRouteCourse;
   dropPosition: 'before' | 'after' | null;
@@ -83,6 +94,8 @@ export function RouteCourseItem({
   const dragPreview = useRef<HTMLElement | null>(null);
   const dragGhost = useRef<HTMLCanvasElement | null>(null);
   const dragMoveListener = useRef<((event: globalThis.DragEvent) => void) | null>(null);
+  const dragLayoutObserver = useRef<ResizeObserver | null>(null);
+  const dragActive = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const dragFrame = useRef<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -129,6 +142,7 @@ export function RouteCourseItem({
 
     const source = event.currentTarget;
     const bounds = source.getBoundingClientRect();
+    const sourceStyles = getComputedStyle(source);
     dragPreview.current?.remove();
     const preview = source.cloneNode(true) as HTMLElement;
     preview.removeAttribute('id');
@@ -142,10 +156,31 @@ export function RouteCourseItem({
     preview.style.height = `${bounds.height}px`;
     preview.style.minHeight = `${bounds.height}px`;
     preview.style.maxHeight = `${bounds.height}px`;
+    for (const property of [
+      'align-items',
+      'column-gap',
+      'grid-template-areas',
+      'grid-template-columns',
+      'padding-bottom',
+      'padding-left',
+      'padding-right',
+      'padding-top',
+      'row-gap',
+    ]) {
+      preview.style.setProperty(property, sourceStyles.getPropertyValue(property));
+    }
+    const sourceVisual = source.querySelector<HTMLElement>('.my-path__course-visual');
+    const previewVisual = preview.querySelector<HTMLElement>('.my-path__course-visual');
+    if (sourceVisual && previewVisual) {
+      const visualBounds = sourceVisual.getBoundingClientRect();
+      previewVisual.style.width = `${visualBounds.width}px`;
+      previewVisual.style.height = `${visualBounds.height}px`;
+    }
     preview.style.setProperty('--my-path-drag-x', `${bounds.left}px`);
     preview.style.setProperty('--my-path-drag-y', `${bounds.top}px`);
     document.body.append(preview);
     dragPreview.current = preview;
+    dragActive.current = true;
 
     onDragStart(event);
     const transparentDragImage = document.createElement('canvas');
@@ -161,6 +196,18 @@ export function RouteCourseItem({
     };
     dragMoveListener.current = moveListener;
     document.addEventListener('dragover', moveListener);
+
+    const routePanel = source.closest<HTMLElement>('.my-path__route-panel');
+    if (routePanel) {
+      const startedInDesktopLayout = usesDesktopRouteLayout(routePanel);
+      const observer = new ResizeObserver(() => {
+        if (dragActive.current && usesDesktopRouteLayout(routePanel) !== startedInDesktopLayout) {
+          handleDragEnd();
+        }
+      });
+      observer.observe(routePanel);
+      dragLayoutObserver.current = observer;
+    }
   }
 
   function moveDragPreview(clientX: number, clientY: number) {
@@ -180,16 +227,20 @@ export function RouteCourseItem({
   }
 
   function handleDragEnd() {
+    const wasActive = dragActive.current;
+    dragActive.current = false;
     dragBlocked.current = false;
     if (dragFrame.current !== null) cancelAnimationFrame(dragFrame.current);
     dragFrame.current = null;
+    dragLayoutObserver.current?.disconnect();
+    dragLayoutObserver.current = null;
     if (dragMoveListener.current) document.removeEventListener('dragover', dragMoveListener.current);
     dragMoveListener.current = null;
     dragGhost.current?.remove();
     dragGhost.current = null;
     dragPreview.current?.remove();
     dragPreview.current = null;
-    onDragEnd();
+    if (wasActive) onDragEnd();
   }
 
   return (
@@ -239,9 +290,9 @@ export function RouteCourseItem({
           </div>
         </div>}
         {showControls && optionsOpen && <div className="my-path__course-menu" ref={menuRef}>
-              {onNote && <button type="button" className="my-path__course-menu-action" onClick={() => { setOptionsOpen(false); onNote(); }}><FileText size={17} aria-hidden="true" /><span>{t(hasNote ? 'myPath.editNote' : 'myPath.addNote')}</span></button>}
-              {onPriorityChange && <label className="my-path__course-menu-priority"><Star size={17} aria-hidden="true" /><span className="my-path__sr-only">{t('myPath.priority.label')}</span><select aria-label={t('myPath.priority.label')} value={priority} onChange={event => onPriorityChange(event.target.value as CoursePriority)}><option value="normal">{t('myPath.priority.normal')}</option><option value="medium">{t('myPath.priority.medium')}</option><option value="high">{t('myPath.priority.high')}</option></select></label>}
-              {onReplace && <button type="button" className="my-path__course-menu-action" onClick={() => { setOptionsOpen(false); onReplace(); }}><Repeat2 size={17} aria-hidden="true" /><span>{t('myPath.replaceCourse')}</span></button>}
+              {onNote && <button type="button" className="my-path__course-menu-action my-path__course-menu-action--note" onClick={() => { setOptionsOpen(false); onNote(); }}><FileText size={17} aria-hidden="true" /><span>{t(hasNote ? 'myPath.editNote' : 'myPath.addNote')}</span></button>}
+              {onPriorityChange && <label className="my-path__course-menu-priority"><span className="my-path__priority-control"><Star size={17} aria-hidden="true" /><select aria-label={t('myPath.priority.label')} value={priority} onChange={event => onPriorityChange(event.target.value as CoursePriority)}><option value="normal">{t('myPath.priority.normal')}</option><option value="medium">{t('myPath.priority.medium')}</option><option value="high">{t('myPath.priority.high')}</option></select></span><span className="my-path__sr-only">{t('myPath.priority.label')}</span></label>}
+              {onReplace && <button type="button" className="my-path__course-menu-action my-path__course-menu-action--replace" onClick={() => { setOptionsOpen(false); onReplace(); }}><Repeat2 size={17} aria-hidden="true" /><span>{t('myPath.replaceCourse')}</span></button>}
               {canReorder && <button type="button" className="my-path__course-menu-action my-path__course-menu-delete" onClick={() => { setOptionsOpen(false); onRemove(); }}><Trash2 size={17} aria-hidden="true" /><span>{t('myPath.removeCourse', { title: course.title })}</span></button>}
         </div>}
       </article>

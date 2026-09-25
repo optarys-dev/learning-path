@@ -57,7 +57,7 @@ export function SavedRoutesSection({ refreshKey = 0, highlightedRouteId }: Saved
         </div>
         <img className="my-path__saved-mascot" src={roadmapMascot} alt="" />
         <QuestDoodle kind="arrow" className="my-path__saved-doodle" />
-        {state.status === 'ready' && <QuestMetric value={state.routes.length} label={t('myPath.savedCount', { count: state.routes.length })} />}
+        {state.status === 'ready' && <QuestMetric value={state.routes.length} label={t('myPath.savedCount')} />}
       </div>
 
       {state.status === 'loading' && <p className="my-path__saved-status" role="status">{t('myPath.loadingSaved')}</p>}

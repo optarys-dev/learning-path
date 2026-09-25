@@ -253,6 +253,7 @@ html[data-theme='light'] .my-path-page {
 
 .my-path__route-panel {
   position: relative;
+  container: route-panel / inline-size;
   min-width: 0;
   overflow: hidden;
   padding: clamp(var(--cq-space-6), 3vw, var(--cq-space-8));
@@ -726,6 +727,7 @@ html[data-theme='light'] .my-path__delete-route { color: var(--cq-color-text-on-
   .my-path__hero-orbit { right: var(--cq-space-4); }
   .my-path__route-panel-header { align-items: flex-start; flex-direction: column; gap: var(--cq-space-4); }
   .my-path__route-overview { width: 100%; justify-items: start; }
+  .my-path--proposal .my-path__route-overview { flex: none; }
   .my-path__route-progress { width: min(100%, 22rem); }
   .my-path__course-card { grid-template-columns: 3rem minmax(0, 1fr); }
   .my-path__course-controls { grid-column: 2; justify-content: flex-end; margin-top: calc(var(--cq-space-2) * -1); }
@@ -807,7 +809,7 @@ html[data-theme='light'] .my-path__delete-route { color: var(--cq-color-text-on-
 .my-path__saved-mascot { width: clamp(6rem, 12vw, 9rem); max-height: 8rem; object-fit: contain; filter: drop-shadow(0 .75rem 1rem var(--cq-color-illustration-shadow)); }
 .my-path__saved-doodle { position: absolute; z-index: -1; right: 11rem; bottom: -1rem; width: 10rem; color: var(--cq-color-brand-primary); opacity: .28; transform: rotate(-8deg); }
 .my-path__saved-create { width: fit-content; }
-.my-path__saved-create-actions { display: flex; flex-wrap: wrap; gap: var(--cq-space-3); }
+.my-path__saved-create-actions { display: flex; flex-wrap: wrap; gap: var(--cq-space-3); margin-block-start: var(--cq-space-4); }
 
 .route-picker-dialog { width: min(100%, 64rem); padding-top: var(--cq-space-8); }
 .route-picker-dialog > h2 { max-width: calc(100% - 3rem); margin: 0 0 var(--cq-space-5); }
@@ -835,7 +837,7 @@ html[data-theme='light'] .my-path__delete-route { color: var(--cq-color-text-on-
   .my-path__saved-intro { padding-right: 5.5rem; }
 }
 /* Desktop route timeline: course cards alternate around one connected path. */
-@media (min-width: 52.01rem) {
+@container route-panel (min-width: 64rem) {
   .my-path__course-list {
     grid-template-columns: minmax(0, 1fr) 4.5rem minmax(0, 1fr);
     align-items: center;
@@ -857,7 +859,7 @@ html[data-theme='light'] .my-path__delete-route { color: var(--cq-color-text-on-
   .my-path__course-card { grid-area: card; }
 }
 
-@media (max-width: 52rem) {
+@container route-panel (max-width: 63.99rem) {
   .my-path__course-list { grid-template-columns: 1fr; }
   .my-path__course-step,
   .my-path__course-step:nth-child(even) {
@@ -898,7 +900,7 @@ html[data-theme='dark'] .my-path__course-card .cq-quest-tab--paper {
   color: #fff;
 }
 
-@media (min-width: 52.01rem) {
+@container route-panel (min-width: 64rem) {
   .my-path__course-list {
     column-gap: clamp(var(--cq-space-8), 6vw, var(--cq-space-16));
     row-gap: clamp(var(--cq-space-8), 5vw, 4.75rem);
@@ -906,7 +908,7 @@ html[data-theme='dark'] .my-path__course-card .cq-quest-tab--paper {
   .my-path__course-card { min-height: 8.5rem; }
 }
 
-@media (max-width: 52rem) {
+@container route-panel (max-width: 63.99rem) {
   .my-path__course-list { gap: var(--cq-space-6); }
 }
 
@@ -916,6 +918,7 @@ html[data-theme='dark'] .my-path__course-card .cq-quest-tab--paper {
   overflow: hidden;
   background: var(--cq-color-bg-surface);
 }
+.my-path--saved-detail .my-path__course-card { container: course-card / inline-size; }
 
 /* Route management controls: compact, textual controls keep the two real progress states obvious. */
 .my-path__route-summary, .my-path__saved-stats { display: flex; flex-wrap: wrap; gap: var(--cq-space-2); align-items: center; margin-top: var(--cq-space-4); }
@@ -951,7 +954,7 @@ html[data-theme='dark'] .route-note-dialog { border-color: rgb(177 129 255 / 55%
 @media (max-width: 42rem) { .my-path__course-action { font-size: 0; width: 2.25rem; padding: 0; }.my-path__course-action svg { width: 1rem; height: 1rem; }.my-path__saved-actions { width: 100%; }.my-path__saved-actions .cq-button { flex: 1; }.route-replace-dialog__comparison { grid-template-columns: 1fr; }.route-replace-dialog__comparison > svg { justify-self: center; transform: rotate(90deg); }.route-share-dialog { max-height: 90dvh; }.route-share-card { grid-template-columns: 1fr; aspect-ratio: auto; }.route-share-card__copy { padding-bottom: var(--cq-space-5); }.route-share-card__overview { gap: var(--cq-space-5); border-top: 1px solid rgb(255 255 255 / 16%); border-left: 0; }.route-share-card__map { grid-template-columns: repeat(3, 1fr); }.route-share-card__map::before { display: none; }.route-note-dialog { padding: var(--cq-space-5); }.route-note-dialog__sticky { min-height: 16rem; padding: var(--cq-space-4); }.route-note-dialog__sticky textarea { min-height: 11rem; } }
 
 @media (min-width: 52.01rem) {
-  .my-path--saved-detail .my-path__course-card { grid-template-columns: 5rem minmax(0, 1fr) auto; min-height: 10rem; padding: var(--cq-space-5); }
+  .my-path--saved-detail .my-path__course-card { grid-template-columns: 5rem minmax(0, 1fr) auto; min-height: 10rem; padding-inline: var(--cq-space-6); }
   .my-path--saved-detail .my-path__course-visual { width: 5rem; height: 5rem; border-radius: 1rem; box-shadow: 0 .5rem 1.25rem rgb(0 0 0 / 18%); }
 }
 
@@ -1254,6 +1257,21 @@ html[data-theme='light'] .route-share-card__brand-light { display: block; }
   box-shadow: none;
   color: var(--cq-color-text-primary);
 }
+.my-path--saved-detail .my-path__course-card > .my-path__course-menu {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'note' 'priority' 'replace';
+  gap: var(--cq-space-3);
+  padding-block: var(--cq-space-3);
+  padding-inline: var(--cq-space-4);
+}
+.my-path--saved-detail .my-path__course-menu-action--note { grid-area: note; }
+.my-path--saved-detail .my-path__course-menu-action--replace { grid-area: replace; }
+.my-path--saved-detail .my-path__course-card > .my-path__course-menu button,
+.my-path--saved-detail .my-path__course-card > .my-path__course-menu button span {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
 .my-path__course-card > .my-path__course-menu button {
   width: 100%;
   min-width: 0;
@@ -1291,6 +1309,21 @@ html[data-theme='light'] .route-share-card__brand-light { display: block; }
   background: color-mix(in srgb, var(--cq-color-bg-elevated) 54%, transparent);
   color: var(--cq-color-brand-primary);
 }
+.my-path--saved-detail .my-path__course-card > .my-path__course-menu-priority {
+  display: block;
+  grid-area: priority;
+  padding-block: var(--cq-space-1);
+  padding-inline: var(--cq-space-3);
+}
+.my-path--saved-detail .my-path__priority-control {
+  display: flex;
+  align-items: center;
+  gap: var(--cq-space-2);
+  width: 100%;
+  min-width: 0;
+}
+.my-path--saved-detail .my-path__priority-control > svg { flex: none; }
+.my-path--saved-detail .my-path__priority-control > select { flex: 1; }
 .my-path__course-menu-priority select {
   width: 100%;
   min-width: 0;
@@ -1331,10 +1364,27 @@ html[data-theme='light'] .my-path__course-card > .my-path__course-menu {
   background: rgb(255 255 255 / 68%);
 }
 
+@container course-card (min-width: 22rem) {
+  .my-path--saved-detail .my-path__course-card > .my-path__course-menu {
+    grid-template-columns: minmax(8.5rem, 1fr) minmax(10rem, 1fr);
+    grid-template-areas:
+      'note replace'
+      'priority priority';
+  }
+}
+
+@container course-card (min-width: 31rem) {
+  .my-path--saved-detail .my-path__course-card > .my-path__course-menu {
+    grid-template-columns: minmax(8.5rem, 1fr) minmax(9rem, 1fr) minmax(10rem, 1fr);
+    grid-template-areas: 'note priority replace';
+  }
+}
+
 @media (max-width: 36rem) {
   .my-path__course-card > .my-path__course-menu {
     grid-template-columns: 1fr 1fr;
   }
+  .my-path--saved-detail .my-path__course-card > .my-path__course-menu { padding-inline: var(--cq-space-2); }
   .my-path__course-menu-priority { grid-column: 1 / -1; }
 }
 
