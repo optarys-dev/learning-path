@@ -28,11 +28,6 @@ export function CourseRoutePreview() {
                     <img src={course.imageUrl} alt="" loading="lazy" />
                     <span className="route-course__copy"><small>DevTalles</small><strong>{course.title}</strong></span>
                     <ExternalLink size={15} aria-hidden="true" />
-                    <span className="route-course__detail" aria-hidden="true">
-                      <span>{t('landing.preview.course')}</span>
-                      <strong>{course.title}</strong>
-                      <span>{t('landing.preview.openCourse')}</span>
-                    </span>
                   </a>
                 </li>
               );

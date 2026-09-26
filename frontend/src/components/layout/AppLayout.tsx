@@ -21,7 +21,7 @@ export function AppLayout({
   variant?: 'application' | 'welcome';
 }) {
   const { t } = useTranslation();
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const navigate = useNavigate();
   const { notify } = useNotifications();
 
@@ -52,6 +52,15 @@ export function AppLayout({
   }, [pathname]);
 
   useEffect(() => {
+    if (pathname !== '/' || !hash) return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' });
+      setMenuOpen(false);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname, hash]);
+
+  useEffect(() => {
     if (!profileMenuOpen) return;
 
     function dismissProfileMenu(event: MouseEvent | KeyboardEvent) {
@@ -80,6 +89,13 @@ export function AppLayout({
         user.id,
       )}/${encodeURIComponent(user.avatar)}.png?size=80`
     : null);
+
+  function scrollToLandingSection(section: string) {
+    setMenuOpen(false);
+    if (pathname === '/') {
+      window.requestAnimationFrame(() => document.getElementById(section)?.scrollIntoView({ block: 'start' }));
+    }
+  }
 
   async function handleLogout() {
     if (isLoggingOut) return;
@@ -252,17 +268,26 @@ export function AppLayout({
               </div>
             </>
           ) : (
-            <div className="welcome-navigation">
+            <>
+            <Button ref={menuButton} variant="secondary" className="menu-toggle"
+              aria-label={t(menuOpen ? 'layout.closeMenu' : 'layout.openMenu')}
+              aria-expanded={menuOpen} aria-controls="public-navigation" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+            </Button>
+            <div className="app-navigation welcome-navigation public-navigation" data-open={menuOpen} id="public-navigation"
+              onKeyDown={event => { if (event.key === 'Escape') { setMenuOpen(false); menuButton.current?.focus(); } }}>
               <nav
                 aria-label={t(
                   'landing.navigation',
                 )}
               >
-                <NavLink to="/">
-                  Inicio
+                <NavLink to="/" end onClick={() => setMenuOpen(false)}>
+                  {t('layout.home')}
                 </NavLink>
-
-                <NavLink to="/catalog">
+                <Link to="/#how-it-works" onClick={() => scrollToLandingSection('how-it-works')}>{t('landing.howLink')}</Link>
+                <Link to="/#your-experience" onClick={() => scrollToLandingSection('your-experience')}>{t('landing.insideLink')}</Link>
+                <Link to="/#questions" onClick={() => scrollToLandingSection('questions')}>{t('landing.faqLink')}</Link>
+                <NavLink to="/catalog" onClick={() => setMenuOpen(false)}>
                   {t('layout.catalog')}
                 </NavLink>
 
@@ -274,10 +299,12 @@ export function AppLayout({
               <NavLink
                 className="welcome-navigation__login"
                 to="/login"
+                onClick={() => setMenuOpen(false)}
               >
                 {t('login.navigation')}
               </NavLink>
             </div>
+            </>
           )}
         </div>
       </header>

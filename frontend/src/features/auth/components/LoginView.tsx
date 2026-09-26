@@ -1,6 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, CircleAlert, Compass, Route, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ChevronDown, CircleAlert, Compass, FolderOpen, Paperclip, Route, type LucideIcon } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 import deviReady from '../../../assets/portal/10_continuar_aprendiendo.png';
 import deviLoading from '../../../assets/portal/01_cargando.png';
@@ -27,7 +27,7 @@ export function LoginView({ state, onLogin, onGoogleLogin, googleLoading = false
     : status === 'unavailable' ? t('welcome.unavailable')
     : status === 'authenticated' ? t('welcome.session')
     : status === 'loading' ? t('welcome.connecting') : '';
-  const sceneDevi = status === 'loading' ? deviLoading : status === 'error' || status === 'cancelled' ? deviError : deviReady;
+  const sceneDevi = status === 'loading' || googleLoading ? deviLoading : status === 'error' || status === 'cancelled' || googleError ? deviError : deviReady;
 
   return (
     <div className="login-page">
@@ -47,15 +47,11 @@ export function LoginView({ state, onLogin, onGoogleLogin, googleLoading = false
               <GoogleIcon />{t('login.googleContinue')}
             </Button>}
             {googleError && <p className="login-feedback" data-error="true" role="alert">{t('login.googleError')}</p>}
-            <p id="discord-purpose" className="login-card__purpose">{t('login.privacy')}</p>
+            <details className="login-account-info">
+              <summary>{t('login.accountInfo')}<ChevronDown size={15} aria-hidden="true" /></summary>
+              <p id="discord-purpose">{t('login.privacy')}</p>
+            </details>
           </>}
-          <div className="login-card__flow">
-            <p>{t('login.flowTitle')}</p>
-            <ol>
-              <li><span aria-hidden="true">01</span>{t('login.flowOne')}</li>
-              <li><span aria-hidden="true">02</span>{t('login.flowTwo')}</li>
-            </ol>
-          </div>
           <p id="discord-feedback" className="login-feedback" data-error={status === 'error'} role={status === 'error' ? 'alert' : 'status'}>{status === 'unavailable' && <CircleAlert size={17} aria-hidden="true" />}{feedback}</p>
         </section>
       </motion.div>
@@ -64,18 +60,18 @@ export function LoginView({ state, onLogin, onGoogleLogin, googleLoading = false
         animate={reduceMotion ? undefined : { opacity: 1, x: 0 }}
         transition={{ duration: 0.4, delay: reduceMotion ? 0 : 0.08, ease: 'easeOut' }}>
         <div className="login-aside__copy">
-          <span className="login-aside__spark" aria-hidden="true">✳</span>
+          <span className="login-aside__label"><FolderOpen size={17} aria-hidden="true" />{t('login.sceneLabel')}</span>
           <h2 id="login-aside-title"><Trans i18nKey="login.asideTitle" components={{ accent: <span className="text-accent" /> }} /></h2>
-          <p>{t('login.asideDescription')}</p>
-          <ul>{(['benefitOne', 'benefitTwo', 'benefitThree'] as const).map((key, index) => {
+        </div>
+        <div className="login-aside__scene" aria-hidden="true">
+          <div className="login-scene__sheet"><Paperclip size={30} /><Route size={28} /><span /><span /><CheckCircle2 size={20} /></div>
+          <div className="login-scene__note"><Compass size={24} /><span /><span /></div>
+          <img src={sceneDevi} alt="" width="248" height="277" />
+        </div>
+        <ul className="login-aside__benefits">{(['benefitOne', 'benefitTwo', 'benefitThree'] as const).map((key, index) => {
             const Icon = benefitIcons[index];
             return <li key={key}><span aria-hidden="true"><Icon size={16} /></span>{t(`login.${key}`)}</li>;
           })}</ul>
-        </div>
-        <div className="login-aside__scene" aria-hidden="true">
-          <span className="login-aside__node login-aside__node--two" />
-          <img src={sceneDevi} alt="" width="248" height="277" />
-        </div>
       </motion.aside>
     </div>
   );

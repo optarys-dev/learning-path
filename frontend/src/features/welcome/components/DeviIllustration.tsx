@@ -15,7 +15,8 @@ export function DeviIllustration({ variant, className, ...imageProps }: DeviIllu
       transition={{ duration: 0.45, ease: 'easeOut' }}
       whileHover={reduceMotion ? undefined : { scale: 1.015, rotate: 0.6 }}
     >
-      <img {...imageProps} />
+      <img loading={variant === 'hero' ? 'eager' : 'lazy'} decoding="async"
+        fetchPriority={variant === 'hero' ? 'high' : 'auto'} {...imageProps} />
     </motion.div>
   );
 }
