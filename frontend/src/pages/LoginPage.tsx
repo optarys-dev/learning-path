@@ -1,9 +1,10 @@
+import { appRoutes } from '@/config/navigation';
 import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useDiscordLogin, type DiscordLoginAdapter } from '../features/auth/hooks/useDiscordLogin';
-import { LoginView } from '../features/auth/components/LoginView';
-import { getLoginProviders, startGoogleLogin } from '../features/auth/api/session';
+import { useDiscordLogin, type DiscordLoginAdapter } from '@/features/auth/hooks/useDiscordLogin';
+import { LoginView } from '@/features/auth/components/LoginView';
+import { getLoginProviders, startGoogleLogin } from '@/features/auth/api/session';
 
 export function LoginPage({ adapter, sessionNextPath }: {
   adapter?: DiscordLoginAdapter;
@@ -22,7 +23,7 @@ export function LoginPage({ adapter, sessionNextPath }: {
   const { state, login } = useDiscordLogin(adapter);
   useEffect(() => { document.title = `${t('login.navigation')} · CODE QUEST 2026`; }, [t]);
   const nextPath = sessionNextPath ?? (state.status === 'authenticated' ? state.nextPath : undefined);
-  if (nextPath?.startsWith('/') && !nextPath.startsWith('//') && !nextPath.includes('\\') && !['/', '/login'].includes(nextPath.split(/[?#]/)[0])) {
+  if (nextPath?.startsWith(appRoutes.home) && !nextPath.startsWith('//') && !nextPath.includes('\\') && ![appRoutes.home, appRoutes.login].some(path => path === nextPath.split(/[?#]/)[0])) {
     return <Navigate to={nextPath} replace />;
   }
   return <LoginView state={state} onLogin={() => { if (!googleLoading) void login(); }}

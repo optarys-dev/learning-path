@@ -1,17 +1,18 @@
+import { appRoutes } from '@/config/navigation';
 import { Link } from 'react-router-dom';
-import { useAuthSession } from '../../auth/hooks/useAuthSession';
+import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 import { Trans, useTranslation } from 'react-i18next';
 import { ArrowRight, Check, Compass, Layers, Paperclip, Route, Sparkles, type LucideIcon } from 'lucide-react';
 import { DeviIllustration } from './DeviIllustration';
 import { CourseRoutePreview } from './CourseRoutePreview';
 import { SectionAccent } from './SectionAccent';
-import deviGoal from '../../../assets/codequest/characters/02_mascota_astronauta_cq_en_la_cima.png';
-import reactIcon from '../../../assets/technologies/react.svg';
-import typescriptIcon from '../../../assets/technologies/typescript.svg';
-import nodeIcon from '../../../assets/technologies/nodejs.svg';
-import javascriptIcon from '../../../assets/technologies/javascript.svg';
-import gitIcon from '../../../assets/technologies/git.svg';
-import cssIcon from '../../../assets/technologies/css3.svg';
+import deviGoal from '@/assets/codequest/characters/02_mascota_astronauta_cq_en_la_cima.png';
+import reactIcon from '@/assets/technologies/react.svg';
+import typescriptIcon from '@/assets/technologies/typescript.svg';
+import nodeIcon from '@/assets/technologies/nodejs.svg';
+import javascriptIcon from '@/assets/technologies/javascript.svg';
+import gitIcon from '@/assets/technologies/git.svg';
+import cssIcon from '@/assets/technologies/css3.svg';
 
 const experienceIcons: LucideIcon[] = [Compass, Route, Layers];
 const routeStepKeys = ['routeStep1', 'routeStep2', 'routeStep3'] as const;
@@ -62,7 +63,7 @@ export function LandingDetails() {
                 <span className="experience__icon" aria-hidden="true"><Icon size={23} /></span>
                 <h3>{t(`landing.experience.${item}.title`)}</h3>
                 <p>{t(`landing.experience.${item}.text`)}</p>
-                <Link className="experience__link" to={user ? ['/learning-profile', '/create-route/manual', '/my-path'][index] : '/login'}>
+                <Link className="experience__link" to={user ? [appRoutes.learningProfile, appRoutes.manualRoute, appRoutes.savedRoutes][index] : appRoutes.login}>
                   {t(`landing.experience.${item}.action`)}<ArrowRight size={17} aria-hidden="true" />
                 </Link>
               </div>
@@ -99,8 +100,8 @@ export function LandingDetails() {
           <p className="landing-eyebrow">{t('landing.closing.eyebrow')}</p>
           <h2 id="closing-title"><Trans i18nKey="landing.closing.title" components={{ accent: <span className="text-accent" /> }} /></h2>
           <p>{t('landing.closing.note')}</p>
-          <Link to={user ? '/create-route' : '/login'} className="cq-button cq-button--primary">{t('landing.createRoute')} <ArrowRight size={18} aria-hidden="true" /></Link>
-          <Link to="/catalog" className="landing-text-link">{t('landing.exploreCatalog')} <ArrowRight size={16} aria-hidden="true" /></Link>
+          <Link to={user ? appRoutes.createRoute : appRoutes.login} className="cq-button cq-button--primary">{t('landing.createRoute')} <ArrowRight size={18} aria-hidden="true" /></Link>
+          <Link to={appRoutes.catalog} className="landing-text-link">{t('landing.exploreCatalog')} <ArrowRight size={16} aria-hidden="true" /></Link>
         </div>
         <div className="landing-closing__scene" aria-hidden="true">
           <SectionAccent kind="tools" />

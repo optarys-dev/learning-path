@@ -11,7 +11,7 @@ export function subscribeToUnauthenticated(listener: UnauthenticatedListener) {
   return () => { unauthenticatedListeners.delete(listener); };
 }
 
-function isAbortError(error: unknown) { return error instanceof DOMException && error.name === 'AbortError'; }
+export function isAbortError(error: unknown) { return error instanceof Error && error.name === 'AbortError'; }
 
 async function request(path: string, options: ApiRequestOptions = {}): Promise<Response> {
   const { json, notifyOnUnauthenticated = true, headers, ...requestOptions } = options;
@@ -39,7 +39,10 @@ async function request(path: string, options: ApiRequestOptions = {}): Promise<R
 export async function requestJson<T>(path: string, options?: ApiRequestOptions): Promise<T> {
   const response = await request(path, options);
   try { return await response.json() as T; }
-  catch { throw new ApiError({ message: 'El servicio devolvió una respuesta inválida.', kind: 'invalid-response' }); }
+  catch (error) {
+    if (isAbortError(error)) throw error;
+    throw new ApiError({ message: 'El servicio devolvió una respuesta inválida.', kind: 'invalid-response' });
+  }
 }
 
 export async function requestVoid(path: string, options?: ApiRequestOptions): Promise<void> { await request(path, options); }

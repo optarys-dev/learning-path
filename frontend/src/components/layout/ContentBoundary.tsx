@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PageState } from '../ui/PageState/PageState';
+import { PageState } from '@/components/ui';
 
 class ErrorBoundary extends Component<{ children: ReactNode; fallback: (reset: () => void) => ReactNode }, { failed: boolean }> {
   state = { failed: false };

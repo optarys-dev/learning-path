@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import codeQuestLogo from '../../../assets/brand/codequest-logo.svg';
+import codeQuestLogo from '@/assets/brand/codequest-logo.svg';
 
 const introSessionKey = 'codequest.landing-intro.seen';
 const introDuration = 2800;

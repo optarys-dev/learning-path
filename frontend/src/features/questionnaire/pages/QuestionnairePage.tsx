@@ -1,42 +1,28 @@
+import { appRoutes } from '@/config/navigation';
 import { useEffect, useLayoutEffect, useRef, useState, type TransitionEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Lightbulb } from 'lucide-react';
-import { useAuthSession } from '../../auth/hooks/useAuthSession';
-import deviLaptop from '../../../assets/assessment/04_aprendiendo_con_laptop.svg';
-import deviSelection from '../../../assets/assessment/05_seleccion_correcta.svg';
-import deviNeedsAnswer from '../../../assets/assessment/06_necesita_una_respuesta.svg';
-import deviProgress from '../../../assets/assessment/07_progreso_de_la_ruta.svg';
-import deviReady from '../../../assets/assessment/08_perfil_completado.svg';
-import routeExplorer from '../../../assets/codequest/characters/04_mascota_astronauta_con_mapa_del_tesoro.png';
-import { Button } from '../../../components/ui/Button/Button';
-import { QuestProgress } from '../../../components/ui';
-import { MyPathPage } from '../../routes/pages/MyPathPage';
-import { clearPendingRoute, loadPendingRoute } from '../../routes/model/draftRoute';
-import { savePreferences } from '../api/preferences';
-import { areas, desiredOutcomes, legacyContexts, levels, practicalExperiences, questions } from '../model/config';
-import { loadQuestionnaireDraft, saveQuestionnaireDraft } from '../model/draft';
-import { mapPreferences } from '../model/preferencesMapping';
-import { selectArea } from '../model/state';
-import type { AreaId, QuestionnaireAnswers, QuestionnaireState, TechnologyId } from '../model/types';
-import { isApiError } from '../../../lib/api';
-import { useNotifications } from '../../../components/notifications';
+import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
+import deviLaptop from '@/assets/assessment/04_aprendiendo_con_laptop.svg';
+import deviSelection from '@/assets/assessment/05_seleccion_correcta.svg';
+import deviNeedsAnswer from '@/assets/assessment/06_necesita_una_respuesta.svg';
+import deviProgress from '@/assets/assessment/07_progreso_de_la_ruta.svg';
+import deviReady from '@/assets/assessment/08_perfil_completado.svg';
+import routeExplorer from '@/assets/codequest/characters/04_mascota_astronauta_con_mapa_del_tesoro.png';
+import { Button, QuestProgress } from '@/components/ui';
+import { MyPathPage } from '@/features/routes/pages/MyPathPage';
+import { clearPendingRoute, loadPendingRoute } from '@/features/routes/model/draftRoute';
+import { savePreferences } from '@/features/questionnaire/api/preferences';
+import { questions } from '@/features/questionnaire/model/config';
+import { loadQuestionnaireDraft, saveQuestionnaireDraft } from '@/features/questionnaire/model/draft';
+import { mapPreferences } from '@/features/questionnaire/model/preferencesMapping';
+import { QuestionOptions } from '@/features/questionnaire/components/QuestionOptions';
+import { isStepComplete } from '@/features/questionnaire/model/validation';
+import type { QuestionnaireAnswers, QuestionnaireState } from '@/features/questionnaire/model/types';
+import { isApiError } from '@/lib/api';
+import { useNotifications } from '@/components/notifications';
 import './QuestionnairePage.css';
-
-function isStepComplete(step: number, answers: QuestionnaireAnswers): boolean {
-  switch (questions[step].id) {
-    case 'learningGoal': return answers.goal !== null;
-    case 'technologyInterests': return true;
-    case 'currentExperience': return answers.level !== null;
-    case 'knownSkills': return true;
-    case 'desiredOutcome': return answers.desiredOutcome !== null;
-    case 'practicalExperience': return answers.experience !== null;
-  }
-}
-
-function toggle(items: TechnologyId[], item: TechnologyId): TechnologyId[] {
-  return items.includes(item) ? items.filter(value => value !== item) : [...items, item];
-}
 
 const COMPLETE_TOP_GAP = 12;
 type PreferencesErrorKind = 'validation' | 'unauthorized' | 'server' | 'http' | 'network';
@@ -92,7 +78,6 @@ export function QuestionnairePage() {
     desiredOutcome: deviSelection,
     practicalExperience: deviProgress,
   }[question.id];
-  const technologies = answers.goal === null ? [] : areas[answers.goal];
   const progressPercent = questions.length > 1 ? (currentStep / (questions.length - 1)) * 100 : 100;
 
   useEffect(() => { if (result === null) saveQuestionnaireDraft(state); }, [state, result]);
@@ -297,7 +282,7 @@ export function QuestionnairePage() {
   return (
     <div ref={profileRef} onTransitionEnd={finishEntry} className={`learning-profile${welcome ? ' learning-profile--welcome' : ''}${entryPhase !== 'idle' ? ' learning-profile--entering' : ''}${entryPhase === 'sliding' ? ' learning-profile--sliding' : ''}${started ? ' learning-profile--started' : ''}`}>
       <nav className="learning-profile__creation-options" aria-label={t('manualRoute.methodLabel')}>
-        <Link to="/create-route">{t('manualRoute.manualOption')}</Link>
+        <Link to={appRoutes.createRoute}>{t('manualRoute.manualOption')}</Link>
         <span aria-current="page">{t('manualRoute.recommendedOption')}</span>
       </nav>
       <div className="learning-profile__reveal-viewport" ref={viewportRef}>
@@ -342,94 +327,7 @@ export function QuestionnairePage() {
             </div>
             <img className="learning-profile__mascot learning-profile__mascot--explore" src={showError ? deviNeedsAnswer : stepMascot} alt="" />
           </header>
-          {question.id === 'learningGoal' && (
-              <fieldset className="learning-profile__options learning-profile__options--areas" aria-describedby={showError ? 'question-error' : undefined}>
-                <legend className="sr-only">{t('questionnaire.questions.learningGoal')}</legend>
-                {(Object.keys(areas) as AreaId[]).map(area => (
-                  <label className="learning-profile__option learning-profile__area-card" key={area}>
-                    <input type="radio" name="learning-area" checked={answers.goal === area}
-                      onChange={() => setAnswers(selectArea(answers, area))} />
-                    <span><strong>{t(`questionnaire.areas.${area}`)}</strong><small>{t(`questionnaire.areaDescriptions.${area}`)}</small></span>
-                  </label>
-                ))}
-              </fieldset>
-          )}
-          {question.id === 'technologyInterests' && (
-            <fieldset className="learning-profile__options learning-profile__options--compact"
-              aria-describedby={showError ? 'question-error' : undefined}>
-              <legend className="sr-only">{t('questionnaire.questions.technologyInterests')}</legend>
-              {technologies.map(item => (
-                <label className="learning-profile__option learning-profile__chip" key={item}>
-                  <input type="checkbox" checked={answers.interests.includes(item)}
-                    onChange={() => setAnswers({ ...answers, interests: toggle(answers.interests, item) })} />
-                  <span>{t(`questionnaire.technologies.${item}`)}</span>
-                </label>
-              ))}
-            </fieldset>
-          )}
-          {question.id === 'currentExperience' && (
-            <fieldset className="learning-profile__options" aria-describedby={showError ? 'question-error' : undefined}>
-              <legend className="sr-only">{t('questionnaire.questions.currentExperience')}</legend>
-              {levels.map(level => (
-                <label className="learning-profile__option" key={level}>
-                  <input type="radio" name="current-experience" checked={answers.level === level}
-                    onChange={() => setAnswers({ ...answers, level })} />
-                  <span>{t(`questionnaire.levels.${level}`)}</span>
-                </label>
-              ))}
-            </fieldset>
-          )}
-          {question.id === 'knownSkills' && (
-            <fieldset className="learning-profile__options learning-profile__options--compact">
-              <legend className="sr-only">{t('questionnaire.questions.knownSkills')}</legend>
-              {technologies.map(item => (
-                <label className="learning-profile__option learning-profile__chip" key={item}>
-                  <input type="checkbox" checked={answers.knownSkills.includes(item)}
-                    onChange={() => setAnswers({ ...answers, knownSkills: toggle(answers.knownSkills, item) })} />
-                  <span>{t(`questionnaire.technologies.${item}`)}</span>
-                </label>
-              ))}
-            </fieldset>
-          )}
-          {question.id === 'desiredOutcome' && (
-            <fieldset className="learning-profile__options" aria-describedby={showError ? 'question-error' : undefined}>
-              <legend className="sr-only">{t('questionnaire.questions.desiredOutcome')}</legend>
-              {desiredOutcomes.map(desiredOutcome => (
-                <label className="learning-profile__option" key={desiredOutcome}>
-                  <input type="radio" name="desired-outcome" checked={answers.desiredOutcome === desiredOutcome}
-                    onChange={() => setAnswers({ ...answers, desiredOutcome })} />
-                  <span>{t(`questionnaire.outcomes.${desiredOutcome}`)}</span>
-                </label>
-              ))}
-            </fieldset>
-          )}
-          {question.id === 'practicalExperience' && (
-            <div className="learning-profile__final-step">
-              <fieldset className="learning-profile__options" aria-describedby={showError ? 'question-error' : undefined}>
-                <legend className="sr-only">{t('questionnaire.questions.practicalExperience')}</legend>
-                {practicalExperiences.map(experience => (
-                  <label className="learning-profile__option" key={experience}>
-                    <input type="radio" name="practical-experience" checked={answers.experience === experience}
-                      onChange={() => setAnswers({ ...answers, experience })} />
-                    <span>{t(`questionnaire.experiences.${experience}`)}</span>
-                  </label>
-                ))}
-              </fieldset>
-              <fieldset className="learning-profile__legacy-context">
-                <legend>{t('questionnaire.legacyQuestion')}</legend>
-                <p>{t('questionnaire.legacyHint')}</p>
-                <div className="learning-profile__legacy-options">
-                  {legacyContexts.map(legacyContext => (
-                    <label className="learning-profile__legacy-option" key={legacyContext}>
-                      <input type="radio" name="legacy-context" checked={answers.legacyContext === legacyContext}
-                        onChange={() => setAnswers({ ...answers, legacyContext })} />
-                      <span>{t(`questionnaire.legacyContexts.${legacyContext}`)}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            </div>
-          )}
+          <QuestionOptions questionId={question.id} answers={answers} showError={showError} onChange={setAnswers} />
           {showError && <p id="question-error" className="learning-profile__error" role="alert">{t('questionnaire.requiredError')}</p>}
           </div>
           <div className="learning-profile__actions">

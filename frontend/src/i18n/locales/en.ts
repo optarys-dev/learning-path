@@ -3,6 +3,12 @@ import { landingEn } from './landing.en';
 import { loginEn } from './login.en';
 
 export const en = {
+  theme: { switchToLight: 'Switch to light mode', switchToDark: 'Switch to dark mode', light: 'Light mode', dark: 'Dark mode' },
+  course: { inProgress: 'In progress', completed: 'Completed', progress: 'Progress for {{title}}',
+    levels: { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' } },
+  devPreview: { label: 'DEV · Visual preview, no real session',
+    idle: 'Initial', loading: 'Loading', error: 'Error', cancelled: 'Cancelled', authenticated: 'Signed in', unavailable: 'Unavailable' },
+
   landing: landingEn,
   login: loginEn,
   welcome: {
@@ -175,6 +181,7 @@ export const en = {
     addedAnnouncement: '{{title}} was added to the end of the path.',
   },
   myPath: {
+    storageError: 'We could not save this change in your browser. Check storage and try again.',
     pageTitle: 'Your learning path',
     eyebrow: 'Your next mission',
     initialTitle: 'Your next path starts here',
@@ -282,6 +289,13 @@ export const en = {
     actionTitle: 'Your potential has no limits.',
     actionDescription: 'Save this path and start whenever you are ready.',
     errors: {
+      preferencesRequired: 'Complete your learning profile to request a path recommendation.',
+      embeddingsUnavailable: 'The recommendation catalog is not available yet. Try again later.',
+      embeddingUnavailable: 'We could not prepare the recommendation. Please try again in a moment.',
+      invalidRoute: 'Enter a valid goal and select between 1 and 30 distinct courses.',
+      courseUnavailable: 'One or more courses are no longer available. Review your selection.',
+      invalidProgress: 'We could not validate the course progress. Please try again.',
+
       unauthorized: 'Your session expired. Sign in again to continue.',
       forbidden: 'Your session is active, but you do not have permission to perform this action.',
       validation: 'The request could not be validated. Review the proposal and try again.',

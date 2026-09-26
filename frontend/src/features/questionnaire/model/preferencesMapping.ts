@@ -1,6 +1,6 @@
-import { ApiError } from '../../../lib/api';
-import type { PreferencesDto } from '../api/preferences';
-import { es } from '../../../i18n/locales/es';
+import { ApiError } from '@/lib/api';
+import type { PreferencesDto } from '@/features/questionnaire/api/preferences';
+import { es } from '@/i18n/locales/es';
 import { areas, desiredOutcomes, levels, practicalExperiences } from './config';
 import type { LevelId, QuestionnaireAnswers, TechnologyId } from './types';
 

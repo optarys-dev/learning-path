@@ -1,7 +1,8 @@
+import { appRoutes } from '@/config/navigation';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { PageState } from '../components/ui/PageState/PageState';
+import { PageState } from '@/components/ui';
 
 export function SectionPage({ section }: { section: 'home' | 'catalog' | 'myPath' | 'notFound' }) {
   const { t } = useTranslation();
@@ -15,7 +16,7 @@ export function SectionPage({ section }: { section: 'home' | 'catalog' | 'myPath
       </div>
       <PageState kind="empty" title={t(section === 'notFound' ? 'layout.notFoundState' : 'layout.comingSoon')}
         description={t(section === 'notFound' ? 'layout.notFoundHelp' : 'layout.comingSoonDescription')}>
-        {section === 'notFound' && <Link className="cq-button cq-button--primary" to="/">{t('layout.backHome')}</Link>}
+        {section === 'notFound' && <Link className="cq-button cq-button--primary" to={appRoutes.home}>{t('layout.backHome')}</Link>}
       </PageState>
     </>
   );

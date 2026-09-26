@@ -1,3 +1,4 @@
+import { appRoutes } from '@/config/navigation';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { LearningJourney } from './LearningJourney';
@@ -6,10 +7,10 @@ import { LandingDetails } from './LandingDetails';
 import { PageTrail } from './PageTrail';
 import { SectionAccent } from './SectionAccent';
 import { ArrowRight, BookOpen, Compass, Map, FolderOpen, Paperclip, FileText, type LucideIcon } from 'lucide-react';
-import { useAuthSession } from '../../auth/hooks/useAuthSession';
-import '../styles/welcome.css';
-import '../styles/landing.css';
-import '../styles/landing-refinements.css';
+import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
+import '@/features/welcome/styles/welcome.css';
+import '@/features/welcome/styles/landing.css';
+import '@/features/welcome/styles/landing-refinements.css';
 
 export function WelcomeView() {
   const { t } = useTranslation();
@@ -28,8 +29,8 @@ export function WelcomeView() {
         <h1 id="welcome-title">{t('welcome.title')} <span>{t('welcome.titleAccent')}</span></h1>
         <p className="welcome__description"><Trans i18nKey="landing.heroDescription" components={{ strong: <strong /> }} /></p>
         <div className="welcome__action">
-          <Link className="cq-button cq-button--primary welcome__cta" to={user ? '/create-route' : '/login'}>{t('landing.createRoute')} <ArrowRight size={19} aria-hidden="true" /></Link>
-          <Link className="landing-text-link" to="/catalog"><BookOpen size={18} aria-hidden="true" />{t('landing.exploreCatalog')}</Link>
+          <Link className="cq-button cq-button--primary welcome__cta" to={user ? appRoutes.createRoute : appRoutes.login}>{t('landing.createRoute')} <ArrowRight size={19} aria-hidden="true" /></Link>
+          <Link className="landing-text-link" to={appRoutes.catalog}><BookOpen size={18} aria-hidden="true" />{t('landing.exploreCatalog')}</Link>
         </div>
         <p className="welcome__choice">{t('landing.heroChoice')}</p>
         <p className="welcome__signature">{t('welcome.signature')}</p>
