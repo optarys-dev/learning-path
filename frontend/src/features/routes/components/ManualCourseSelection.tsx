@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, BookOpen, Flag, Route, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui';
 import type { CatalogCourse } from '@/features/catalog';
@@ -20,7 +20,11 @@ export function ManualCourseSelection({ courses, canSave, saving, error, onMove,
       <span>{t('manualRoute.orderStep')}</span>
       <div><h2>{t('manualRoute.orderTitle')}</h2><p>{t('manualRoute.orderHint')}</p></div>
     </div>
-    {courses.length === 0 ? <p className="manual-route__selection-empty">{t('manualRoute.emptySelection')}</p>
+    <p className="manual-route__count" role="status">{t('manualRoute.selectedCount', { count: courses.length })}</p>
+    {courses.length === 0 ? <div className="manual-route__selection-empty">
+      <div className="manual-route__journey" aria-hidden="true"><BookOpen /><Route /><Flag /></div>
+      <strong>{t('manualRoute.emptyTitle')}</strong><p>{t('manualRoute.emptySelection')}</p>
+    </div>
       : <ol>{courses.map((course, index) => <li key={course.courseId}>
         <span>{index + 1}</span><strong>{course.title}</strong>
         <div>
@@ -32,6 +36,7 @@ export function ManualCourseSelection({ courses, canSave, saving, error, onMove,
     {error && <p className="manual-route__error" role="alert">{error}</p>}
     <div className="manual-route__selection-action">
       <Button onClick={() => { void onSave(); }} isLoading={saving} loadingLabel={t('manualRoute.saving')} disabled={!canSave}>{t('manualRoute.save')}</Button>
+      <p>{t('manualRoute.saveHint')}</p>
     </div>
   </aside>;
 }

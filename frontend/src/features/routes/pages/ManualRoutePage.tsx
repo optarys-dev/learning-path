@@ -1,7 +1,7 @@
 import { routeLimits } from '@/features/routes/model/constants';
 import { appRoutes } from '@/config/navigation';
 import { useEffect } from 'react';
-import { Map, Sparkles } from 'lucide-react';
+import { Check, Map, NotebookPen, Paperclip, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router-dom';
 import { PageState } from '@/components/ui';
@@ -40,13 +40,16 @@ export function ManualRoutePage() {
               {t(hasPendingRecommendation ? 'manualRoute.resumeRecommended' : 'manualRoute.recommendedOption')}
             </Link>
           </nav>
-          <strong><Map size={18} aria-hidden="true" />{t('manualRoute.selectedCount', { count: selected.length })}</strong>
         </div>
       </header>
       <section className="manual-route__details" aria-label={t('manualRoute.detailsTitle')}>
         <div className="manual-route__details-heading">
           <span>{t('manualRoute.detailsStep')}</span>
           <div><h2>{t('manualRoute.detailsTitle')}</h2><p>{t('manualRoute.detailsHint')}</p></div>
+        </div>
+        <div className="manual-route__notebook" aria-hidden="true">
+          <Paperclip className="manual-route__clip" size={25} />
+          <NotebookPen size={28} /><span /><span /><Check size={16} />
         </div>
         <div className="manual-route__fields">
           <label htmlFor="manual-route-name">
@@ -55,8 +58,8 @@ export function ManualRoutePage() {
               onChange={event => setGoal(event.target.value)} placeholder={t('manualRoute.namePlaceholder')} />
           </label>
           <label htmlFor="manual-route-description">
-            {t('manualRoute.descriptionLabel')}
-            <textarea id="manual-route-description" value={explanation} maxLength={routeLimits.explanationLength}
+            <span>{t('manualRoute.descriptionLabel')} <small>{t('manualRoute.optional')}</small></span>
+            <textarea id="manual-route-description" rows={2} value={explanation} maxLength={routeLimits.explanationLength}
               onChange={event => setExplanation(event.target.value)} placeholder={t('manualRoute.descriptionPlaceholder')} />
           </label>
         </div>
