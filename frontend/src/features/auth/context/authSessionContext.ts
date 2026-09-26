@@ -1,6 +1,6 @@
 import { createContext } from 'react';
-import type { AuthenticatedUser } from '../api/session';
-import type { ApiError } from '../../../lib/api';
+import type { AuthenticatedUser } from '@/features/auth/api/session';
+import type { ApiError } from '@/lib/api';
 
 export interface AuthSessionContextValue {
   user: AuthenticatedUser | null;

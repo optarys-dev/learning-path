@@ -1,181 +1,82 @@
 <p align="center">
-  <img src="frontend/src/assets/brand/codequest-2026-mission.png" alt="CODE QUEST 2026" width="420" />
+  <img src="frontend/src/assets/brand/codequest-2026-mission.png" alt="CODE QUEST 2026" width="320" />
 </p>
 
-<h1 align="center">CODE QUEST 2026</h1>
+<h1 align="center">Learning Path</h1>
 
 <p align="center">
-  Una forma de convertir tus objetivos en una ruta de aprendizaje clara, con cursos reales de DevTalles.
+  <strong>De tener opciones a tener un plan.</strong><br />
+  Tu objetivo, los cursos de DevTalles y un camino para seguir aprendiendo.
 </p>
 
 <p align="center">
-  <a href="#qué-es-code-quest">Conoce el proyecto</a> ·
-  <a href="#qué-puedes-hacer">Funcionalidades</a> ·
-  <a href="#cómo-está-construido">Arquitectura</a> ·
-  <a href="#ponerlo-en-marcha">Instalación</a>
+  <a href="https://codequest2026.optarys.com/"><strong>🚀 Explorar la aplicación</strong></a> ·
+  <a href="#cómo-recomendamos-tu-ruta">🧠 Cómo recomendamos</a> ·
+  <a href="#dentro-del-proyecto">🔎 Ver el código</a>
 </p>
 
-## Qué es CODE QUEST
+---
 
-CODE QUEST ayuda a elegir **qué aprender y en qué orden**. Puedes responder un cuestionario para recibir una ruta recomendada según tu meta, experiencia e intereses, o construir una ruta manualmente con los cursos del catálogo. Después puedes guardarla, ajustarla y seguir tu avance desde un mismo lugar.
+## 🧭 Tu recorrido, a tu manera
 
-Los cursos se estudian en **DevTalles**: CODE QUEST organiza el recorrido, pero no aloja las clases ni sincroniza automáticamente el progreso con la plataforma de cursos.
+Learning Path te ayuda a decidir **qué aprender y en qué orden**. Puedes recibir una recomendación según tu perfil o construir una ruta manualmente. Tú decides qué conservar y cuándo guardarla.
 
-## Qué puedes hacer
-
-| Área | Experiencia |
+| | Lo que puedes hacer |
 | --- | --- |
-| Descubrir | Explorar el catálogo de cursos y consultar su información disponible. |
-| Personalizar | Iniciar sesión con Discord y completar un perfil con intereses, conocimientos y objetivo. |
-| Crear | Generar una propuesta recomendada o elegir y ordenar cursos para crear una ruta manual. |
-| Avanzar | Guardar varias rutas, editar sus cursos y marcar cada uno como **No iniciado** o **Completado**. |
-| Organizar | Escribir una nota y asignar prioridad normal, media o alta a cada curso. |
-| Ajustar | Reemplazar cursos de una ruta y conservar su lugar dentro del recorrido. |
-| Compartir | Ver una vista previa y descargar el mapa de la ruta como PNG horizontal, cuadrado o vertical 9:16. Las rutas largas se dividen en varias imágenes. |
+| 🧠 **Descubrir** | Explorar el catálogo y recibir una propuesta personalizada. |
+| ✍️ **Crear** | Elegir, ordenar y ajustar tus propios cursos. |
+| ✅ **Avanzar** | Guardar rutas, marcar cursos completados y añadir notas y prioridades. |
+| 🗺️ **Compartir** | Exportar tu recorrido como un mapa en PNG. |
 
-La interfaz está disponible en **español e inglés**, con **tema claro y oscuro** y diseño adaptable a móvil y escritorio.
+**Discord y Google · Español e inglés · Tema claro y oscuro**
 
-### Un recorrido típico
+Las clases se estudian en DevTalles. Aquí organizas tu aprendizaje; el progreso se registra por ti y las notas y prioridades son locales al navegador.
 
-1. Entras a CODE QUEST y accedes con Discord.
-2. Indicas qué quieres aprender y tu punto de partida.
-3. Revisas la propuesta de cursos, o creas una ruta desde cero.
-4. Guardas la ruta y marcas los cursos que completas.
-5. Añades notas, ajustas prioridades y compartes tu mapa cuando quieras.
+## 🧠 Cómo recomendamos tu ruta
 
-## Cómo está construido
+Partimos de lo que quieres aprender y buscamos cursos reales del catálogo que te ayuden a conseguirlo.
 
-```text
-Navegador (React + TypeScript)
-       │
-       ├── rutas y progreso ──> API ASP.NET Core ──> PostgreSQL
-       │                              │                    └── pgvector: búsqueda semántica
-       ├── notas y prioridades ──> localStorage
-       └── imágenes PNG ──> generación en el navegador
-                                      │
-                                      ├── FastAPI + modelo local de embeddings
-                                      └── Groq (refinamiento opcional de la recomendación)
+```mermaid
+flowchart TD
+    A["Tu objetivo y perfil"] --> B["Buscar cursos relacionados con tu objetivo"]
+    B --> C["Elegir cursos y proponer un orden"]
+    C --> D["IA opcional: mejorar orden y explicaciones"]
+    D --> E["Propuesta editable · tú decides guardar"]
 ```
 
-| Pieza | Responsabilidad |
-| --- | --- |
-| **Frontend** | React, TypeScript, Vite y React Router para pantallas, navegación y edición de rutas. `i18next` gestiona los dos idiomas. |
-| **API** | ASP.NET Core 10 expone el catálogo, autenticación, preferencias, recomendaciones y rutas guardadas. |
-| **Datos** | PostgreSQL y Entity Framework Core conservan usuarios, catálogo, rutas y progreso. `pgvector` permite comparar cursos y preferencias. |
-| **Embeddings** | Un servicio Python/FastAPI genera los vectores del catálogo y de las preferencias con un modelo local. |
-| **IA opcional** | Groq puede refinar el orden y las explicaciones de una propuesta; si no está disponible, se mantiene la recomendación semántica. |
+1. **Buscamos por significado.** Comparamos tu objetivo, intereses y experiencia con el contenido de los cursos. No hace falta que el título repita exactamente tus palabras.
+2. **Elegimos y ordenamos.** Proponemos hasta seis cursos relacionados, considerando sus temas, nivel y requisitos verificados, además de lo que ya sabes. Buscamos variedad sin alejarnos de tu objetivo.
+3. **Explicamos por qué.** La IA puede ajustar el orden y explicar el aporte de cada curso. Solo utiliza los cursos que el motor eligió; si falla, conservamos la propuesta original.
 
-### Decisiones que importan
+> **Ejemplo:** para «web con Python», el motor prioriza fundamentos y cursos del tema. Puede proponer menos de seis para evitar rellenar la ruta con tecnologías ajenas al objetivo. Los requisitos orientan; no bloquean cursos.
 
-- **El usuario decide cuándo guardar.** La recomendación es una propuesta editable; no se convierte en ruta guardada hasta confirmarla.
-- **El progreso tiene dos estados en la interfaz.** Cada curso se marca como No iniciado (0 %) o Completado (100 %); el resumen de la ruta se calcula a partir de esos cursos.
-- **Notas y prioridades son personales y locales.** Se asocian a la ruta y al curso en `localStorage`; no viajan a la API ni se sincronizan entre dispositivos.
-- **La recomendación no depende por completo de la IA generativa.** El motor semántico selecciona cursos; el refinamiento con Groq es opcional y tiene una alternativa cuando falla.
-- **El contenido sigue en su origen.** CODE QUEST enlaza a los cursos de DevTalles y no copia ni distribuye sus clases.
+La recomendación es una **propuesta que puedes revisar y ajustar**. Tú decides cuándo guardarla.
 
-## Organización del repositorio
+## 🛠️ Dentro del proyecto
 
-```text
-frontend/
-  src/features/          Autenticación, catálogo, cuestionario y rutas
-  src/components/        Componentes compartidos y estructura de la app
-  src/styles/            Tokens y estilos globales
-  src/i18n/              Textos en español e inglés
-  src/assets/            Identidad e ilustraciones
-backend/
-  Controllers/            Endpoints HTTP
-  Application/            Casos de uso, recomendaciones y contratos
-  Infrastructure/         Persistencia, migraciones y proveedores externos
-  embedding-worker/       Indexación y API de embeddings en Python
-  tests/                  Pruebas de la API
-database/seeds/           Material de referencia del catálogo
-docs/                    Guías de arquitectura, diseño e internacionalización
-```
+| Experiencia | Aplicación y datos | Recomendación |
+| --- | --- | --- |
+| React · TypeScript · Vite | ASP.NET Core · EF Core | Python · FastAPI |
+| React Router · i18next | PostgreSQL · pgvector | Embeddings locales · Groq |
 
-## Ponerlo en marcha
+Cada pieza tiene una responsabilidad: el frontend presenta y edita, la API coordina y persiste, Python genera vectores y el motor elige el recorrido.
 
-Este ejemplo usa **PowerShell** y ejecuta PostgreSQL en Docker; la API, el worker y el frontend se inician por separado para facilitar el desarrollo. Necesitas Docker, **.NET 10**, Node.js con npm, **Python 3.10+** y una aplicación de Discord OAuth para probar las funciones protegidas.
+<details>
+<summary><strong>🔎 Explorar la implementación y sus pruebas</strong></summary>
 
-### 1. Iniciar PostgreSQL
+- [Perfil del usuario](frontend/src/features/questionnaire/model/preferencesMapping.ts) → [embeddings](backend/embedding-worker/embedding_service.py) → [búsqueda](backend/Application/Routes/Queries/GetSemanticRecommendationQuery.cs).
+- [Selección y orden](backend/Application/Routes/HybridSemanticRecommendationEngine.cs) → [refinamiento validado](backend/Application/Routes/RouteRefinementService.cs) → [guardado](backend/Application/Routes/Commands/SaveLearningRouteCommand.cs).
+- [Pruebas del motor](backend/tests/CodeQuest2026.Server.Tests/HybridSemanticRecommendationEngineTests.cs) · [Pruebas de refinamiento](backend/tests/CodeQuest2026.Server.Tests/GroqRouteRefinerTests.cs) · [Pruebas del frontend](frontend/tests/README.md).
+- [Arquitectura](docs/architecture.md) · [Documentación del frontend](frontend/README.md) · [Documentación del backend](backend/README.md).
 
-Desde la raíz del repositorio:
+</details>
 
-```powershell
-Copy-Item .env.example .env
-# Cambia POSTGRES_PASSWORD en .env por una contraseña local.
-docker compose up -d postgres
-```
+---
 
-El archivo `.env` de la raíz configura **Docker Compose**; la API .NET no lo carga automáticamente. Si cambias el puerto, usuario o nombre de la base, ajusta también las conexiones de los pasos siguientes.
+<p align="center">
+  <img src="frontend/src/assets/brand/devi-laptop.svg" alt="Devi aprendiendo" width="90" /><br />
+  <strong>Una meta. Un punto de partida. Tu propio recorrido.</strong><br />
+  <a href="https://codequest2026.optarys.com/">Conoce Learning Path →</a>
+</p>
 
-### 2. Preparar la base de datos e iniciar la API
-
-En otra terminal, desde `backend/`:
-
-```powershell
-$env:ConnectionStrings__DefaultConnection = 'Host=localhost;Port=5432;Database=codequest2026;Username=codequest;Password=TU_PASSWORD'
-$env:DISCORD_CLIENT_ID = 'TU_CLIENT_ID'
-$env:DISCORD_CLIENT_SECRET = 'TU_CLIENT_SECRET'
-$env:ASPNETCORE_ENVIRONMENT = 'Development'
-
-dotnet tool restore --tool-manifest dotnet-tools.json
-dotnet ef database update --context AppDbContext
-dotnet run --launch-profile http
-```
-
-Usa aquí la misma contraseña que configuraste en `.env`. Las migraciones crean el esquema y cargan el catálogo inicial; **no ejecutes por separado el SQL histórico de `database/seeds/`**. La API escucha en `http://localhost:5107`; Swagger está en `http://localhost:5107/swagger`.
-
-### 3. Indexar cursos e iniciar el worker
-
-En otra terminal, desde `backend/embedding-worker/`:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-$env:DATABASE_URL = 'postgresql://codequest:TU_PASSWORD@localhost:5432/codequest2026'
-
-python embedding_cli.py index
-python embedding_cli.py serve
-```
-
-La primera indexación descarga el modelo y puede tardar. El worker queda en `http://127.0.0.1:8765`; vuelve a ejecutar `index` cuando cambie el catálogo o el modelo. La API usa esa URL por defecto.
-
-### 4. Iniciar el frontend
-
-En otra terminal, desde `frontend/`:
-
-```powershell
-npm ci
-npm run dev
-```
-
-Abre **http://localhost:5173**. Deja `VITE_API_BASE_URL` vacío para usar el proxy local de Vite; si necesitas una URL absoluta, configura `frontend/.env` a partir de `frontend/.env.example`.
-
-Para el inicio de sesión, registra en la aplicación de Discord la URL de retorno que uses: `http://localhost:5173/auth/discord/callback` con el proxy de Vite, o `http://localhost:5107/auth/discord/callback` si entras directamente por la API. Consulta la [guía de Discord](backend/docs/DISCORD_OAUTH.md) para HTTPS y despliegue.
-
-> **Refinamiento opcional:** configura `Groq__ApiKey` en la terminal de la API si quieres probar la recomendación refinada. Sin esa clave, la propuesta semántica sigue disponible.
-
-### Docker Compose completo
-
-`compose.yaml` también puede levantar PostgreSQL, el worker y la API con el frontend compilado. La base se **migra antes** del arranque completo y los cursos se **indexan explícitamente**. Los comandos y detalles de red están en el [README del backend](backend/README.md#docker). En producción, el inicio de sesión requiere una URL pública HTTPS.
-
-## Verificaciones y más documentación
-
-```powershell
-# Desde frontend/
-npm run lint
-npm run build
-
-# Desde la raíz
-dotnet test CodeQuest2026.slnx
-```
-
-- [Backend, endpoints y recomendación](backend/README.md)
-- [Worker de embeddings](backend/embedding-worker/README.md)
-- [Arquitectura](docs/architecture.md) · [Sistema de diseño](docs/design-system.md) · [Idiomas](docs/i18n.md)
-- [Migraciones](backend/docs/MIGRATIONS.md) · [Colaboración](CONTRIBUTING.md)
-
-## Licencia y recursos de terceros
-
-El código propio de este proyecto se publica bajo la [licencia MIT](LICENSE). Los nombres, logos, miniaturas y contenidos de terceros —incluidos los de DevTalles y sus cursos— pertenecen a sus respectivos titulares; su presencia aquí no concede derechos sobre esas marcas o materiales.
+Código propio bajo [licencia MIT](LICENSE). Las marcas, miniaturas y contenidos de terceros pertenecen a sus respectivos titulares.

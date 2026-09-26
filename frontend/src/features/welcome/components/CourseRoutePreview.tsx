@@ -1,9 +1,9 @@
 import { BookOpen, ExternalLink, Flag, Map, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DeviIllustration } from './DeviIllustration';
-import deviRoute from '../../../assets/codequest/characters/04_mascota_astronauta_con_mapa_del_tesoro.png';
-import lunarTerrain from '../../../assets/codequest/scenes/10_divisor_lunar_neón_con_ruta_estelar.png';
-import { featuredCourses } from '../model/featuredCourses';
+import deviRoute from '@/assets/codequest/characters/04_mascota_astronauta_con_mapa_del_tesoro.png';
+import lunarTerrain from '@/assets/codequest/scenes/10_divisor_lunar_neón_con_ruta_estelar.png';
+import { featuredCourses } from '@/features/welcome/model/featuredCourses';
 
 const routeMarkers = [BookOpen, Map, Sparkles, Flag];
 const routeStepKeys = ['start', 'build', 'practice', 'next'] as const;

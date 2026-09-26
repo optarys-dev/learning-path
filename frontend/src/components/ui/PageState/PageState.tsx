@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '../Button/Button';
+import { Button } from '@/components/ui/Button/Button';
 import './PageState.css';
 
 type PageStateProps = {

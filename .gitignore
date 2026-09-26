@@ -42,3 +42,6 @@ secrets/
 coverage/
 Thumbs.db
 .DS_Store
+
+# Frontend regression test compilation
+frontend/.test-build/

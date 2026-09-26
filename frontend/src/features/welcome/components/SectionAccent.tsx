@@ -1,4 +1,4 @@
-import lunarBeacon from '../../../assets/codequest/scenes/11_baliza_lunar_futurista_brillante.png';
+import lunarBeacon from '@/assets/codequest/scenes/11_baliza_lunar_futurista_brillante.png';
 import { Bookmark, Check, Highlighter, NotebookPen, Paperclip, Pencil, type LucideIcon } from 'lucide-react';
 
 type AccentKind = 'beacon' | 'note' | 'bookmark' | 'tools';

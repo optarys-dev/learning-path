@@ -1,6 +1,7 @@
+import { routeStorage } from './constants';
 import type { CreateRouteDto, DraftRoute, DraftSavedRoute, RouteRecommendation, SavedRoute, UpdateRouteDto } from './types';
 
-const PENDING_ROUTE_KEY = 'learning-path:pending-recommendation:v1';
+const PENDING_ROUTE_KEY = routeStorage.pendingRecommendation;
 
 export function loadPendingRoute(userId: string): { route: DraftRoute; modified: boolean } | null {
   try {

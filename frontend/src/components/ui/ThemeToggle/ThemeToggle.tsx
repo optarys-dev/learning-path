@@ -1,5 +1,6 @@
 import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './ThemeToggle.css';
 
 type Theme = 'light' | 'dark';
@@ -16,11 +17,13 @@ function getInitialTheme(): Theme {
 }
 
 export function ThemeToggle() {
+  const { t } = useTranslation();
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem(themeStorageKey, theme);
+    try { window.localStorage.setItem(themeStorageKey, theme); }
+    catch { /* The active theme still works when browser storage is unavailable. */ }
   }, [theme]);
 
   const toggleTheme = () => {
@@ -36,13 +39,13 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={
         theme === 'dark'
-          ? 'Cambiar a modo claro'
-          : 'Cambiar a modo oscuro'
+          ? t('theme.switchToLight')
+          : t('theme.switchToDark')
       }
       title={
         theme === 'dark'
-          ? 'Modo claro'
-          : 'Modo oscuro'
+          ? t('theme.light')
+          : t('theme.dark')
       }
     >
       {theme === 'dark'

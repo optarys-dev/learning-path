@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
+import { routeStorage } from '@/features/routes/model/constants';
+import { appRoutes } from '@/config/navigation';
+import { useEffect, useEffectEvent, useState } from 'react';
 import { CalendarDays, FileText, Map, Route as RouteIcon, Share2, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Button } from '../../../components/ui/Button/Button';
-import { QuestDoodle, QuestMetric, QuestSticker } from '../../../components/ui';
-import { useAuthSession } from '../../auth/hooks/useAuthSession';
-import { getSavedRoutes } from '../api/routes';
-import { RouteRequestError, type SavedRoute } from '../model/types';
-import { readRouteCourseLocalState, routeStats } from '../model/routeLocalState';
-import roadmapMascot from '../../../assets/codequest/characters/05_mascota_astronauta_presenta_el_roadmap.png';
+import { Button, QuestDoodle, QuestMetric, QuestSticker } from '@/components/ui';
+import { useRouteError } from '@/features/routes/hooks/useRouteError';
+import { getSavedRoutes } from '@/features/routes/api/routes';
+import { type SavedRoute } from '@/features/routes/model/types';
+import { readRouteCourseLocalState, routeStats } from '@/features/routes/model/routeLocalState';
+import roadmapMascot from '@/assets/codequest/characters/05_mascota_astronauta_presenta_el_roadmap.png';
 
 interface SavedRoutesSectionProps {
   refreshKey?: number;
@@ -17,7 +18,7 @@ interface SavedRoutesSectionProps {
 
 export function SavedRoutesSection({ refreshKey = 0, highlightedRouteId }: SavedRoutesSectionProps) {
   const { i18n, t } = useTranslation();
-  const { refresh: refreshSession } = useAuthSession();
+  const translateError = useRouteError();
   const [state, setState] = useState<
     { status: 'loading' } |
     { status: 'ready'; routes: SavedRoute[] } |
@@ -28,23 +29,23 @@ export function SavedRoutesSection({ refreshKey = 0, highlightedRouteId }: Saved
 
   useEffect(() => {
     const refresh = () => setLocalStateVersion(version => version + 1);
-    window.addEventListener('learning-path:course-state-change', refresh);
-    return () => window.removeEventListener('learning-path:course-state-change', refresh);
+    window.addEventListener(routeStorage.courseStateChanged, refresh);
+    return () => window.removeEventListener(routeStorage.courseStateChanged, refresh);
   }, []);
 
+  const onLoadError = useEffectEvent((error: unknown) => {
+    setState({ status: 'error', message: translateError(error).message });
+  });
+
   useEffect(() => {
-    let active = true;
-    getSavedRoutes().then(routes => {
-      if (active) setState({ status: 'ready', routes });
+    const controller = new AbortController();
+    getSavedRoutes(controller.signal).then(routes => {
+      if (!controller.signal.aborted) setState({ status: 'ready', routes });
     }).catch(error => {
-      if (!active) return;
-      const kind = error instanceof RouteRequestError ? error.kind : 'http';
-      if (kind === 'unauthorized') void refreshSession();
-      const key = kind === 'invalid-response' ? 'invalidResponse' : kind === 'not-found' ? 'notFound' : kind;
-      setState({ status: 'error', message: t(`myPath.errors.${key}`) });
+      if (!controller.signal.aborted) onLoadError(error);
     });
-    return () => { active = false; };
-  }, [refreshKey, refreshSession, retryVersion, t]);
+    return () => controller.abort();
+  }, [refreshKey, retryVersion]);
 
   return (
     <section className="my-path__saved my-path__saved--surface" aria-labelledby="saved-routes-title">
@@ -53,7 +54,7 @@ export function SavedRoutesSection({ refreshKey = 0, highlightedRouteId }: Saved
           <p className="my-path__eyebrow"><RouteIcon size={16} aria-hidden="true" />{t('myPath.savedEyebrow')}</p>
           <h1 className="cq-journey-title" id="saved-routes-title">{t('myPath.collectionTitle')}</h1>
           <p>{t('myPath.collectionDescription')}</p>
-          <div className="my-path__saved-create-actions"><Link className="cq-button cq-button--primary my-path__saved-create" to="/create-route">{t('manualRoute.createManual')}</Link><Link className="cq-button cq-button--secondary" to="/learning-profile">{t('manualRoute.createPersonalized')}</Link></div>
+          <div className="my-path__saved-create-actions"><Link className="cq-button cq-button--primary my-path__saved-create" to={appRoutes.createRoute}>{t('manualRoute.createManual')}</Link><Link className="cq-button cq-button--secondary" to={appRoutes.learningProfile}>{t('manualRoute.createPersonalized')}</Link></div>
         </div>
         <img className="my-path__saved-mascot" src={roadmapMascot} alt="" />
         <QuestDoodle kind="arrow" className="my-path__saved-doodle" />
@@ -92,7 +93,7 @@ export function SavedRoutesSection({ refreshKey = 0, highlightedRouteId }: Saved
                 <div className="my-path__saved-stats"><span>✓ {stats.completed} {t('myPath.completed')}</span><span>○ {stats.notStarted} {t('myPath.notStarted')}</span><span><FileText size={14} aria-hidden="true" />{t('myPath.notesCount', { count: stats.notes })}</span><span><Star size={14} aria-hidden="true" />{t('myPath.priorityCount', { count: stats.priorities })}</span></div>
                 {route.courses.length > 0 && <small>{route.courses.slice(0, 3).map(course => course.title).join(' · ')}</small>}
               </div>
-              <div className="my-path__saved-actions"><Link className="cq-button cq-button--secondary" to={`/my-path/${encodeURIComponent(route.routeId)}`}>{t('myPath.viewRoute')}</Link><Link className="my-path__saved-share" aria-label={t('myPath.shareRoute')} to={`/my-path/${encodeURIComponent(route.routeId)}#share`}><Share2 size={17} aria-hidden="true" /></Link></div>
+              <div className="my-path__saved-actions"><Link className="cq-button cq-button--secondary" to={appRoutes.savedRoute(route.routeId)}>{t('myPath.viewRoute')}</Link><Link className="my-path__saved-share" aria-label={t('myPath.shareRoute')} to={`${appRoutes.savedRoute(route.routeId)}#share`}><Share2 size={17} aria-hidden="true" /></Link></div>
             </li>
           ); })}
         </ul>

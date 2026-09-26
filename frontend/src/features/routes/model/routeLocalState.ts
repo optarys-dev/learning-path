@@ -1,6 +1,8 @@
+import { routeStorage } from './constants';
 import type { CourseNote, CoursePriority, RouteCourseLocalState, SavedRoute } from './types';
+import { isRecord } from '@/lib/validation';
 
-const storageKey = 'learning-path:course-state';
+const storageKey = routeStorage.courseState;
 const emptyState = (): RouteCourseLocalState => ({ notes: {}, priorities: {} });
 const courseKey = (routeId: string, courseId: string) => `${routeId}:${courseId}`;
 
@@ -10,19 +12,28 @@ export function readRouteCourseLocalState(): RouteCourseLocalState {
     const raw = window.localStorage.getItem(storageKey);
     if (!raw) return emptyState();
     const parsed: unknown = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return emptyState();
-    const state = parsed as Partial<RouteCourseLocalState>;
+    if (!isRecord(parsed)) return emptyState();
+    const notes: Record<string, CourseNote> = {};
+    const priorities: Record<string, CoursePriority> = {};
+    if (isRecord(parsed.notes)) for (const [key, note] of Object.entries(parsed.notes)) {
+      if (isRecord(note) && typeof note.content === 'string' && typeof note.updatedAt === 'string' &&
+        Number.isFinite(Date.parse(note.updatedAt))) notes[key] = { content: note.content, updatedAt: note.updatedAt };
+    }
+    if (isRecord(parsed.priorities)) for (const [key, priority] of Object.entries(parsed.priorities)) {
+      if (priority === 'normal' || priority === 'medium' || priority === 'high') priorities[key] = priority;
+    }
     return {
-      notes: state.notes && typeof state.notes === 'object' ? state.notes : {},
-      priorities: state.priorities && typeof state.priorities === 'object' ? state.priorities : {},
+      notes,
+      priorities,
     };
   } catch { return emptyState(); }
 }
 
 function write(state: RouteCourseLocalState) {
   if (typeof window !== 'undefined') {
+    // Callers display the failure and keep the editor open; never claim a failed write succeeded.
     window.localStorage.setItem(storageKey, JSON.stringify(state));
-    window.dispatchEvent(new Event('learning-path:course-state-change'));
+    window.dispatchEvent(new Event(routeStorage.courseStateChanged));
   }
 }
 
