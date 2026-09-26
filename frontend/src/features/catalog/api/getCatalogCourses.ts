@@ -1,15 +1,14 @@
-import { apiUrl } from '../../../config/api';
+import { ApiError, requestJson } from '../../../lib/api';
+import { parseCatalogPage } from '../model/parseCatalogPage';
 import type { CatalogCourse, CatalogPageResult } from '../types';
 
 export const catalogPageSize = 12;
 
 export async function getCatalogCourses(page: number, signal?: AbortSignal, pageSize = catalogPageSize): Promise<CatalogPageResult> {
   const parameters = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
-  const response = await fetch(`${apiUrl}/courses?${parameters}`, { headers: { Accept: 'application/json' }, signal });
-
-  if (!response.ok) throw new Error(`Unable to load catalog: ${response.status}`);
-
-  return response.json() as Promise<CatalogPageResult>;
+  const pageResult = parseCatalogPage(await requestJson<unknown>(`/courses?${parameters}`, { signal, notifyOnUnauthenticated: false }));
+  if (!pageResult) throw new ApiError({ message: 'El catálogo devolvió un formato inesperado.', kind: 'invalid-response' });
+  return pageResult;
 }
 
 export async function getAllCatalogCourses(signal?: AbortSignal): Promise<CatalogCourse[]> {

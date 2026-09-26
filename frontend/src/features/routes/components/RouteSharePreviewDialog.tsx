@@ -1,3 +1,4 @@
+import { Dialog } from '../../../components/ui/Dialog/Dialog';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronLeft, ChevronRight, Download, Share2, X } from 'lucide-react';
@@ -138,8 +139,8 @@ export function RouteShareDialog({ route, localState, onClose }: RouteShareDialo
   }
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
-  return <div className="route-dialog-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
-    <section className="route-dialog learning-share-dialog" role="dialog" aria-modal="true" aria-labelledby="learning-share-title">
+  return <Dialog labelledBy="learning-share-title" onClose={onClose}>
+    <section className="route-dialog learning-share-dialog">
       <div className="learning-share-dialog__top">
         <div><span className="learning-share-dialog__eyebrow">{t('myPath.shareRoute')}</span><h2 id="learning-share-title">{t('myPath.shareRouteTitle')}</h2></div>
         <button className="learning-share-dialog__close" type="button" onClick={onClose} aria-label={t('myPath.closeDialog')}><X aria-hidden="true" /></button>
@@ -193,5 +194,5 @@ export function RouteShareDialog({ route, localState, onClose }: RouteShareDialo
         <div className="learning-share-art__footer"><span>{t('myPath.shareCourseCount', { total: stats.total })}</span><span>CODE QUEST 2026</span></div>
       </div>}), document.body)}
     </section>
-  </div>;
+  </Dialog>;
 }

@@ -3,6 +3,7 @@ import { CheckCircle2, Code2, ExternalLink, FileText, GripVertical, MoreHorizont
 import { useTranslation } from 'react-i18next';
 import { QuestMetric, QuestTab } from '../../../components/ui';
 import type { CoursePriority, EditableRouteCourse } from '../model/types';
+import { safeExternalUrl } from '../../../lib/urls';
 
 const desktopRouteMinWidthRem = 64;
 
@@ -43,16 +44,6 @@ function positiveWeeks(value: string | number | null | undefined): number | null
   return Number.isFinite(weeks) && weeks > 0 ? weeks : null;
 }
 
-function safeCourseUrl(value: string | null | undefined): string | null {
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    return url.protocol === 'https:' || url.protocol === 'http:' ? url.toString() : null;
-  } catch {
-    return null;
-  }
-}
-
 function courseMark(title: string): string | null {
   const normalizedTitle = title.toUpperCase();
   if (normalizedTitle.includes('C#')) return 'C#';
@@ -88,8 +79,8 @@ export function RouteCourseItem({
   const { t } = useTranslation();
   const weeks = positiveWeeks(course.estimatedWeeks);
   const mark = courseMark(course.title);
-  const courseUrl = safeCourseUrl(course.courseUrl);
-  const courseImage = safeCourseUrl(course.imageUrl);
+  const courseUrl = safeExternalUrl(course.courseUrl);
+  const courseImage = safeExternalUrl(course.imageUrl);
   const dragBlocked = useRef(false);
   const dragPreview = useRef<HTMLElement | null>(null);
   const dragGhost = useRef<HTMLCanvasElement | null>(null);
@@ -101,6 +92,14 @@ export function RouteCourseItem({
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [optionsOpen, setOptionsOpen] = useState(false);
+
+  useEffect(() => () => {
+    if (dragFrame.current !== null) cancelAnimationFrame(dragFrame.current);
+    dragLayoutObserver.current?.disconnect();
+    if (dragMoveListener.current) document.removeEventListener('dragover', dragMoveListener.current);
+    dragGhost.current?.remove();
+    dragPreview.current?.remove();
+  }, []);
 
   useEffect(() => {
     if (!optionsOpen) return;
@@ -290,10 +289,10 @@ export function RouteCourseItem({
           </div>
         </div>}
         {showControls && optionsOpen && <div className="my-path__course-menu" ref={menuRef}>
-              {onNote && <button type="button" className="my-path__course-menu-action my-path__course-menu-action--note" onClick={() => { setOptionsOpen(false); onNote(); }}><FileText size={17} aria-hidden="true" /><span>{t(hasNote ? 'myPath.editNote' : 'myPath.addNote')}</span></button>}
-              {onPriorityChange && <label className="my-path__course-menu-priority"><span className="my-path__priority-control"><Star size={17} aria-hidden="true" /><select aria-label={t('myPath.priority.label')} value={priority} onChange={event => onPriorityChange(event.target.value as CoursePriority)}><option value="normal">{t('myPath.priority.normal')}</option><option value="medium">{t('myPath.priority.medium')}</option><option value="high">{t('myPath.priority.high')}</option></select></span><span className="my-path__sr-only">{t('myPath.priority.label')}</span></label>}
-              {onReplace && <button type="button" className="my-path__course-menu-action my-path__course-menu-action--replace" onClick={() => { setOptionsOpen(false); onReplace(); }}><Repeat2 size={17} aria-hidden="true" /><span>{t('myPath.replaceCourse')}</span></button>}
-              {canReorder && <button type="button" className="my-path__course-menu-action my-path__course-menu-delete" onClick={() => { setOptionsOpen(false); onRemove(); }}><Trash2 size={17} aria-hidden="true" /><span>{t('myPath.removeCourse', { title: course.title })}</span></button>}
+              {onNote && <button type="button" disabled={locked} className="my-path__course-menu-action my-path__course-menu-action--note" onClick={() => { setOptionsOpen(false); menuButtonRef.current?.focus(); onNote(); }}><FileText size={17} aria-hidden="true" /><span>{t(hasNote ? 'myPath.editNote' : 'myPath.addNote')}</span></button>}
+              {onPriorityChange && <label className="my-path__course-menu-priority"><span className="my-path__priority-control"><Star size={17} aria-hidden="true" /><select aria-label={t('myPath.priority.label')} value={priority} disabled={locked} onChange={event => onPriorityChange(event.target.value as CoursePriority)}><option value="normal">{t('myPath.priority.normal')}</option><option value="medium">{t('myPath.priority.medium')}</option><option value="high">{t('myPath.priority.high')}</option></select></span><span className="my-path__sr-only">{t('myPath.priority.label')}</span></label>}
+              {onReplace && <button type="button" disabled={locked} className="my-path__course-menu-action my-path__course-menu-action--replace" onClick={() => { setOptionsOpen(false); menuButtonRef.current?.focus(); onReplace(); }}><Repeat2 size={17} aria-hidden="true" /><span>{t('myPath.replaceCourse')}</span></button>}
+              {canReorder && <button type="button" disabled={locked} className="my-path__course-menu-action my-path__course-menu-delete" onClick={() => { setOptionsOpen(false); onRemove(); }}><Trash2 size={17} aria-hidden="true" /><span>{t('myPath.removeCourse', { title: course.title })}</span></button>}
         </div>}
       </article>
     </li>

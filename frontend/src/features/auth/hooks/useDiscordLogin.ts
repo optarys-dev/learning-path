@@ -11,7 +11,7 @@ export type DiscordLoginAdapter = (signal: AbortSignal) => Promise<
 >;
 
 export function useDiscordLogin(adapter?: DiscordLoginAdapter) {
-  const { user, isLoading } = useAuthSession();
+  const { user, isLoading, sessionError } = useAuthSession();
   const [state, setState] = useState<DiscordLoginState>({ status: 'idle' });
   const request = useRef<AbortController | null>(null);
 
@@ -36,7 +36,7 @@ export function useDiscordLogin(adapter?: DiscordLoginAdapter) {
     }
   }
 
-  const sessionState: DiscordLoginState = !isLoading && user
+  const sessionState: DiscordLoginState = !isLoading && !sessionError && user
     ? { status: 'authenticated', nextPath: user.isNewUser === true ? '/create-route' : '/my-path' }
     : state;
   return { state: sessionState, login };

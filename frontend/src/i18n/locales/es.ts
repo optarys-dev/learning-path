@@ -173,6 +173,7 @@ export const es = {
     addedAnnouncement: '{{title}} se agregó al final de la ruta.',
   },
   myPath: {
+    storageError: 'No pudimos guardar el cambio en este navegador. Revisá el almacenamiento y volvé a intentarlo.',
     pageTitle: 'Tu ruta de aprendizaje',
     eyebrow: 'Tu próxima misión',
     initialTitle: 'Tu próxima ruta empieza acá',

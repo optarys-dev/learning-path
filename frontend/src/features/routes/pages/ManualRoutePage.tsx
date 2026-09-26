@@ -5,7 +5,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button/Button';
 import { PageState } from '../../../components/ui/PageState/PageState';
 import { useNotifications } from '../../../components/notifications';
-import { getAllCatalogCourses } from '../../catalog/api/getCatalogCourses';
+import { useAllCatalogCourses } from '../../catalog/hooks/useAllCatalogCourses';
 import type { CatalogCourse } from '../../catalog/types';
 import { useAuthSession } from '../../auth/hooks/useAuthSession';
 import { saveRoute } from '../api/routes';
@@ -18,24 +18,13 @@ export function ManualRoutePage() {
   const navigate = useNavigate();
   const { notify } = useNotifications();
   const { user, isLoading: sessionLoading } = useAuthSession();
-  const [courses, setCourses] = useState<CatalogCourse[]>([]);
+  const { state: catalogState, courses, retry: retryCatalog } = useAllCatalogCourses();
   const [selected, setSelected] = useState<CatalogCourse[]>([]);
   const [goal, setGoal] = useState('');
   const [explanation, setExplanation] = useState('');
   const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [catalogError, setCatalogError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    getAllCatalogCourses(controller.signal)
-      .then(items => { if (!controller.signal.aborted) { setCourses(items); setCatalogError(null); } })
-      .catch(() => { if (!controller.signal.aborted) setCatalogError(t('manualRoute.loadError')); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
-  }, [t]);
 
   useEffect(() => { document.title = `${t('manualRoute.title')} · CODE QUEST 2026`; }, [t]);
 
@@ -92,7 +81,7 @@ export function ManualRoutePage() {
       <section className="manual-route__catalog" aria-labelledby="manual-route-catalog-title">
         <div className="manual-route__section-heading"><span>{t('manualRoute.catalogStep')}</span><div><h2 id="manual-route-catalog-title">{t('manualRoute.catalogTitle')}</h2><p>{t('manualRoute.catalogHint')}</p></div></div>
         <label className="manual-route__search"><Search size={17} aria-hidden="true" /><input aria-label={t('manualRoute.searchPlaceholder')} value={query} onChange={event => setQuery(event.target.value)} placeholder={t('manualRoute.searchPlaceholder')} /></label>
-        {loading ? <p className="manual-route__state" role="status">{t('manualRoute.loadingCourses')}</p> : catalogError ? <p className="manual-route__state manual-route__error" role="alert">{catalogError}</p> : visibleCourses.length === 0 ? <p className="manual-route__state">{t('manualRoute.noCourses')}</p> :
+        {catalogState.status === 'loading' ? <p className="manual-route__state" role="status">{t('manualRoute.loadingCourses')}</p> : catalogState.status === 'error' ? <div><p className="manual-route__state manual-route__error" role="alert">{t('manualRoute.loadError')}</p><Button variant="secondary" onClick={retryCatalog}>{t('layout.retry')}</Button></div> : visibleCourses.length === 0 ? <p className="manual-route__state">{t('manualRoute.noCourses')}</p> :
           <ul className="manual-route__course-grid">{visibleCourses.map(course => { const active = selectedIds.has(course.courseId); return <li key={course.courseId}><button type="button" className={active ? 'is-selected' : ''} onClick={() => toggleCourse(course)} aria-pressed={active} disabled={!active && selected.length >= 30}>
             <span className="manual-route__course-image">{course.imageUrl ? <img src={course.imageUrl} alt="" /> : <BookOpen aria-hidden="true" />}</span><span><strong>{course.title}</strong>{course.level && <small>{course.level}</small>}</span><i>{active ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}</i>
           </button></li>; })}</ul>}

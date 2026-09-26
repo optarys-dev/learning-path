@@ -1,8 +1,5 @@
 import { ApiError, type ApiValidationErrors } from './ApiError';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isRecord } from '../validation';
 
 function readValidationErrors(value: unknown): ApiValidationErrors {
   if (!isRecord(value)) return {};
@@ -15,7 +12,10 @@ function readValidationErrors(value: unknown): ApiValidationErrors {
 
 export async function parseApiError(response: Response): Promise<ApiError> {
   let body: unknown = null;
-  try { body = await response.json(); } catch { /* gateways sometimes return empty or HTML bodies */ }
+  try { body = await response.json(); } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') throw error;
+    // Gateways sometimes return empty or HTML bodies.
+  }
 
   if (isRecord(body)) {
     const detail = typeof body.detail === 'string' ? body.detail : typeof body.message === 'string' ? body.message : null;

@@ -1,20 +1,14 @@
 import { apiUrl } from '../../../config/api';
 import { ApiError, requestJson, requestVoid } from '../../../lib/api';
-
-export interface AuthenticatedUser {
-  id: string;
-  userId: string;
-  username: string;
-  displayName: string;
-  avatar: string | null;
-  isNewUser: boolean;
-  provider?: 'Discord' | 'Google';
-  avatarUrl?: string | null;
-}
+import { parseSession, type AuthenticatedUser } from '../model/parseSession';
+import { isRecord } from '../../../lib/validation';
+export type { AuthenticatedUser } from '../model/parseSession';
 
 export async function getCurrentSession(signal?: AbortSignal): Promise<AuthenticatedUser | null> {
   try {
-    return await requestJson<AuthenticatedUser>('/auth/me', { signal, notifyOnUnauthenticated: false });
+    const session = parseSession(await requestJson<unknown>('/auth/me', { signal, notifyOnUnauthenticated: false }));
+    if (!session) throw new ApiError({ message: 'El servicio devolvió una sesión inválida.', kind: 'invalid-response' });
+    return session;
   } catch (error) {
     if (error instanceof ApiError && error.isUnauthenticated) return null;
     throw error;
@@ -34,8 +28,12 @@ export function startDiscordLogin() {
   window.location.assign(loginUrl.toString());
 }
 
-export function getLoginProviders(signal?: AbortSignal) {
-  return requestJson<{ google: boolean }>('/auth/providers', { signal, notifyOnUnauthenticated: false });
+export async function getLoginProviders(signal?: AbortSignal): Promise<{ google: boolean }> {
+  const providers = await requestJson<unknown>('/auth/providers', { signal, notifyOnUnauthenticated: false });
+  if (!isRecord(providers) || typeof providers.google !== 'boolean') {
+    throw new ApiError({ message: 'El servicio devolvió proveedores inválidos.', kind: 'invalid-response' });
+  }
+  return { google: providers.google };
 }
 
 export function startGoogleLogin() {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type DragEvent } from 'react';
+import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState, type DragEvent } from 'react';
 import { FileText, Map as MapIcon, Plus, Share2, Sparkles, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -16,15 +16,22 @@ import { RouteCoursePickerDialog } from '../components/RouteCoursePickerDialog';
 import { buildUpdateRouteRequest, createSavedRouteDraft } from '../model/draftRoute';
 import { getCourseNote, getCoursePriority, readRouteCourseLocalState, removeCourseNote, routeStats, saveCourseNote, setCoursePriority } from '../model/routeLocalState';
 import { RouteRequestError, type DraftSavedRoute, type DraftSavedRouteCourse, type RouteCourseLocalState, type RouteRequestErrorKind } from '../model/types';
+import { replaceSavedRouteCourse } from '../model/editSavedRoute';
 import './MyPathPage.css';
 
-type Operation = 'idle' | 'saving' | 'deleting';
+type Operation = 'idle' | 'saving' | 'deleting' | 'progress';
 type LoadState = { status: 'loading' } | { status: 'error'; kind: RouteRequestErrorKind; message: string } | { status: 'ready' };
 type DropTarget = { courseKey: string; position: 'before' | 'after' } | null;
 
 export function SavedRouteDetailPage() {
-  const { t } = useTranslation();
   const { routeId } = useParams();
+  const { user } = useAuthSession();
+  if (!routeId) return <Navigate to="/my-path" replace />;
+  return <SavedRouteDetail key={user?.userId + ':' + routeId} routeId={routeId} />;
+}
+
+function SavedRouteDetail({ routeId }: { routeId: string }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isLoading: isSessionLoading, refresh: refreshSession } = useAuthSession();
@@ -46,6 +53,7 @@ export function SavedRouteDetailPage() {
   const [replacementCourse, setReplacementCourse] = useState<DraftSavedRouteCourse | null>(null);
   const [shareOpen, setShareOpen] = useState(() => window.location.hash === '#share');
   const [coursePickerOpen, setCoursePickerOpen] = useState(false);
+  const mutationInFlight = useRef(false);
   const draggedCourse = useRef<string | null>(null);
   const dragCoursesRef = useRef<DraftSavedRouteCourse[] | null>(null);
   const lastDragTarget = useRef<string | null>(null);
@@ -60,24 +68,27 @@ export function SavedRouteDetailPage() {
     return { kind, message: error instanceof RouteRequestError && error.apiMessage ? error.apiMessage : t(`myPath.errors.${key}`) };
   }, [refreshSession, t]);
 
+  const onLoadError = useEffectEvent((error: unknown) => {
+    setLoadState({ status: 'error', ...translatedError(error) });
+  });
+  const userId = user?.userId;
   useEffect(() => {
-    if (isSessionLoading || !user || !routeId) return;
-    let active = true;
-    const savedRouteRequest = getSavedRoute(routeId);
+    if (isSessionLoading || !userId) return;
+    const controller = new AbortController();
+    const savedRouteRequest = getSavedRoute(routeId, controller.signal);
     savedRouteRequest.then(savedRoute => {
-      if (!active) return;
+      if (controller.signal.aborted) return;
       const next = createSavedRouteDraft(savedRoute);
       setRoute(next);
       setDraft(next);
       setLoadState({ status: 'ready' });
       document.title = `${savedRoute.goal} · CODE QUEST 2026`;
     }).catch(error => {
-      if (!active) return;
-      const translated = translatedError(error);
-      setLoadState({ status: 'error', ...translated });
+      if (controller.signal.aborted) return;
+      onLoadError(error);
     });
-    return () => { active = false; };
-  }, [isSessionLoading, retryVersion, routeId, translatedError, user]);
+    return () => controller.abort();
+  }, [isSessionLoading, retryVersion, routeId, userId]);
 
   useLayoutEffect(() => {
     const previousRects = reorderRects.current;
@@ -161,7 +172,10 @@ export function SavedRouteDetailPage() {
   }
 
   async function changeCourseStatus(course: DraftSavedRouteCourse) {
-    if (!route || locked) return;
+    if (!route || locked || mutationInFlight.current || !route.courses.some(item => item.courseId === course.courseId)) return;
+    mutationInFlight.current = true;
+    setOperation('progress');
+    setActionError(null);
     const completed = course.progressPercentage !== 100;
     const apply = (value: DraftSavedRoute | null) => value ? ({ ...value, courses: value.courses.map(item => item.courseId === course.courseId ? { ...item, progressPercentage: completed ? 100 : 0 } : item) }) : value;
     setRoute(apply); setDraft(apply);
@@ -176,28 +190,37 @@ export function SavedRouteDetailPage() {
     } catch (error) {
       const restore = (value: DraftSavedRoute | null) => value ? ({ ...value, courses: value.courses.map(item => item.courseId === course.courseId ? { ...item, progressPercentage: course.progressPercentage } : item) }) : value;
       setRoute(restore); setDraft(restore); setActionError(translatedError(error).message);
-    }
+    } finally { mutationInFlight.current = false; setOperation('idle'); }
   }
 
   function changePriority(course: DraftSavedRouteCourse, priority: 'high' | 'medium' | 'normal') {
-    if (route) setLocalState(setCoursePriority(route.routeId, course.courseId, priority));
+    if (!route) return;
+    try { setLocalState(setCoursePriority(route.routeId, course.courseId, priority)); }
+    catch { setActionError(t('myPath.storageError')); }
   }
 
   async function replaceCourse(course: DraftSavedRouteCourse, alternative: { courseId: number; title: string; imageUrl: string; courseUrl: string }) {
-    if (!route || locked) return;
-    const base = editing ? draft! : route;
-    const next = { ...base, courses: base.courses.map(item => item.uiKey === course.uiKey ? { ...item, courseId: String(alternative.courseId), title: alternative.title, imageUrl: alternative.imageUrl, courseUrl: alternative.courseUrl } : item) };
+    if (!route || !draft || locked || mutationInFlight.current) return;
+    const next = replaceSavedRouteCourse(editing ? draft : route, course.uiKey, alternative);
+    if (editing) {
+      setCourses(next.courses, t('myPath.replacedAnnouncement', { title: alternative.title }));
+      setReplacementCourse(null);
+      return;
+    }
+    mutationInFlight.current = true;
+    setActionError(null);
     setOperation('saving');
     try {
       const updated = createSavedRouteDraft(await updateRoute(route.routeId, buildUpdateRouteRequest(next)));
       setRoute(updated); setDraft(updated); setModified(false); setReplacementCourse(null);
       setAnnouncement(t('myPath.replacedAnnouncement', { title: alternative.title }));
     } catch (error) { setActionError(translatedError(error).message); }
-    finally { setOperation('idle'); }
+    finally { mutationInFlight.current = false; setOperation('idle'); }
   }
 
   async function saveChanges() {
-    if (!draft || !modified || draft.courses.length === 0 || locked) return;
+    if (!draft || !modified || draft.courses.length === 0 || locked || mutationInFlight.current) return;
+    mutationInFlight.current = true;
     setOperation('saving');
     setActionError(null);
     setActionSuccess(null);
@@ -213,12 +236,14 @@ export function SavedRouteDetailPage() {
     } catch (error) {
       setActionError(translatedError(error).message);
     } finally {
+      mutationInFlight.current = false;
       setOperation('idle');
     }
   }
 
   async function removeRoute() {
-    if (locked || !window.confirm(t('myPath.confirmDeleteRoute', { goal: route!.goal }))) return;
+    if (locked || mutationInFlight.current || !window.confirm(t('myPath.confirmDeleteRoute', { goal: route!.goal }))) return;
+    mutationInFlight.current = true;
     setOperation('deleting');
     setActionError(null);
     setActionSuccess(null);
@@ -228,7 +253,7 @@ export function SavedRouteDetailPage() {
     } catch (error) {
       setActionError(translatedError(error).message);
       setOperation('idle');
-    }
+    } finally { mutationInFlight.current = false; }
   }
 
   function cancelEditing() {
@@ -254,7 +279,7 @@ export function SavedRouteDetailPage() {
           <section className="my-path__recommendation" aria-labelledby="saved-route-goal">
             <div className="my-path__recommendation-heading"><p>{t('myPath.goalLabel')}</p>
               <p className="my-path__course-count">{t('myPath.courseCount', { count: currentRoute.courses.length })}</p></div>
-            {editing ? <div className="my-path__route-fields"><input aria-label={t('manualRoute.nameLabel')} value={draft.goal} maxLength={1000} onChange={event => { setDraft({ ...draft, goal: event.target.value }); setModified(true); }} /><textarea aria-label={t('manualRoute.descriptionLabel')} value={draft.explanation ?? ''} maxLength={4000} onChange={event => { setDraft({ ...draft, explanation: event.target.value }); setModified(true); }} placeholder={t('manualRoute.descriptionPlaceholder')} /></div> : <><h2 id="saved-route-goal">{currentRoute.goal}</h2>{currentRoute.explanation && <p>{currentRoute.explanation}</p>}</>}
+            {editing ? <div className="my-path__route-fields"><input disabled={locked} aria-label={t('manualRoute.nameLabel')} value={draft.goal} maxLength={1000} onChange={event => { setDraft({ ...draft, goal: event.target.value }); setModified(true); }} /><textarea disabled={locked} aria-label={t('manualRoute.descriptionLabel')} value={draft.explanation ?? ''} maxLength={4000} onChange={event => { setDraft({ ...draft, explanation: event.target.value }); setModified(true); }} placeholder={t('manualRoute.descriptionPlaceholder')} /></div> : <><h2 id="saved-route-goal">{currentRoute.goal}</h2>{currentRoute.explanation && <p>{currentRoute.explanation}</p>}</>}
             <div className="my-path__route-summary"><span><strong>{Math.round(stats.percentage)}%</strong>{t('myPath.progressLabel')}</span><span>✓ {stats.completed} {t('myPath.completed')}</span><span>○ {stats.notStarted} {t('myPath.notStarted')}</span><span><FileText size={14} aria-hidden="true" />{t('myPath.notesCount', { count: stats.notes })}</span><span><Star size={14} aria-hidden="true" />{t('myPath.priorityCount', { count: stats.priorities })}</span></div>
             <div className="my-path__route-progress"><i style={{ width: `${stats.percentage}%` }} /></div>
           </section>
@@ -283,8 +308,8 @@ export function SavedRouteDetailPage() {
                   showControls canReorder={editing} locked={locked} completed={course.progressPercentage === 100}
                   hasNote={Boolean(getCourseNote(localState, currentRoute.routeId, course.courseId))}
                   priority={getCoursePriority(localState, currentRoute.routeId, course.courseId)}
-                  onToggleCompleted={() => { void changeCourseStatus(course); }} onNote={() => setNoteCourse(course)}
-                  onPriorityChange={priority => changePriority(course, priority)} onReplace={() => setReplacementCourse(course)} dragging={draggingCourse === course.uiKey}
+                  onToggleCompleted={route.courses.some(item => item.courseId === course.courseId) ? () => { void changeCourseStatus(course); } : undefined} onNote={() => setNoteCourse(course)}
+                  onPriorityChange={priority => changePriority(course, priority)} onReplace={() => { setActionError(null); setReplacementCourse(course); }} dragging={draggingCourse === course.uiKey}
                   dropPosition={dropTarget?.courseKey === course.uiKey ? dropTarget.position : null}
                   elementRef={element => element ? courseElements.current.set(course.uiKey, element) : courseElements.current.delete(course.uiKey)}
                   onRemove={() => removeCourse(course.uiKey)}
@@ -348,21 +373,21 @@ export function SavedRouteDetailPage() {
               {editing ? <>
                 <Button variant="secondary" onClick={cancelEditing} disabled={locked}>{t('myPath.cancel')}</Button>
                 <Button onClick={() => { void saveChanges(); }} isLoading={operation === 'saving'}
-                  loadingLabel={t('myPath.savingChanges')} disabled={!modified || !currentRoute.goal.trim() || currentRoute.courses.length === 0 || operation === 'deleting'}>
+                  loadingLabel={t('myPath.savingChanges')} disabled={!modified || !currentRoute.goal.trim() || currentRoute.courses.length === 0 || locked}>
                   {t('myPath.saveChanges')}
                 </Button>
               </> : <>
                 <Button variant="secondary" onClick={() => setShareOpen(true)} disabled={locked}><Share2 size={16} aria-hidden="true" />{t('myPath.shareRoute')}</Button>
                 <Button variant="secondary" onClick={() => { setActionSuccess(null); setEditing(true); }} disabled={locked}>{t('myPath.editRoute')}</Button>
                 <Button className="my-path__delete-route" onClick={() => { void removeRoute(); }} isLoading={operation === 'deleting'}
-                  loadingLabel={t('myPath.deletingRoute')} disabled={operation === 'saving'}>{t('myPath.deleteRoute')}</Button>
+                  loadingLabel={t('myPath.deletingRoute')} disabled={locked}>{t('myPath.deleteRoute')}</Button>
               </>}
             </div>
           </footer>
         </section>
         <p className="my-path__sr-only" aria-live="polite" aria-atomic="true">{announcement}</p>
         {noteCourse && <RouteNoteDialog courseTitle={noteCourse.title} note={getCourseNote(localState, currentRoute.routeId, noteCourse.courseId)} onClose={() => setNoteCourse(null)} onSave={content => setLocalState(saveCourseNote(currentRoute.routeId, noteCourse.courseId, content))} onDelete={() => setLocalState(removeCourseNote(currentRoute.routeId, noteCourse.courseId))} />}
-        {replacementCourse && <RouteReplaceDialog course={replacementCourse} routeCourseIds={currentRoute.courses.map(course => course.courseId)} onClose={() => setReplacementCourse(null)} onReplace={alternative => { void replaceCourse(replacementCourse, alternative); }} />}
+        {replacementCourse && <RouteReplaceDialog error={actionError} busy={locked} course={replacementCourse} routeCourseIds={currentRoute.courses.map(course => course.courseId)} onClose={() => { if (!locked) setReplacementCourse(null); }} onReplace={alternative => { void replaceCourse(replacementCourse, alternative); }} />}
         {shareOpen && <RouteShareDialog route={currentRoute} localState={localState} onClose={() => setShareOpen(false)} />}
         {coursePickerOpen && <RouteCoursePickerDialog excludedCourseIds={currentRoute.courses.map(course => course.courseId)} onClose={() => setCoursePickerOpen(false)} onAdd={addCourse} />}
       </div>

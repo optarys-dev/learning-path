@@ -12,7 +12,7 @@ export function CatalogCourseCard({ course }: CatalogCourseCardProps) {
 
   return <article className="catalog-course-card">
     <div className="catalog-course-card__media">
-      {!imageFailed ? <img src={course.imageUrl} alt={course.imageAlt} loading="lazy" onError={() => setImageFailed(true)} /> : <BookOpen aria-hidden="true" />}
+      {!imageFailed && course.imageUrl ? <img src={course.imageUrl} alt={course.imageAlt} loading="lazy" onError={() => setImageFailed(true)} /> : <BookOpen aria-hidden="true" />}
     </div>
     <div className="catalog-course-card__content">
       <div className="catalog-course-card__meta">
@@ -20,10 +20,10 @@ export function CatalogCourseCard({ course }: CatalogCourseCardProps) {
         {course.level && <QuestTab tone="paper">{course.level}</QuestTab>}
       </div>
       <h3>{course.title}</h3>
-      <a className="catalog-course-card__link" href={course.courseUrl} target="_blank" rel="noreferrer" aria-label={`${t('catalog.openCourse')}: ${course.title}`}>
+      {course.courseUrl && <a className="catalog-course-card__link" href={course.courseUrl} target="_blank" rel="noreferrer" aria-label={`${t('catalog.openCourse')}: ${course.title}`}>
         <span className="catalog-course-card__link-label">{t('catalog.openCourse')}</span>
         <ArrowUpRight size={17} aria-hidden="true" />
-      </a>
+      </a>}
     </div>
   </article>;
 }

@@ -20,7 +20,8 @@ export function ThemeToggle() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem(themeStorageKey, theme);
+    try { window.localStorage.setItem(themeStorageKey, theme); }
+    catch { /* The active theme still works when browser storage is unavailable. */ }
   }, [theme]);
 
   const toggleTheme = () => {

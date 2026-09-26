@@ -1,183 +1,70 @@
-import { apiUrl } from '../../../config/api';
-import type {
-  CreateRouteDto,
-  RecommendationCourse,
-  RouteRecommendation,
-  SavedRoute,
-  SavedRouteCourse,
-  UpdateRouteDto,
-} from '../model/types';
-import { RouteRequestError, type RouteRequestErrorKind } from '../model/types';
+import { ApiError, requestJson, requestVoid } from '../../../lib/api';
+import { isAbortError } from '../../../lib/api/apiClient';
+import { parseRouteRecommendation, parseSavedRoute } from '../model/parseRoutes';
+import { RouteRequestError, type CreateRouteDto, type RouteRecommendation, type SavedRoute, type UpdateRouteDto, type RouteRequestErrorKind } from '../model/types';
+export { parseRouteRecommendation, parseSavedRoute } from '../model/parseRoutes';
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+function routeError(error: unknown): never {
+  if (isAbortError(error)) throw error;
+  if (!(error instanceof ApiError)) throw error;
+  let kind: RouteRequestErrorKind = 'http';
+  if (error.kind !== 'http') kind = error.kind;
+  else if (error.status === 400 || error.status === 409 || error.status === 422) kind = 'validation';
+  else if (error.status === 401 || error.status === 403) kind = 'unauthorized';
+  else if (error.status === 404) kind = 'not-found';
+  else if (error.status !== null && error.status >= 500) kind = 'server';
+  throw new RouteRequestError(kind, error.kind === 'http' ? error.message : null);
 }
 
-function normalizeNumber(value: unknown): number | null {
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-  if (typeof value !== 'string' || value.trim() === '') return null;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
+// Preserve the route feature's error contract while sharing transport and 401 handling.
+async function requestJsonRoute(response: Promise<unknown>): Promise<unknown> {
+  try { return await response; } catch (error) { return routeError(error); }
 }
-
-function normalizeCourseId(value: unknown): string | null {
-  if (typeof value === 'string') return value.trim() === '' ? null : value;
-  return typeof value === 'number' && Number.isFinite(value) ? String(value) : null;
-}
-
-function nullableString(value: unknown): string | null | undefined {
-  if (value === null) return null;
-  return typeof value === 'string' ? value : undefined;
-}
-
-function optionalUrl(value: unknown): string | null | undefined {
-  if (value === null || value === '') return null;
-  return typeof value === 'string' ? value : undefined;
-}
-
-function parseRecommendationCourse(value: unknown): RecommendationCourse | null {
-  if (!isRecord(value) || typeof value.title !== 'string' || typeof value.reason !== 'string') return null;
-  const courseId = normalizeCourseId(value.courseId);
-  const position = normalizeNumber(value.position);
-  const score = normalizeNumber(value.score);
-  const estimatedWeeks = normalizeNumber(value.estimatedWeeks);
-  if (courseId === null || position === null || score === null || estimatedWeeks === null) return null;
-  return { courseId, position, title: value.title, score, reason: value.reason, estimatedWeeks };
-}
-
-export function parseRouteRecommendation(value: unknown): RouteRecommendation | null {
-  if (!isRecord(value) || typeof value.method !== 'string' || typeof value.goal !== 'string' ||
-    (typeof value.explanation !== 'string' && value.explanation !== null) ||
-    typeof value.refinementStatus !== 'string' || !Array.isArray(value.courses)) return null;
-  const courses = value.courses.map(parseRecommendationCourse);
-  if (courses.some(course => course === null)) return null;
-  return {
-    method: value.method,
-    goal: value.goal,
-    explanation: value.explanation,
-    courses: courses.filter((course): course is RecommendationCourse => course !== null),
-    refinementStatus: value.refinementStatus,
-    model: value.model ?? null,
-  };
-}
-
-function parseSavedRouteCourse(value: unknown): SavedRouteCourse | null {
-  if (!isRecord(value) || typeof value.title !== 'string') return null;
-  const courseId = normalizeCourseId(value.courseId);
-  const position = normalizeNumber(value.position);
-  const reason = value.reason === undefined ? null : nullableString(value.reason);
-  const imageUrl = value.imageUrl === undefined ? null : optionalUrl(value.imageUrl);
-  const courseUrl = value.courseUrl === undefined ? null : optionalUrl(value.courseUrl);
-  const progressPercentage = normalizeNumber(value.progressPercentage) ?? 0;
-  if (courseId === null || position === null || reason === undefined || imageUrl === undefined || courseUrl === undefined || progressPercentage < 0 || progressPercentage > 100) return null;
-  return { courseId, position, title: value.title, reason, imageUrl, courseUrl, progressPercentage };
-}
-
-export function parseSavedRoute(value: unknown): SavedRoute | null {
-  if (!isRecord(value) || typeof value.routeId !== 'string' || value.routeId.trim() === '' ||
-    typeof value.goal !== 'string' || typeof value.recommendationMethod !== 'string' ||
-    typeof value.createdAt !== 'string' || Number.isNaN(Date.parse(value.createdAt)) ||
-    !Array.isArray(value.courses)) return null;
-  const explanation = value.explanation === undefined ? null : nullableString(value.explanation);
-  const courses = value.courses.map(parseSavedRouteCourse);
-  if (explanation === undefined || courses.some(course => course === null)) return null;
-  return {
-    routeId: value.routeId,
-    goal: value.goal,
-    recommendationMethod: value.recommendationMethod,
-    explanation,
-    createdAt: value.createdAt,
-    courses: courses.filter((course): course is SavedRouteCourse => course !== null)
-      .sort((first, second) => first.position - second.position),
-  };
-}
-
-async function readApiMessage(response: Response): Promise<string | null> {
-  try {
-    const body: unknown = await response.json();
-    return isRecord(body) && typeof body.message === 'string' ? body.message : null;
-  } catch {
-    return null;
-  }
-}
-
-function errorKind(response: Response): RouteRequestErrorKind {
-  if (response.status === 400 || response.status === 409 || response.status === 422) return 'validation';
-  if (response.status === 401 || response.status === 403) return 'unauthorized';
-  if (response.status === 404) return 'not-found';
-  if (response.status >= 500) return 'server';
-  return 'http';
-}
-
-async function request(path: string, init?: RequestInit): Promise<Response> {
-  try {
-    const response = await fetch(`${apiUrl}${path}`, { ...init, credentials: 'include' });
-    if (!response.ok) throw new RouteRequestError(errorKind(response), await readApiMessage(response));
-    return response;
-  } catch (error) {
-    if (error instanceof RouteRequestError) throw error;
-    throw new RouteRequestError('network');
-  }
-}
-
-async function readJson(response: Response): Promise<unknown> {
-  try {
-    return await response.json();
-  } catch {
-    throw new RouteRequestError('invalid-response');
-  }
-}
-
 export async function generateRouteRecommendation(excludedCourseIds: string[] = []): Promise<RouteRecommendation> {
   const query = new URLSearchParams();
   excludedCourseIds.forEach(courseId => query.append('excludeCourseIds', courseId));
-  const recommendation = parseRouteRecommendation(await readJson(
-    await request(`/routes/recommendation/semantic/v2${query.size ? `?${query}` : ''}`),
-  ));
+  const recommendation = parseRouteRecommendation(await requestJsonRoute(requestJson<unknown>(`/routes/recommendation/semantic/v2${query.size ? `?${query}` : ''}`)));
   if (!recommendation) throw new RouteRequestError('invalid-response');
   return recommendation;
 }
 
-export async function getSavedRoutes(): Promise<SavedRoute[]> {
-  const body = await readJson(await request('/routes'));
+export async function getSavedRoutes(signal?: AbortSignal): Promise<SavedRoute[]> {
+  const body = await requestJsonRoute(requestJson<unknown>('/routes', { signal }));
   if (!Array.isArray(body)) throw new RouteRequestError('invalid-response');
   const routes = body.map(parseSavedRoute);
   if (routes.some(route => route === null)) throw new RouteRequestError('invalid-response');
   return routes.filter((route): route is SavedRoute => route !== null);
 }
 
-export async function getSavedRoute(routeId: string): Promise<SavedRoute> {
-  const route = parseSavedRoute(await readJson(await request(`/routes/${encodeURIComponent(routeId)}`)));
+export async function getSavedRoute(routeId: string, signal?: AbortSignal): Promise<SavedRoute> {
+  const route = parseSavedRoute(await requestJsonRoute(requestJson<unknown>(`/routes/${encodeURIComponent(routeId)}`, { signal })));
   if (!route) throw new RouteRequestError('invalid-response');
   return route;
 }
 
 export async function saveRoute(dto: CreateRouteDto): Promise<SavedRoute> {
-  const route = parseSavedRoute(await readJson(await request('/routes', {
+  const route = parseSavedRoute(await requestJsonRoute(requestJson<unknown>('/routes', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dto),
+    json: dto,
   })));
   if (!route) throw new RouteRequestError('invalid-response');
   return route;
 }
 
 export async function updateRoute(routeId: string, dto: UpdateRouteDto): Promise<SavedRoute> {
-  const route = parseSavedRoute(await readJson(await request(`/routes/${encodeURIComponent(routeId)}`, {
+  const route = parseSavedRoute(await requestJsonRoute(requestJson<unknown>(`/routes/${encodeURIComponent(routeId)}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dto),
+    json: dto,
   })));
   if (!route) throw new RouteRequestError('invalid-response');
   return route;
 }
 
 export async function updateCourseProgress(routeId: string, courseId: string, completed: boolean): Promise<SavedRoute> {
-  const route = parseSavedRoute(await readJson(await request(
+  const route = parseSavedRoute(await requestJsonRoute(requestJson<unknown>(
     `/routes/${encodeURIComponent(routeId)}/courses/${encodeURIComponent(courseId)}/progress`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ progressPercentage: completed ? 100 : 0 }),
+      json: { progressPercentage: completed ? 100 : 0 },
     },
   )));
   if (!route) throw new RouteRequestError('invalid-response');
@@ -185,5 +72,6 @@ export async function updateCourseProgress(routeId: string, courseId: string, co
 }
 
 export async function deleteRoute(routeId: string): Promise<void> {
-  await request(`/routes/${encodeURIComponent(routeId)}`, { method: 'DELETE' });
+  try { await requestVoid(`/routes/${encodeURIComponent(routeId)}`, { method: 'DELETE' }); }
+  catch (error) { routeError(error); }
 }

@@ -173,6 +173,7 @@ export const en = {
     addedAnnouncement: '{{title}} was added to the end of the path.',
   },
   myPath: {
+    storageError: 'We could not save this change in your browser. Check storage and try again.',
     pageTitle: 'Your learning path',
     eyebrow: 'Your next mission',
     initialTitle: 'Your next path starts here',

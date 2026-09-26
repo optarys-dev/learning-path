@@ -3,9 +3,6 @@
   --landing-paper: var(--cq-color-bg-surface);
   --landing-edge: color-mix(in srgb, var(--cq-color-brand-primary) 28%, var(--cq-color-border-default));
 }
-.public-navigation { gap: clamp(.5rem, 1.3vw, 1.25rem); }
-.public-navigation nav { gap: .15rem; }
-.public-navigation nav a { padding-inline: .6rem; white-space: nowrap; font-size: .82rem; }
 .landing .welcome--landing { align-items: center; gap: clamp(2rem, 5vw, 5rem); padding-block: 3rem 5rem; }
 .landing .welcome--landing::before { display: none; }
 .landing .welcome h1 { font-size: clamp(3rem, 5.8vw, 5.4rem); line-height: 1.02; letter-spacing: -.055em; }
@@ -78,12 +75,6 @@
   .landing .landing-faq details[open] p { animation: none; }
 }
 @media (max-width: 68rem) {
-  .app-header__inner:has(.public-navigation) .menu-toggle { display: inline-flex; }
-  .public-navigation { display: none; }
-  .public-navigation[data-open='true'] { display: flex; width: 100%; flex: none; align-items: flex-start; flex-direction: column; padding-block: 1rem; }
-  .public-navigation nav { display: flex; width: 100%; align-items: stretch; flex-direction: column; }
-  .public-navigation .welcome-navigation__login { display: inline-flex; width: fit-content; }
-  .public-navigation nav a { padding: .65rem; font-size: 1rem; }
   .landing .route-map__stops { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem 1rem; }
   .landing .route-map__stop:nth-child(n) { transform: none; }
 }

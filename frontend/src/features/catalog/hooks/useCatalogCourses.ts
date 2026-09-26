@@ -12,7 +12,7 @@ export function useCatalogCourses() {
     const controller = new AbortController();
 
     void getCatalogCourses(page, controller.signal)
-      .then(data => setResult({ key: requestKey, data, error: null }))
+      .then(data => { if (!controller.signal.aborted) setResult({ key: requestKey, data, error: null }); })
       .catch(reason => {
         if (controller.signal.aborted) return;
         setResult({ key: requestKey, data: null, error: reason instanceof Error ? reason : new Error('Unable to load catalog.') });

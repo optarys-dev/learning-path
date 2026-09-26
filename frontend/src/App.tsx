@@ -1,41 +1,24 @@
 import { lazy } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { AppLayout } from './components/layout/AppLayout';
-import { PageState } from './components/ui/PageState/PageState';
 import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
-import { useAuthSession } from './features/auth/hooks/useAuthSession';
-import { CatalogPage } from './features/catalog/pages/CatalogPage';
-import { QuestionnairePage } from './features/questionnaire/pages/QuestionnairePage';
-import { MyPathPage } from './features/routes/pages/MyPathPage';
-import { ManualRoutePage } from './features/routes/pages/ManualRoutePage';
-import { SavedRouteDetailPage } from './features/routes/pages/SavedRouteDetailPage';
 import { LoginCallbackPage } from './pages/LoginCallbackPage';
 import { LoginPage } from './pages/LoginPage';
 import { SectionPage } from './pages/SectionPage';
 import { WelcomePage } from './pages/WelcomePage';
+
+const CatalogPage = lazy(() => import('./features/catalog/pages/CatalogPage').then(module => ({ default: module.CatalogPage })));
+const QuestionnairePage = lazy(() => import('./features/questionnaire/pages/QuestionnairePage').then(module => ({ default: module.QuestionnairePage })));
+const MyPathPage = lazy(() => import('./features/routes/pages/MyPathPage').then(module => ({ default: module.MyPathPage })));
+const ManualRoutePage = lazy(() => import('./features/routes/pages/ManualRoutePage').then(module => ({ default: module.ManualRoutePage })));
+const SavedRouteDetailPage = lazy(() => import('./features/routes/pages/SavedRouteDetailPage').then(module => ({ default: module.SavedRouteDetailPage })));
 
 const WelcomePreviewPage = import.meta.env.DEV
   ? lazy(() => import('./pages/WelcomePreviewPage'))
   : null;
 
 function App() {
-  const { isLoading, sessionError, refresh } = useAuthSession();
-  const { t } = useTranslation();
-  const { pathname } = useLocation();
-
-  if (!isLoading && sessionError && pathname !== '/') {
-    return (
-      <PageState
-        kind="error"
-        title={t('errors.sessionUnavailable')}
-        description={t('errors.sessionUnavailableDescription')}
-        onRetry={() => { void refresh(); }}
-      />
-    );
-  }
-
   return (
     <Routes>
       <Route element={<AppLayout variant="welcome" />}>
