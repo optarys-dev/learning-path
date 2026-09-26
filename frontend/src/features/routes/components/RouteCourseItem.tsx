@@ -71,6 +71,7 @@ export function RouteCourseItem({
   const mark = courseMark(course.title);
   const courseUrl = safeExternalUrl(course.courseUrl);
   const courseImage = safeExternalUrl(course.imageUrl);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const dragPreviewBindings = useCourseDragPreview(onDragStart, onDragEnd);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -102,7 +103,9 @@ export function RouteCourseItem({
       <article className={`my-path__course-card${canReorder && !locked ? ' is-draggable' : ''}${completed ? ' is-completed' : ''}`}
         draggable={canReorder && !locked} {...dragPreviewBindings}>
         <div className="my-path__course-visual" aria-hidden="true">
-          {courseImage ? <img src={courseImage} alt="" /> : mark ?? <Code2 size={24} />}
+          {courseImage && courseImage !== failedImageUrl
+            ? <img src={courseImage} alt="" onError={() => setFailedImageUrl(courseImage)} />
+            : mark ?? <Code2 size={24} />}
         </div>
         <div className="my-path__course-copy">
           <div className="my-path__course-signals">

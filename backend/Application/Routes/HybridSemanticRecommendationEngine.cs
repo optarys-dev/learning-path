@@ -341,7 +341,8 @@ public sealed partial class HybridSemanticRecommendationEngine
                 item.Course.Title,
                 Math.Round(item.Score, 4),
                 reason,
-                estimatedWeeks);
+                estimatedWeeks,
+                string.IsNullOrWhiteSpace(item.Course.ImageUrl) ? null : item.Course.ImageUrl);
         }).ToArray();
 
         var explanation = focusedIntent && coreCount > 0

@@ -31,7 +31,8 @@ function parseRecommendationCourse(value: unknown): RecommendationCourse | null 
   const score = normalizeNumber(value.score);
   const estimatedWeeks = normalizeNumber(value.estimatedWeeks);
   if (courseId === null || position === null || !Number.isSafeInteger(position) || position < 1 || score === null || estimatedWeeks === null || estimatedWeeks < 0) return null;
-  return { courseId, position, title: value.title, score, reason: value.reason, estimatedWeeks };
+  const imageUrl = typeof value.imageUrl === 'string' ? safeExternalUrl(value.imageUrl) : null;
+  return { courseId, position, title: value.title, score, reason: value.reason, estimatedWeeks, imageUrl };
 }
 
 export function parseRouteRecommendation(value: unknown): RouteRecommendation | null {

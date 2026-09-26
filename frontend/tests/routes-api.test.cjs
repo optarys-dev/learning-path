@@ -8,6 +8,21 @@ const { ApiError } = require('../.test-build/lib/api/ApiError');
 const types = require('../.test-build/features/routes/model/types');
 const parsers = require('../.test-build/features/routes/model/parseRoutes');
 
+test('recommendation thumbnails survive parsing and drafting with safe fallbacks', () => {
+  const { createDraftRoute } = require('../.test-build/features/routes/model/draftRoute');
+  for (const imageUrl of ['https://example.test/course.jpg', null, undefined, '', 'javascript:alert(1)']) {
+    const course = { courseId: 123, position: 1, title: 'Course', score: 0.95, reason: 'Reason', estimatedWeeks: 8, imageUrl };
+    const route = parsers.parseRouteRecommendation({ method: 'semantic', goal: 'Learn', explanation: null,
+      refinementStatus: 'skipped', model: null, courses: [course] });
+    assert.ok(route);
+    const draft = createDraftRoute(route);
+    assert.equal(draft.courses[0].imageUrl, imageUrl?.startsWith('https://') ? imageUrl : null);
+    assert.equal(draft.courses[0].courseId, '123');
+    assert.equal(draft.courses[0].score, course.score);
+    assert.equal(draft.courses[0].position, course.position);
+  }
+});
+
 function loadRoutesApi(requestJson) {
   const filename = path.join(__dirname, '../src/features/routes/api/routes.ts');
   const output = ts.transpileModule(fs.readFileSync(filename, 'utf8'), {

@@ -1,4 +1,5 @@
 export interface RecommendationCourse {
+  imageUrl?: string | null;
   courseId: string;
   position: number;
   title: string;
