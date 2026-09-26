@@ -1,181 +1,392 @@
 <p align="center">
-  <img src="frontend/src/assets/brand/codequest-2026-mission.png" alt="CODE QUEST 2026" width="420" />
+  <img src="frontend/src/assets/brand/codequest-2026-mission.png" alt="CODE QUEST 2026 · Learning Path" width="400" />
 </p>
 
-<h1 align="center">CODE QUEST 2026</h1>
+<h1 align="center">Learning Path · CODE QUEST 2026</h1>
 
 <p align="center">
-  Una forma de convertir tus objetivos en una ruta de aprendizaje clara, con cursos reales de DevTalles.
+  <strong>Una meta. Un punto de partida. Tu propio recorrido.</strong><br />
+  Convertimos un catálogo de cursos en un camino de aprendizaje que puedes entender, ajustar y retomar.
 </p>
 
 <p align="center">
-  <a href="#qué-es-code-quest">Conoce el proyecto</a> ·
-  <a href="#qué-puedes-hacer">Funcionalidades</a> ·
-  <a href="#cómo-está-construido">Arquitectura</a> ·
-  <a href="#ponerlo-en-marcha">Instalación</a>
+  <a href="https://codequest2026.optarys.com/"><strong>🚀 Explorar la aplicación</strong></a> ·
+  <a href="#el-corazón-del-proyecto">🧠 Cómo recomendamos</a> ·
+  <a href="#un-ejemplo-de-principio-a-fin">🧭 Ver un ejemplo</a> ·
+  <a href="#recorrido-por-el-código">🔎 Explorar el código</a>
 </p>
 
-## Qué es CODE QUEST
+<p align="center">
+  React + TypeScript &nbsp; / &nbsp; ASP.NET Core &nbsp; / &nbsp; PostgreSQL + pgvector &nbsp; / &nbsp; Python + embeddings
+</p>
 
-CODE QUEST ayuda a elegir **qué aprender y en qué orden**. Puedes responder un cuestionario para recibir una ruta recomendada según tu meta, experiencia e intereses, o construir una ruta manualmente con los cursos del catálogo. Después puedes guardarla, ajustarla y seguir tu avance desde un mismo lugar.
+---
 
-Los cursos se estudian en **DevTalles**: CODE QUEST organiza el recorrido, pero no aloja las clases ni sincroniza automáticamente el progreso con la plataforma de cursos.
+## Aprender empieza antes del primer curso
 
-## Qué puedes hacer
+Tener muchos cursos disponibles no siempre significa saber por dónde empezar. Entre tecnologías, niveles y objetivos, falta una pieza: **convertir las opciones en un plan con sentido**.
 
-| Área | Experiencia |
+Learning Path conecta el catálogo de **DevTalles** con el objetivo y el punto de partida de cada persona. La propuesta incluye cursos reales, un orden de estudio y una explicación de su aporte. Después, el usuario conserva el control: puede ajustar el recorrido, guardarlo y registrar su avance.
+
+> **Nuestra decisión central:** recomendar, explicar y dejar decidir. La plataforma acompaña el aprendizaje; el cuestionario no es un requisito para explorarla ni para crear una ruta manual.
+
+Este repositorio muestra cómo construimos esa experiencia. Para conocer el producto, puedes entrar directamente a **[codequest2026.optarys.com](https://codequest2026.optarys.com/)**; esta portada se centra en su implementación, no en la instalación.
+
+## Dos maneras de construir tu camino
+
+| 🧠 Con una recomendación | ✍️ Con tus propias decisiones |
 | --- | --- |
-| Descubrir | Explorar el catálogo de cursos y consultar su información disponible. |
-| Personalizar | Iniciar sesión con Discord y completar un perfil con intereses, conocimientos y objetivo. |
-| Crear | Generar una propuesta recomendada o elegir y ordenar cursos para crear una ruta manual. |
-| Avanzar | Guardar varias rutas, editar sus cursos y marcar cada uno como **No iniciado** o **Completado**. |
-| Organizar | Escribir una nota y asignar prioridad normal, media o alta a cada curso. |
-| Ajustar | Reemplazar cursos de una ruta y conservar su lugar dentro del recorrido. |
-| Compartir | Ver una vista previa y descargar el mapa de la ruta como PNG horizontal, cuadrado o vertical 9:16. Las rutas largas se dividen en varias imágenes. |
+| Respondes el perfil de aprendizaje. | Seleccionas cursos del catálogo. |
+| El motor combina significado, asociaciones temáticas y señales de preparación. | Defines el nombre, la descripción y el orden. |
+| Recibes una propuesta editable de hasta **6 cursos**. | Construyes una ruta de **1 a 30 cursos**, sin repetir. |
+| Revisas las razones y decides qué conservar. | No necesitas completar el cuestionario. |
+| **Guardar es una acción explícita.** | **Guardar es una acción explícita.** |
 
-La interfaz está disponible en **español e inglés**, con **tema claro y oscuro** y diseño adaptable a móvil y escritorio.
+Una vez guardadas, ambas rutas comparten consulta, edición, reemplazo de cursos, progreso, notas, prioridades y exportación visual.
 
-### Un recorrido típico
+<details>
+<summary><strong>✨ Qué puedes experimentar en la aplicación</strong></summary>
 
-1. Entras a CODE QUEST y accedes con Discord.
-2. Indicas qué quieres aprender y tu punto de partida.
-3. Revisas la propuesta de cursos, o creas una ruta desde cero.
-4. Guardas la ruta y marcas los cursos que completas.
-5. Añades notas, ajustas prioridades y compartes tu mapa cuando quieras.
+| Momento | Lo que construimos |
+| --- | --- |
+| Descubrir | Landing educativa y catálogo público, sin obligar a iniciar sesión. |
+| Entrar | Discord y Google cuando está configurado. Cada cuenta conserva sus datos; no se fusionan automáticamente por correo. |
+| Elegir | Constructor manual o perfil para una recomendación personalizada. |
+| Entender | Mapa del recorrido, razones por curso y explicación de la propuesta. |
+| Ajustar | Ordenar, retirar o reemplazar cursos según el contexto de la pantalla. |
+| Avanzar | Marcar cursos como No iniciado o Completado y consultar el resumen. |
+| Organizar | Notas y prioridades por curso, guardadas en el navegador. |
+| Compartir | Vista previa y PNG horizontal, cuadrado o vertical 9:16; paginación de rutas largas. |
+| Sentirse cómodo | Español e inglés, temas claro/oscuro, diseño adaptable y atención al foco y al teclado. |
 
-## Cómo está construido
+Las clases se ven en **DevTalles**. Learning Path organiza y enlaza el contenido; no aloja clases ni sincroniza automáticamente el avance con esa plataforma.
+
+</details>
+
+## El corazón del proyecto
+
+### De un objetivo a una propuesta explicable
+
+La recomendación tiene **dos etapas**: un motor híbrido selecciona y ordena cursos del catálogo; después, un proveedor de IA puede refinar ese orden y sus explicaciones. El motor base ya produce una propuesta sin depender del refinamiento generativo.
+
+```mermaid
+flowchart TD
+    A["Perfil: objetivo, intereses y experiencia"] --> B["Embedding de consulta · Python"]
+    C["Catálogo activo con vectores compatibles"] --> D["Similitud coseno · pgvector"]
+    B --> D
+    D --> E["Motor híbrido: relevancia, intención y cobertura"]
+    F["Categorías, tags y metadatos"] --> E
+    G["Conocimientos previos"] --> E
+    E --> H["Selección y orden de hasta 6 cursos"]
+    H --> I{"¿Refinamiento disponible y válido?"}
+    I -->|Sí| J["Mismos cursos: orden y razones refinados"]
+    I -->|No| K["Propuesta original conservada"]
+    J --> L["Vista previa editable"]
+    K --> L
+    L --> M["Confirmación del usuario"]
+    M --> N["Ruta persistida con su orden y contexto"]
+```
+
+### 01 · Traducir el perfil a datos concretos
+
+El frontend valida las respuestas y las transforma en un contrato estable antes de enviarlas a la API. Las tecnologías usan nombres canónicos en español, independientemente del idioma visual.
+
+| Dato que llega al recomendador | Cómo interviene |
+| --- | --- |
+| **Objetivo** | Meta elegida; participa en el embedding y en la detección del tema central. |
+| **Intereses** | Tecnologías seleccionadas; participan en el embedding y las asociaciones temáticas. |
+| **Experiencia declarada** | Se transforma a principiante, intermedio o avanzado; participa en el texto del embedding y el refinamiento. |
+| **Conocimientos previos** | Orientan preparación y orden; no se incluyen en el embedding de consulta. |
+| **Idioma preferido** | Filtra cursos compatibles; aquellos sin idioma informado también pueden participar. |
+| **Minutos por semana** | Permiten estimar semanas de contenido cuando hay duración disponible. |
+
+<details>
+<summary><strong>🔬 Precisión sobre el contrato actual del cuestionario</strong></summary>
+
+El objetivo enviado corresponde al **resultado que la persona quiere conseguir**. El área organiza las tecnologías disponibles, pero no se envía como campo independiente. Experiencia práctica y contexto de sistemas existentes permanecen en el cuestionario y su resumen; actualmente no son campos del DTO del recomendador.
+
+El mapeo utiliza **español** como idioma preferido y **60 minutos semanales** como valor fijo. Son valores de implementación, no una disponibilidad horaria preguntada al usuario. El idioma visual no cambia ese filtro.
+
+El nivel declarado influye en la consulta semántica, pero el motor base **no aplica un peso independiente por nivel de usuario ni bloquea cursos avanzados**. Para ordenar usa el nivel publicado de cada curso y las señales de preparación descritas más adelante.
+
+**Código:** [mapeo del perfil](frontend/src/features/questionnaire/model/preferencesMapping.ts) · [cliente de embeddings](backend/Infrastructure/Embeddings/PreferenceEmbeddingClient.cs).
+
+</details>
+
+### 02 · Representar el catálogo por su significado
+
+Python prepara un texto por curso con **título, nivel, categorías y etiquetas**. Añade descripción, temario, resultados, habilidades, requisitos y público cuando los metadatos tienen procedencia admitida: no provienen del seed inferido y tienen una URL de fuente o fecha de verificación.
+
+El modelo local configurado por defecto es **`Qwen/Qwen3-Embedding-0.6B`**, cargado con Sentence Transformers. Convierte los textos en vectores normalizados. Para las preferencias añade una instrucción de recuperación de cursos al objetivo, intereses y experiencia.
+
+La indexación guarda **identificador de modelo, dimensión, hash del contenido y fecha de generación**. Si el modelo y el hash no cambiaron, omite recalcular ese curso. La preparación del catálogo ocurre separadamente de cada consulta.
+
+**Por qué importa:** comparamos intención y contenido más allá de palabras exactas, manteniendo trazabilidad de la representación utilizada.
+
+**Código:** [textos y embeddings](backend/embedding-worker/embedding_service.py) · [indexación incremental](backend/embedding-worker/embedding_cli.py).
+
+### 03 · Recuperar candidatos compatibles
+
+La API genera el vector de consulta y PostgreSQL calcula:
 
 ```text
-Navegador (React + TypeScript)
-       │
-       ├── rutas y progreso ──> API ASP.NET Core ──> PostgreSQL
-       │                              │                    └── pgvector: búsqueda semántica
-       ├── notas y prioridades ──> localStorage
-       └── imágenes PNG ──> generación en el navegador
-                                      │
-                                      ├── FastAPI + modelo local de embeddings
-                                      └── Groq (refinamiento opcional de la recomendación)
+similitud coseno = 1 − distancia coseno
 ```
 
-| Pieza | Responsabilidad |
-| --- | --- |
-| **Frontend** | React, TypeScript, Vite y React Router para pantallas, navegación y edición de rutas. `i18next` gestiona los dos idiomas. |
-| **API** | ASP.NET Core 10 expone el catálogo, autenticación, preferencias, recomendaciones y rutas guardadas. |
-| **Datos** | PostgreSQL y Entity Framework Core conservan usuarios, catálogo, rutas y progreso. `pgvector` permite comparar cursos y preferencias. |
-| **Embeddings** | Un servicio Python/FastAPI genera los vectores del catálogo y de las preferencias con un modelo local. |
-| **IA opcional** | Groq puede refinar el orden y las explicaciones de una propuesta; si no está disponible, se mantiene la recomendación semántica. |
+Participan cursos **activos**, con vectores del **mismo modelo y dimensión** y compatibles con el idioma preferido. El filtro reconoce idioma base, variantes y cursos sin idioma informado. También admite excluir IDs para solicitar alternativas.
 
-### Decisiones que importan
+La consulta conserva **todo el conjunto compatible**, no únicamente los primeros vecinos: las asociaciones y la selección necesitan observar ese catálogo candidato. No es todavía una búsqueda aproximada limitada a un top-k.
 
-- **El usuario decide cuándo guardar.** La recomendación es una propuesta editable; no se convierte en ruta guardada hasta confirmarla.
-- **El progreso tiene dos estados en la interfaz.** Cada curso se marca como No iniciado (0 %) o Completado (100 %); el resumen de la ruta se calcula a partir de esos cursos.
-- **Notas y prioridades son personales y locales.** Se asocian a la ruta y al curso en `localStorage`; no viajan a la API ni se sincronizan entre dispositivos.
-- **La recomendación no depende por completo de la IA generativa.** El motor semántico selecciona cursos; el refinamiento con Groq es opcional y tiene una alternativa cuando falla.
-- **El contenido sigue en su origen.** CODE QUEST enlaza a los cursos de DevTalles y no copia ni distribuye sus clases.
+**Código:** [consulta semántica y filtros](backend/Application/Routes/Queries/GetSemanticRecommendationQuery.cs).
 
-## Organización del repositorio
+### 04 · Combinar significado y contexto del catálogo
+
+El motor **`semantic-graph-v6`** combina dos señales:
+
+| Señal | Peso | Qué representa |
+| --- | --- | --- |
+| Similitud semántica normalizada | **82 %** | Cercanía entre consulta y contenido del curso. |
+| Asociación temática | **18 %** | Coincidencias de categorías, tags, títulos y relaciones observadas en el catálogo candidato. |
 
 ```text
-frontend/
-  src/features/          Autenticación, catálogo, cuestionario y rutas
-  src/components/        Componentes compartidos y estructura de la app
-  src/styles/            Tokens y estilos globales
-  src/i18n/              Textos en español e inglés
-  src/assets/            Identidad e ilustraciones
-backend/
-  Controllers/            Endpoints HTTP
-  Application/            Casos de uso, recomendaciones y contratos
-  Infrastructure/         Persistencia, migraciones y proveedores externos
-  embedding-worker/       Indexación y API de embeddings en Python
-  tests/                  Pruebas de la API
-database/seeds/           Material de referencia del catálogo
-docs/                    Guías de arquitectura, diseño e internacionalización
+S = clamp((similitud_coseno + 1) / 2, 0, 1)
+R = 0.82 × S + 0.18 × G
+
+Si el título contiene Legacy y no fue solicitado:
+R = max(0, R − 0.08)
 ```
 
-## Ponerlo en marcha
+**`R` expresa relevancia relativa, no probabilidad de éxito ni una promesa de aprendizaje.**
 
-Este ejemplo usa **PowerShell** y ejecuta PostgreSQL en Docker; la API, el worker y el frontend se inician por separado para facilitar el desarrollo. Necesitas Docker, **.NET 10**, Node.js con npm, **Python 3.10+** y una aplicación de Discord OAuth para probar las funciones protegidas.
+Se normalizan mayúsculas, acentos y nombres como `C#`, `.NET` y `Node.js`. Los alias son acotados: `web` se relaciona con frontend/backend con peso 0,45; `js` se reconoce como JavaScript.
 
-### 1. Iniciar PostgreSQL
+Las coocurrencias categoría–tag permiten reconocer asociaciones indirectas. Se toma la más fuerte en lugar de sumar todos los tags. **Describen afinidad temática; no constituyen un grafo de prerrequisitos obligatorios.**
 
-Desde la raíz del repositorio:
+<details>
+<summary><strong>🧩 Cómo resolvemos una intención compuesta, como «web con Python»</strong></summary>
 
-```powershell
-Copy-Item .env.example .env
-# Cambia POSTGRES_PASSWORD en .env por una contraseña local.
-docker compose up -d postgres
+Cuando se identifica categoría y tecnología, la asociación `G` distingue:
+
+| Relación con la intención | G |
+| --- | ---: |
+| Comparte tema y dominio | 1,00 |
+| Enseña fundamentos del tema en la categoría Fundamentos | 0,85 |
+| Comparte únicamente dominio | 0,35 |
+| Comparte únicamente tema | 0,15 |
+| No coincide con esas señales | 0,00 |
+
+Los tags mencionados **en el objetivo** prevalecen sobre intereses adicionales para definir el tema central. Si esa intención enfocada tiene cursos centrales, elimina candidatos con `G < 0,35` y admite **como máximo un complemento** con `0,35 ≤ G < 0,80`.
+
+Puede devolver menos de seis cursos. No completa posiciones artificialmente con otras tecnologías solo porque pertenecen al mismo dominio. Mencionar Python como requisito tampoco demuestra que un curso enseñe Python.
+
+Para intenciones no compuestas, la asociación indirecta usa:
+
+```text
+0.4 × peso_de_coincidencia × coocurrencias / frecuencia
 ```
 
-El archivo `.env` de la raíz configura **Docker Compose**; la API .NET no lo carga automáticamente. Si cambias el puerto, usuario o nombre de la base, ajusta también las conexiones de los pasos siguientes.
+Se toma el máximo entre señales admitidas para evitar que muchas etiquetas genéricas inflen el puntaje.
 
-### 2. Preparar la base de datos e iniciar la API
+</details>
 
-En otra terminal, desde `backend/`:
+### 05 · Seleccionar con cobertura y preparación
 
-```powershell
-$env:ConnectionStrings__DefaultConnection = 'Host=localhost;Port=5432;Database=codequest2026;Username=codequest;Password=TU_PASSWORD'
-$env:DISCORD_CLIENT_ID = 'TU_CLIENT_ID'
-$env:DISCORD_CLIENT_SECRET = 'TU_CLIENT_SECRET'
-$env:ASPNETCORE_ENVIRONMENT = 'Development'
+La selección es incremental: escoge el siguiente candidato según relevancia, novedad temática y preparación, hasta seis cursos o hasta agotar candidatos elegibles.
 
-dotnet tool restore --tool-manifest dotnet-tools.json
-dotnet ef database update --context AppDbContext
-dotnet run --launch-profile http
+```text
+puntaje de selección = R + bonificación de novedad − penalización de preparación
+
+bonificación: hasta 0.06 por proporción de tags aún no cubiertos
+penalización: hasta 0.06 por proporción de temas requeridos aún desconocidos
 ```
 
-Usa aquí la misma contraseña que configuraste en `.env`. Las migraciones crean el esquema y cargan el catálogo inicial; **no ejecutes por separado el SQL histórico de `database/seeds/`**. La API escucha en `http://localhost:5107`; Swagger está en `http://localhost:5107/swagger`.
+La novedad se bonifica si hay asociación temática y tags. Cada elección actualiza temas cubiertos y habilidades acreditadas en los metadatos. Es una proyección para organizar el recorrido: no significa que el usuario ya haya adquirido esas habilidades ni marca cursos como completados. El ID desempata de forma determinista.
 
-### 3. Indexar cursos e iniciar el worker
+**Seleccionar no es ordenar.** El conjunto elegido se organiza con este criterio:
 
-En otra terminal, desde `backend/embedding-worker/`:
+1. Cursos centrales antes de complementarios, para intenciones compuestas.
+2. Nivel publicado: principiante, intermedio y avanzado; desconocido se trata como intermedio.
+3. Proporción de requisitos temáticos pendientes.
+4. Mayor relevancia.
+5. ID para desempatar.
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-$env:DATABASE_URL = 'postgresql://codequest:TU_PASSWORD@localhost:5432/codequest2026'
+La preparación se recalcula tras cada curso colocado. Las habilidades y requisitos usados necesitan **fecha de verificación** y no pueden proceder de `inferred-seed-v1`. Se reconocen requisitos textuales de conocimiento y se descartan formulaciones negativas u opcionales. Es una heurística apoyada en metadatos, no una validación académica de dependencias.
 
-python embedding_cli.py index
-python embedding_cli.py serve
+Cada curso recibe posición, puntaje, razón y semanas estimadas cuando hay duración y disponibilidad válidas:
+
+```text
+semanas de contenido = ceil(duración del curso / minutos por semana)
 ```
 
-La primera indexación descarga el modelo y puede tardar. El worker queda en `http://127.0.0.1:8765`; vuelve a ejecutar `index` cuando cambie el catálogo o el modelo. La API usa esa URL por defecto.
+La estimación expresa tiempo de contenido; no mide práctica ni tiempo hasta dominar una tecnología. Los requisitos pendientes se explican; **no bloquean el curso**.
 
-### 4. Iniciar el frontend
+**Código:** [motor híbrido completo](backend/Application/Routes/HybridSemanticRecommendationEngine.cs).
 
-En otra terminal, desde `frontend/`:
+### 06 · Refinar con IA dentro de límites verificables
 
-```powershell
-npm ci
-npm run dev
+El endpoint V2 entrega la propuesta base a `RouteRefinementService`. Se registra **Groq** detrás de una interfaz de proveedor; el modelo predeterminado del adaptador es `openai/gpt-oss-20b`. Son valores del código, no una afirmación sobre la configuración del despliegue.
+
+El proveedor recibe el perfil y **solo los cursos seleccionados**. Puede reorganizarlos y redactar explicación y razones específicas. Las instrucciones exigen fundamentar dependencias en requisitos y habilidades verificados, evitar promesas y tratar preferencias y metadatos como datos no confiables.
+
+La respuesta está restringida por JSON Schema y se valida de nuevo en la aplicación:
+
+- El número de cursos debe coincidir con la propuesta original.
+- Cada ID original aparece **exactamente una vez**.
+- No se aceptan cursos nuevos, duplicados ni omitidos.
+- Se validan propiedades y textos de explicación y razones.
+- Se conservan puntajes y estimaciones; se actualizan posiciones y razones.
+
+> **La IA mejora la presentación y puede ajustar el orden; catálogo y motor delimitan qué cursos puede utilizar.** Las instrucciones reducen afirmaciones sin fundamento, aunque no equivalen a comprobar automáticamente cada frase generada.
+
+Si el proveedor no está configurado, falla, tarda demasiado o devuelve datos inválidos, se conserva la propuesta original. `refinementStatus` distingue `applied` de casos como `not_configured`, `timeout` o `invalid_response`.
+
+Esta recuperación corresponde al **refinamiento**: sin servicio de embeddings o índice compatible no existe propuesta base que recuperar, y la API informa ese problema.
+
+**Código:** [orquestación V2](backend/Application/Routes/Queries/GetSemanticRecommendationV2Query.cs) · [refinamiento y validación](backend/Application/Routes/RouteRefinementService.cs) · [Groq](backend/Infrastructure/Groq/GroqProvider.cs).
+
+### 07 · Convertir una propuesta en una ruta propia
+
+Generar una recomendación **no inserta una ruta guardada**. El frontend crea un borrador editable. Una propuesta ya generada puede conservarse en `sessionStorage`, con comprobación de propietario, para recuperarla dentro de esa sesión del navegador cuando el almacenamiento está disponible.
+
+Al confirmar, `POST /routes` valida identidad del usuario, cursos activos, ausencia de duplicados y límite de 1 a 30 cursos. El arreglo enviado determina las posiciones persistidas. Las rutas recomendadas conservan una **copia de las preferencias utilizadas**; las manuales no las exigen y guardan un snapshot vacío.
+
+Después se pueden consultar varias rutas y editar sus recorridos. En el detalle guardado, reemplazar durante edición modifica el borrador y espera Guardar cambios. El resumen de avance se calcula como cursos completados dividido entre cursos totales; no está ponderado por duración.
+
+**Código:** [borrador y recuperación](frontend/src/features/routes/model/draftRoute.ts) · [persistencia](backend/Application/Routes/Commands/SaveLearningRouteCommand.cs).
+
+## Un ejemplo de principio a fin
+
+> **Objetivo ilustrativo:** «Aprender a desarrollar aplicaciones web con Python».
+
+Este caso está representado en las pruebas con un catálogo controlado. Explica la lógica; no promete que producción devuelva siempre los mismos cursos.
+
+| Paso | Decisión del sistema |
+| --- | --- |
+| Interpretar | Reconoce web y Python como tema explícito. |
+| Comparar | Calcula cercanía semántica aunque los títulos no repitan la frase completa. |
+| Enfocar | Favorece Python aplicado a web y sus fundamentos; otros intereses no desplazan el núcleo. |
+| Seleccionar | En el escenario de prueba incluye fundamentos, Django y FastAPI; excluye automatización con Python y JavaScript ajeno al núcleo. |
+| Ordenar | Coloca fundamentos primero y recalcula preparación antes de los siguientes cursos. |
+| Explicar | Identifica aporte y requisitos pendientes; si fundamentos acredita Python, no lo anuncia después como requisito sin cubrir. |
+| Confirmar | Entrega una vista previa. El usuario decide cuándo guardarla. |
+
+<details>
+<summary><strong>✅ Evidencia en pruebas, no solo en una descripción</strong></summary>
+
+[HybridSemanticRecommendationEngineTests](backend/tests/CodeQuest2026.Server.Tests/HybridSemanticRecommendationEngineTests.cs) cubre categorías, diversidad de tags, asociaciones indirectas, web amplio, web con Python, backend con Go, objetivos explícitos y requisitos verificados o negados.
+
+[GroqRouteRefinerTests](backend/tests/CodeQuest2026.Server.Tests/GroqRouteRefinerTests.cs) comprueba refinamiento y recuperación ante respuestas inválidas, errores, ausencia de configuración y timeout. El [contrato de proveedores](backend/tests/CodeQuest2026.Server.Tests/AiProviderContractTests.cs) prueba la separación entre orquestación y adaptador.
+
+Las [pruebas del worker](backend/embedding-worker/test_embedding_service.py) caracterizan servicio y textos. Las [pruebas del frontend](frontend/tests/README.md) cubren contratos, URLs, borradores, almacenamiento y cancelación; hay además una fixture de interacciones con datos ficticios.
+
+Estas pruebas documentan escenarios concretos; no garantizan la relevancia de toda recomendación ni sustituyen una evaluación longitudinal del aprendizaje.
+
+</details>
+
+## Una arquitectura con responsabilidades claras
+
+```mermaid
+flowchart LR
+    U["Persona"] --> F["React + TypeScript"]
+    F --> A["API ASP.NET Core · casos de uso"]
+    A --> P[("PostgreSQL + pgvector")]
+    A --> W["Python / FastAPI · vector de consulta"]
+    W --> M["Modelo local de embeddings"]
+    X["Indexación del catálogo"] --> M
+    X --> P
+    A --> G["Proveedor IA · refinamiento opcional"]
+    F --> L["Navegador · notas, prioridades y borradores"]
+    F --> I["Exportación PNG"]
 ```
 
-Abre **http://localhost:5173**. Deja `VITE_API_BASE_URL` vacío para usar el proxy local de Vite; si necesitas una URL absoluta, configura `frontend/.env` a partir de `frontend/.env.example`.
+| Capa | Responsabilidad y decisión |
+| --- | --- |
+| **Experiencia** | React, TypeScript y React Router; features de autenticación, catálogo, cuestionario y rutas. Estado local y contextos de sesión/notificaciones. |
+| **Sistema visual** | CSS con tokens, Lucide, ilustraciones educativas, Framer Motion e i18next. Temas y movimiento reducido donde está implementado. |
+| **Límite HTTP** | Cliente compartido y parsers que validan datos externos antes de tratarlos como modelos del frontend. |
+| **Aplicación** | ASP.NET Core 10 y casos de uso con MediatR: consultar, recomendar, guardar y actualizar progreso son responsabilidades distintas. |
+| **Persistencia** | Entity Framework Core y PostgreSQL conservan usuarios, preferencias, catálogo, asociaciones, rutas y progreso; pgvector calcula similitud. |
+| **Representación semántica** | Python/FastAPI encapsula el modelo local; .NET consume vectores y no carga el modelo. |
+| **Refinamiento** | Interfaz de proveedor y respuestas estructuradas; un fallo generativo conserva la propuesta válida. |
 
-Para el inicio de sesión, registra en la aplicación de Discord la URL de retorno que uses: `http://localhost:5173/auth/discord/callback` con el proxy de Vite, o `http://localhost:5107/auth/discord/callback` si entras directamente por la API. Consulta la [guía de Discord](backend/docs/DISCORD_OAUTH.md) para HTTPS y despliegue.
+### Dónde vive cada decisión del usuario
 
-> **Refinamiento opcional:** configura `Groq__ApiKey` en la terminal de la API si quieres probar la recomendación refinada. Sin esa clave, la propuesta semántica sigue disponible.
+| Información | Persistencia | Alcance |
+| --- | --- | --- |
+| Rutas y orden | PostgreSQL, vinculados al usuario | Recuperables con esa cuenta. |
+| Progreso | PostgreSQL | UI de 0 % o 100 %; contrato con porcentajes. No se sincroniza con DevTalles. |
+| Contexto de recomendación | Snapshot en la ruta | Registra preferencias utilizadas al guardar. |
+| Propuesta pendiente | `sessionStorage`, comprobando usuario | Recuperación de la propuesta lista, no persistencia permanente. |
+| Notas y prioridades | `localStorage`, por ruta y curso | Locales al navegador, sin sincronización entre dispositivos. |
+| Borrador manual | Estado de pantalla | Sin recuperación persistente al abandonar la página. |
+| Imagen compartida | html-to-image en el navegador | Exporta el mapa; no modifica la ruta. |
 
-### Docker Compose completo
+<details>
+<summary><strong>🛠️ Alcance actual y siguientes decisiones de ingeniería</strong></summary>
 
-`compose.yaml` también puede levantar PostgreSQL, el worker y la API con el frontend compilado. La base se **migra antes** del arranque completo y los cursos se **indexan explícitamente**. Los comandos y detalles de red están en el [README del backend](backend/README.md#docker). En producción, el inicio de sesión requiere una URL pública HTTPS.
+Distinguimos los límites de las funcionalidades implementadas:
 
-## Verificaciones y más documentación
+- Requisitos como señales textuales, no certificación de dependencias entre cursos.
+- Consulta de todos los candidatos compatibles; un catálogo mucho mayor requeriría medir y diseñar recuperación limitada.
+- Recuperar una propuesta lista no resuelve todavía la política de generación al abandonar su pantalla.
+- El borrador del cuestionario necesita aislamiento completo por cuenta y migración de entradas antiguas sin propietario.
+- Sincronizar notas y prioridades requeriría contrato y persistencia adicionales.
+- La relevancia se comprueba con escenarios controlados; resultados educativos y satisfacción necesitan evaluación con usuarios.
 
-```powershell
-# Desde frontend/
-npm run lint
-npm run build
+La [revisión técnica del frontend](frontend/docs/frontend-review.md) detalla hallazgos, correcciones y fases pendientes. La [arquitectura](docs/architecture.md) amplía el contexto.
 
-# Desde la raíz
-dotnet test CodeQuest2026.slnx
+</details>
+
+## Recorrido por el código
+
+Para evaluar el núcleo de la solución, recomendamos este orden de lectura:
+
+| Qué explorar | Punto de entrada |
+| --- | --- |
+| **1. Perfil → contrato** | [preferencesMapping.ts](frontend/src/features/questionnaire/model/preferencesMapping.ts) |
+| **2. Texto → vector** | [embedding_service.py](backend/embedding-worker/embedding_service.py) |
+| **3. Catálogo → índice** | [embedding_cli.py](backend/embedding-worker/embedding_cli.py) |
+| **4. Consulta → candidatos** | [GetSemanticRecommendationQuery.cs](backend/Application/Routes/Queries/GetSemanticRecommendationQuery.cs) |
+| **5. Candidatos → recorrido** | [HybridSemanticRecommendationEngine.cs](backend/Application/Routes/HybridSemanticRecommendationEngine.cs) |
+| **6. Recorrido → razones refinadas** | [RouteRefinementService.cs](backend/Application/Routes/RouteRefinementService.cs) |
+| **7. Respuesta → propuesta editable** | [MyPathPage.tsx](frontend/src/features/routes/pages/MyPathPage.tsx) |
+| **8. Confirmación → ruta guardada** | [SaveLearningRouteCommand.cs](backend/Application/Routes/Commands/SaveLearningRouteCommand.cs) |
+
+```text
+frontend/src/features/        Autenticación, catálogo, perfil y rutas
+frontend/src/components/      Layout y componentes compartidos
+frontend/src/lib/             Transporte, validación y utilidades de límite
+frontend/src/styles/          Tokens y estilos globales
+backend/Application/          Casos de uso, contratos y motor de recomendación
+backend/Infrastructure/       Persistencia y adaptadores externos
+backend/embedding-worker/     Textos, modelo local, indexación y servicio de vectores
+backend/tests/                Motor, contratos, autenticación y mutaciones
+frontend/tests/               Regresiones de datos y fixture de interacciones
 ```
 
-- [Backend, endpoints y recomendación](backend/README.md)
-- [Worker de embeddings](backend/embedding-worker/README.md)
-- [Arquitectura](docs/architecture.md) · [Sistema de diseño](docs/design-system.md) · [Idiomas](docs/i18n.md)
-- [Migraciones](backend/docs/MIGRATIONS.md) · [Colaboración](CONTRIBUTING.md)
+<details>
+<summary><strong>📚 Documentación especializada para colaboradores</strong></summary>
 
-## Licencia y recursos de terceros
+Los detalles de desarrollo se mantienen fuera de esta presentación:
 
-El código propio de este proyecto se publica bajo la [licencia MIT](LICENSE). Los nombres, logos, miniaturas y contenidos de terceros —incluidos los de DevTalles y sus cursos— pertenecen a sus respectivos titulares; su presencia aquí no concede derechos sobre esas marcas o materiales.
+- [Frontend y verificaciones](frontend/README.md)
+- [Backend y endpoints](backend/README.md)
+- [Servicio de embeddings](backend/embedding-worker/README.md)
+- [Sistema de diseño](docs/design-system.md) · [Internacionalización](docs/i18n.md)
+- [Migraciones](backend/docs/MIGRATIONS.md) · [Contribución](CONTRIBUTING.md)
+
+</details>
+
+---
+
+<p align="center">
+  <img src="frontend/src/assets/brand/devi-laptop.svg" alt="Devi aprendiendo con su laptop" width="120" />
+  <br />
+  <strong>De tener opciones a tener un plan.</strong><br />
+  Un recorrido explicable, editable y construido alrededor de tu próximo paso.<br /><br />
+  <a href="https://codequest2026.optarys.com/"><strong>Explorar Learning Path →</strong></a>
+</p>
+
+### Licencia y recursos
+
+El código propio se publica bajo la [licencia MIT](LICENSE). Nombres, logos, miniaturas y contenidos de terceros, incluidos DevTalles y sus cursos, pertenecen a sus respectivos titulares. Su uso no concede derechos sobre esas marcas ni materiales.
