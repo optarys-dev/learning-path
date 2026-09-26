@@ -1,0 +1,10 @@
+const { spawnSync } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.resolve(__dirname, '..');
+const compile = spawnSync(process.execPath, [require.resolve('typescript/lib/tsc.js'), '-p', 'tsconfig.tests.json'], { cwd: root, stdio: 'inherit' });
+if (compile.status !== 0) process.exit(compile.status ?? 1);
+fs.writeFileSync(path.join(root, '.test-build/package.json'), JSON.stringify({ type: 'commonjs' }));
+const tests = fs.readdirSync(__dirname).filter(file => file.endsWith('.test.cjs')).map(file => path.join(__dirname, file));
+const result = spawnSync(process.execPath, ['--test', ...tests], { cwd: root, stdio: 'inherit' });
+process.exit(result.status ?? 1);

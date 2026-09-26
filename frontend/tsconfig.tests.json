@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "ignoreDeprecations": "6.0",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": ".test-build",
+    "rootDir": "src",
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2023",
+      "DOM"
+    ]
+  },
+  "include": [
+    "src/lib/validation.ts",
+    "src/lib/urls.ts",
+    "src/lib/api/latestRequest.ts",
+    "src/lib/api/parseProblemDetails.ts",
+    "src/features/auth/model/parseSession.ts",
+    "src/features/catalog/model/parseCatalogPage.ts",
+    "src/features/routes/model/*.ts"
+  ]
+}

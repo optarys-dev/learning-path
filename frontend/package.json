@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc -b && tsc -p tsconfig.browser-tests.json",
+    "test": "node tests/run-tests.cjs"
   },
   "dependencies": {
     "framer-motion": "^13.3.0",

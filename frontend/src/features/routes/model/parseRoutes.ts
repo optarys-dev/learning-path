@@ -80,4 +80,3 @@ export function parseSavedRoute(value: unknown): SavedRoute | null {
       .sort((first, second) => first.position - second.position),
   };
 }
-
