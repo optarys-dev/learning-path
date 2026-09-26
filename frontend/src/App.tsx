@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { AppLayout } from './components/layout/AppLayout';
 import { PageState } from './components/ui/PageState/PageState';
@@ -23,8 +23,9 @@ const WelcomePreviewPage = import.meta.env.DEV
 function App() {
   const { isLoading, sessionError, refresh } = useAuthSession();
   const { t } = useTranslation();
+  const { pathname } = useLocation();
 
-  if (!isLoading && sessionError) {
+  if (!isLoading && sessionError && pathname !== '/') {
     return (
       <PageState
         kind="error"
