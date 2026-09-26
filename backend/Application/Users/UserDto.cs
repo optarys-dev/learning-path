@@ -1,6 +1,6 @@
 namespace CodeQuest2026.Server.Application.Users;
 
-/// <summary>Perfil local sincronizado con la cuenta de Discord autenticada.</summary>
+/// <summary>Perfil local asociado al usuario interno autenticado.</summary>
 /// <param name="UserId">Identificador interno estable de CodeQuest.</param>
 /// <param name="DiscordId">Identificador público de la cuenta de Discord.</param>
 /// <param name="Username">Nombre de usuario actual en Discord.</param>
@@ -11,7 +11,7 @@ namespace CodeQuest2026.Server.Application.Users;
 /// <param name="IsNewUser">Indica que todavía no guardó sus preferencias iniciales.</param>
 public sealed record UserDto(
     string UserId,
-    string DiscordId,
+    string? DiscordId,
     string Username,
     string? DisplayName,
     string? Avatar,

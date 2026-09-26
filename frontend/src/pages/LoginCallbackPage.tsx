@@ -8,7 +8,7 @@ export function LoginCallbackPage() {
   const { t } = useTranslation();
 
   if (!isLoading) {
-    return <Navigate to={user ? (user.isNewUser === true ? '/learning-profile' : '/my-path') : '/login'} replace />;
+    return <Navigate to={user ? (user.isNewUser === true ? '/create-route' : '/my-path') : '/login'} replace />;
   }
 
   return <PageState kind="loading" title={t('welcome.connecting')} />;

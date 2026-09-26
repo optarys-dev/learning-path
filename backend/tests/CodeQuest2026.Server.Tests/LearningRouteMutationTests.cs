@@ -81,7 +81,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     [Fact]
     public async Task ManualRouteUsesProvidedGoalAndCourseOrder()
     {
-        var response = await Controller("123").Save(new SaveLearningRouteRequest
+        var response = await Controller("owner").Save(new SaveLearningRouteRequest
         {
             Goal = " Backend desde cero ",
             RecommendationMethod = "manual-v1",
@@ -102,7 +102,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     [Fact]
     public async Task UpdateSwapsPositionsAndPreservesProvenance()
     {
-        var response = await Controller("123").Update(routeId, Request(2, 1), default);
+        var response = await Controller("owner").Update(routeId, Request(2, 1), default);
         var route = Assert.IsType<LearningRouteDto>(Assert.IsType<OkObjectResult>(response.Result).Value);
         Assert.Equal(new long[] { 2, 1 }, route.Courses.Select(course => course.CourseId));
         Assert.Equal(new[] { 1, 2 }, route.Courses.Select(course => course.Position));
@@ -122,22 +122,22 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     [Fact]
     public async Task ProgressPersistsAndSurvivesReorderingWhileNewCoursesStartAtZero()
     {
-        var response = await Controller("123").UpdateCourseProgress(routeId, 1,
+        var response = await Controller("owner").UpdateCourseProgress(routeId, 1,
             new() { ProgressPercentage = 65 }, default);
         var updated = Assert.IsType<LearningRouteDto>(Assert.IsType<OkObjectResult>(response.Result).Value);
         Assert.Equal(65, updated.Courses.Single(course => course.CourseId == 1).ProgressPercentage);
         Assert.Equal(32.5m, updated.ProgressPercentage);
 
-        var edited = await Controller("123").Update(routeId, Request(2, 1, 3), default);
+        var edited = await Controller("owner").Update(routeId, Request(2, 1, 3), default);
         var route = Assert.IsType<LearningRouteDto>(Assert.IsType<OkObjectResult>(edited.Result).Value);
         Assert.Equal(new[] { 0, 65, 0 }, route.Courses.Select(course => course.ProgressPercentage));
         Assert.Equal(21.67m, route.ProgressPercentage);
         var detail = Assert.IsType<LearningRouteDto>(
-            Assert.IsType<OkObjectResult>((await Controller("123").GetById(routeId, default)).Result).Value);
+            Assert.IsType<OkObjectResult>((await Controller("owner").GetById(routeId, default)).Result).Value);
         Assert.Equal(65, detail.Courses.Single(course => course.CourseId == 1).ProgressPercentage);
         Assert.Equal(21.67m, detail.ProgressPercentage);
         var routes = Assert.IsAssignableFrom<IReadOnlyList<LearningRouteDto>>(
-            Assert.IsType<OkObjectResult>((await Controller("123").List(default)).Result).Value);
+            Assert.IsType<OkObjectResult>((await Controller("owner").List(default)).Result).Value);
         Assert.Equal(65, Assert.Single(routes).Courses.Single(course => course.CourseId == 1).ProgressPercentage);
         Assert.Equal(21.67m, Assert.Single(routes).ProgressPercentage);
         var json = System.Text.Json.JsonSerializer.SerializeToElement(detail,
@@ -151,14 +151,14 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     public async Task RouteProgressReflectsAllCoursesAndCourseRemoval(int progress)
     {
         foreach (var courseId in new long[] { 1, 2 })
-            await Controller("123").UpdateCourseProgress(routeId, courseId,
+            await Controller("owner").UpdateCourseProgress(routeId, courseId,
                 new() { ProgressPercentage = progress }, default);
 
         var detail = Assert.IsType<LearningRouteDto>(
-            Assert.IsType<OkObjectResult>((await Controller("123").GetById(routeId, default)).Result).Value);
+            Assert.IsType<OkObjectResult>((await Controller("owner").GetById(routeId, default)).Result).Value);
         Assert.Equal((decimal)progress, detail.ProgressPercentage);
 
-        var edited = await Controller("123").Update(routeId, Request(2, 3), default);
+        var edited = await Controller("owner").Update(routeId, Request(2, 3), default);
         var route = Assert.IsType<LearningRouteDto>(Assert.IsType<OkObjectResult>(edited.Result).Value);
         Assert.Equal(progress / 2m, route.ProgressPercentage);
     }
@@ -169,7 +169,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     [InlineData(null)]
     public async Task InvalidProgressDoesNotChangeStoredValue(int? progress)
     {
-        Assert.IsType<BadRequestObjectResult>((await Controller("123").UpdateCourseProgress(
+        Assert.IsType<BadRequestObjectResult>((await Controller("owner").UpdateCourseProgress(
             routeId, 1, new() { ProgressPercentage = progress }, default)).Result);
         Assert.All(await Db.LearningRouteCourses.AsNoTracking().ToListAsync(), course => Assert.Equal(0, course.ProgressPercentage));
     }
@@ -180,8 +180,8 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         var request = new UpdateCourseProgressRequest { ProgressPercentage = 100 };
         Assert.IsType<UnauthorizedObjectResult>((await Controller(null).UpdateCourseProgress(routeId, 1, request, default)).Result);
         Assert.IsType<NotFoundObjectResult>((await Controller("456").UpdateCourseProgress(routeId, 1, request, default)).Result);
-        Assert.IsType<NotFoundObjectResult>((await Controller("123").UpdateCourseProgress(Guid.NewGuid(), 1, request, default)).Result);
-        Assert.IsType<NotFoundObjectResult>((await Controller("123").UpdateCourseProgress(routeId, 3, request, default)).Result);
+        Assert.IsType<NotFoundObjectResult>((await Controller("owner").UpdateCourseProgress(Guid.NewGuid(), 1, request, default)).Result);
+        Assert.IsType<NotFoundObjectResult>((await Controller("owner").UpdateCourseProgress(routeId, 3, request, default)).Result);
         Assert.All(await Db.LearningRouteCourses.AsNoTracking().ToListAsync(), course => Assert.Equal(0, course.ProgressPercentage));
     }
 
@@ -199,7 +199,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         await Db.Courses.Where(course => course.CourseId == 1).ExecuteUpdateAsync(setters => setters.SetProperty(course => course.IsActive, false));
         foreach (var progress in new[] { 100, 100, 0 })
         {
-            Assert.IsType<OkObjectResult>((await Controller("123").UpdateCourseProgress(
+            Assert.IsType<OkObjectResult>((await Controller("owner").UpdateCourseProgress(
                 routeId, 1, new() { ProgressPercentage = progress }, default)).Result);
             Assert.Equal(progress, (await Db.LearningRouteCourses.AsNoTracking().SingleAsync(course => course.RouteId == routeId && course.CourseId == 1)).ProgressPercentage);
             Assert.Equal(0, (await Db.LearningRouteCourses.AsNoTracking().SingleAsync(course => course.RouteId == otherRouteId)).ProgressPercentage);
@@ -211,7 +211,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     {
         var request = Request(3);
         request.Explanation = null;
-        var response = await Controller("123").Update(routeId, request, default);
+        var response = await Controller("owner").Update(routeId, request, default);
         Assert.IsType<OkObjectResult>(response.Result);
         Assert.Equal(3, (await Db.LearningRouteCourses.SingleAsync()).CourseId);
         Assert.Null((await Db.LearningRoutes.AsNoTracking().SingleAsync()).Explanation);
@@ -223,7 +223,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     [InlineData(999)]
     public async Task UpdateRejectsUnavailableCoursesWithoutChangingRoute(long id)
     {
-        var response = await Controller("123").Update(routeId, Request(id), default);
+        var response = await Controller("owner").Update(routeId, Request(id), default);
         Assert.IsType<BadRequestObjectResult>(response.Result);
         await AssertOriginal();
     }
@@ -252,7 +252,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
             case "explanation": request.Explanation = new string('x', 4001); break;
         }
 
-        var response = await Controller("123").Update(routeId, request, default);
+        var response = await Controller("owner").Update(routeId, request, default);
         Assert.IsType<BadRequestObjectResult>(response.Result);
         await AssertOriginal();
     }
@@ -260,11 +260,11 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     [Fact]
     public async Task DeleteRemovesRouteAndAssociationsButKeepsCatalog()
     {
-        Assert.IsType<NoContentResult>(await Controller("123").Delete(routeId, default));
+        Assert.IsType<NoContentResult>(await Controller("owner").Delete(routeId, default));
         Assert.Equal(0, await Db.LearningRoutes.CountAsync());
         Assert.Equal(0, await Db.LearningRouteCourses.CountAsync());
         Assert.Equal(4, await Db.Courses.CountAsync());
-        Assert.IsType<NotFoundObjectResult>(await Controller("123").Delete(routeId, default));
+        Assert.IsType<NotFoundObjectResult>(await Controller("owner").Delete(routeId, default));
     }
 
     [Fact]
@@ -272,8 +272,8 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     {
         Assert.IsType<NotFoundObjectResult>(await Controller("456").Delete(routeId, default));
         Assert.IsType<NotFoundObjectResult>((await Controller("456").Update(routeId, Request(3), default)).Result);
-        Assert.IsType<NotFoundObjectResult>(await Controller("123").Delete(Guid.NewGuid(), default));
-        Assert.IsType<NotFoundObjectResult>((await Controller("123").Update(Guid.NewGuid(), Request(3), default)).Result);
+        Assert.IsType<NotFoundObjectResult>(await Controller("owner").Delete(Guid.NewGuid(), default));
+        Assert.IsType<NotFoundObjectResult>((await Controller("owner").Update(Guid.NewGuid(), Request(3), default)).Result);
         await AssertOriginal();
     }
 
@@ -293,7 +293,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
             WHEN NEW.course_id = 3 BEGIN SELECT RAISE(ABORT, 'test failure'); END;
             """);
 
-        await Assert.ThrowsAsync<DbUpdateException>(() => Controller("123").Update(routeId, Request(3), default));
+        await Assert.ThrowsAsync<DbUpdateException>(() => Controller("owner").Update(routeId, Request(3), default));
         await AssertOriginal();
     }
 
@@ -458,7 +458,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         await Db.Courses.Where(course => course.CourseId == 1)
             .ExecuteUpdateAsync(setters => setters.SetProperty(course => course.IsActive, false));
 
-        var controller = Controller("123");
+        var controller = Controller("owner");
         var detail = Assert.IsType<LearningRouteDto>(
             Assert.IsType<OkObjectResult>((await controller.GetById(routeId, default)).Result).Value);
         var routes = Assert.IsAssignableFrom<IReadOnlyList<LearningRouteDto>>(
@@ -495,7 +495,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         if (discordId is not null)
         {
             context.User = new ClaimsPrincipal(new ClaimsIdentity(
-                [new Claim(ClaimTypes.NameIdentifier, discordId)], "test"));
+                [new Claim(CodeQuest2026.Server.Application.Oauth2.SessionIdentity.UserIdClaim, discordId)], "test"));
         }
 
         return new RoutesController(scope.ServiceProvider.GetRequiredService<ISender>())
@@ -518,6 +518,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
             modelBuilder.Ignore<UserPreference>();
             modelBuilder.Ignore<CourseEmbedding>();
             new UserConfiguration().Configure(modelBuilder.Entity<User>());
+            new UserExternalLoginConfiguration().Configure(modelBuilder.Entity<UserExternalLogin>());
             modelBuilder.Entity<User>().Ignore(user => user.Preferences);
             new LearningRouteConfiguration().Configure(modelBuilder.Entity<LearningRoute>());
             modelBuilder.Entity<LearningRoute>().Property(route => route.CreatedAt)

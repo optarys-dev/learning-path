@@ -3,7 +3,8 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Entities
     public class User
     {
         public string UserId { get; set; } = Guid.NewGuid().ToString();
-        public string DiscordId { get; set; } = string.Empty;
+        public string? DiscordId { get; set; }
+        public ICollection<UserExternalLogin> ExternalLogins { get; set; } = new List<UserExternalLogin>();
         public string Username { get; set; } = string.Empty;
         public string? DisplayName { get; set; }
         public string? Avatar { get; set; }

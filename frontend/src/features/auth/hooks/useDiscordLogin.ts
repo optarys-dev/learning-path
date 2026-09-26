@@ -37,7 +37,7 @@ export function useDiscordLogin(adapter?: DiscordLoginAdapter) {
   }
 
   const sessionState: DiscordLoginState = !isLoading && user
-    ? { status: 'authenticated', nextPath: user.isNewUser === true ? '/learning-profile' : '/my-path' }
+    ? { status: 'authenticated', nextPath: user.isNewUser === true ? '/create-route' : '/my-path' }
     : state;
   return { state: sessionState, login };
 }

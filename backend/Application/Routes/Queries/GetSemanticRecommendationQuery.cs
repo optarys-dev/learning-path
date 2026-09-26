@@ -8,7 +8,7 @@ using Pgvector.EntityFrameworkCore;
 namespace CodeQuest2026.Server.Application.Routes.Queries;
 
 /// <summary>Solicita una vista previa de la ruta semántica para las preferencias del usuario.</summary>
-public sealed record GetSemanticRecommendationQuery(string DiscordId) : IRequest<SemanticRecommendationResult>;
+public sealed record GetSemanticRecommendationQuery(string UserId) : IRequest<SemanticRecommendationResult>;
 
 /// <summary>Distingue preferencias ausentes, embeddings indisponibles y una recomendación calculada.</summary>
 public sealed record SemanticRecommendationResult(
@@ -29,7 +29,7 @@ public sealed class GetSemanticRecommendationQueryHandler(
     {
         var preference = await db.UserPreferences
             .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.User.DiscordId == request.DiscordId, cancellationToken);
+            .SingleOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
 
         if (preference is null)
         {

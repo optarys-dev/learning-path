@@ -33,7 +33,7 @@ export const landingEn = {
   faq: {
     eyebrow: 'BEFORE YOUR FIRST STEP', title: 'Clear answers, <accent>from the start.</accent>',
     description: 'A little more about your account, your courses and how the experience works.',
-    login: { question: 'Do I need Discord to sign in?', answer: 'In this first version, Discord identifies your account and keeps your paths and progress.' },
+    login: { question: 'How do I sign in?', answer: 'You can use Discord or Google when enabled. Each account keeps its own paths and progress.' },
     courses: { question: 'Do I watch courses inside CODE QUEST?', answer: 'Yes. CODE QUEST shows the courses in your path, their order, the reason for each recommendation and your progress. When you want to begin one, you can open the official course on DevTalles.' },
     beginner: { question: 'Is this useful for beginners?', answer: 'Yes. The questionnaire considers your experience and current skills to find an appropriate starting point and add the foundations you need.' },
     areas: { question: 'What paths are available?', answer: 'The first version begins with Frontend React and Backend with C# / ASP.NET Core. The system is ready to add new goals and courses later.' },

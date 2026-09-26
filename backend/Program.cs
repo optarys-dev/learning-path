@@ -1,5 +1,6 @@
 using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Oauth2.Discord;
+using CodeQuest2026.Server.Application.Oauth2.Google;
 using CodeQuest2026.Server.Extensions;
 using CodeQuest2026.Server.Infrastructure;
 using CodeQuest2026.Server.Infrastructure.OpenApi;
@@ -31,7 +32,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "CodeQuest2026 API",
         Version = "v1",
-        Description = "API para autenticación con Discord, usuarios y recomendaciones de aprendizaje. " +
+        Description = "API para autenticación con Discord o Google, usuarios y recomendaciones de aprendizaje. " +
                       "Para probar rutas protegidas, inicia sesión abriendo /auth/discord en este mismo navegador."
     });
     options.AddSecurityDefinition("sessionCookie", new OpenApiSecurityScheme
@@ -39,7 +40,7 @@ builder.Services.AddSwaggerGen(options =>
         Type = SecuritySchemeType.ApiKey,
         In = ParameterLocation.Cookie,
         Name = "CodeQuest.Session",
-        Description = "Cookie HttpOnly creada por el inicio de sesión con Discord. El navegador la envía automáticamente."
+        Description = "Cookie HttpOnly creada por el inicio de sesión. El navegador la envía automáticamente."
     });
     options.OperationFilter<SessionCookieOperationFilter>();
     var xmlFile = $"{typeof(Program).Assembly.GetName().Name}.xml";
@@ -47,6 +48,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.ConfigureService(builder.Configuration);
 builder.Services.AddDiscordAuthentication(builder.Configuration, builder.Environment.IsDevelopment());
+builder.Services.AddGoogleAuthentication(builder.Configuration, builder.Environment.IsDevelopment());
 
 const string frontendCorsPolicy = "Frontend";
 var allowedOrigins = builder.Configuration
@@ -69,6 +71,14 @@ var app = builder.Build();
 app.UseExceptionHandler();
 
 app.UseDiscordHttpsCallback(builder.Configuration, app.Environment.IsDevelopment());
+if (!app.Environment.IsDevelopment())
+{
+    app.Use(async (context, next) =>
+    {
+        if (context.Request.Path.StartsWithSegments("/auth/google")) context.Request.Scheme = "https";
+        await next(context);
+    });
+}
 
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {

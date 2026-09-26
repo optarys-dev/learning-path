@@ -10,7 +10,7 @@ namespace CodeQuest2026.Server.Application.Routes.Commands;
 
 public enum SaveRouteStatus { Created, PreferencesRequired, CourseUnavailable }
 public sealed record SaveRouteResult(SaveRouteStatus Status, LearningRouteDto? Route = null);
-public sealed record SaveLearningRouteCommand(string DiscordId, SaveLearningRouteRequest Request)
+public sealed record SaveLearningRouteCommand(string UserId, SaveLearningRouteRequest Request)
     : IRequest<SaveRouteResult>;
 
 public sealed class SaveLearningRouteCommandHandler(AppDbContext db)
@@ -34,12 +34,12 @@ public sealed class SaveLearningRouteCommandHandler(AppDbContext db)
         if (!manualRoute)
         {
             preference = await db.UserPreferences.AsNoTracking()
-                .SingleOrDefaultAsync(x => x.User.DiscordId == command.DiscordId, cancellationToken);
+                .SingleOrDefaultAsync(x => x.UserId == command.UserId, cancellationToken);
             if (preference is null) return new(SaveRouteStatus.PreferencesRequired);
         }
 
         var userId = preference?.UserId ?? await db.Users.AsNoTracking()
-            .Where(user => user.DiscordId == command.DiscordId)
+            .Where(user => user.UserId == command.UserId)
             .Select(user => user.UserId)
             .SingleOrDefaultAsync(cancellationToken);
         if (string.IsNullOrWhiteSpace(userId)) return new(SaveRouteStatus.PreferencesRequired);

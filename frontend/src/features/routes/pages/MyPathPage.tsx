@@ -241,7 +241,7 @@ export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyP
     return <PageState kind="loading" title={t('myPath.sessionLoading')} />;
   }
   if (user === null) return <Navigate to="/login" replace />;
-  if (user.isNewUser) return embedded
+  if (mode === 'proposal' && user.isNewUser) return embedded
     ? <PageState kind="loading" title={t('myPath.sessionLoading')} />
     : <Navigate to="/learning-profile" replace />;
 

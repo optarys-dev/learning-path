@@ -15,6 +15,8 @@ frontend/obj*
 # Backend
 backend/bin/
 backend/obj/
+backend/artifacts/google-auth-build/
+backend/artifacts/google-auth-tests/
 backend/.vs/
 backend/appsettings.Development.json
 backend/appsettings.Local.json

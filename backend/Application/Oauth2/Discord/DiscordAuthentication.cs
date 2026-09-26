@@ -1,6 +1,8 @@
 using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Users.Commands;
 using CodeQuest2026.Server.Infrastructure;
+using CodeQuest2026.Server.Infrastructure.DataSource.Context;
+using Microsoft.EntityFrameworkCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -44,6 +46,29 @@ public static class DiscordAuthentication
                     await ApiProblemDetailsFactory.WriteAsync(context.Response.HttpContext,
                         StatusCodes.Status403Forbidden, ApiErrorCodes.Forbidden);
                 };
+                options.Events.OnValidatePrincipal = async context =>
+                {
+                    var db = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+                    var internalId = context.Principal?.GetUserId();
+                    if (internalId is not null)
+                    {
+                        if (!await db.Users.AnyAsync(x => x.UserId == internalId, context.HttpContext.RequestAborted))
+                            context.RejectPrincipal();
+                        return;
+                    }
+                    // Upgrade existing Discord cookies without requiring another login.
+                    var discordId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var userId = await db.Users.Where(x => x.DiscordId == discordId && discordId != null)
+                        .Select(x => x.UserId).SingleOrDefaultAsync(context.HttpContext.RequestAborted);
+                    if (userId is null || context.Principal?.Identity is not ClaimsIdentity identity)
+                    {
+                        context.RejectPrincipal();
+                        return;
+                    }
+                    identity.AddClaim(new Claim(SessionIdentity.UserIdClaim, userId));
+                    identity.AddClaim(new Claim(SessionIdentity.ProviderClaim, Scheme));
+                    context.ShouldRenew = true;
+                };
             })
             .AddOAuth(Scheme, options =>
             {
@@ -73,13 +98,15 @@ public static class DiscordAuthentication
                     if (!user.RootElement.TryGetProperty("id", out var id) || string.IsNullOrWhiteSpace(id.GetString()))
                         throw new InvalidOperationException("Discord did not return a user identifier.");
                     context.RunClaimActions(user.RootElement);
-                    await context.HttpContext.RequestServices.GetRequiredService<ISender>().Send(
+                    var userId = await context.HttpContext.RequestServices.GetRequiredService<ISender>().Send(
                         new SyncDiscordUserCommand(
                             id.GetString()!,
                             context.Identity!.FindFirst(ClaimTypes.Name)?.Value ?? "",
                             context.Identity.FindFirst("discord:global_name")?.Value,
                             context.Identity.FindFirst("discord:avatar")?.Value),
                         context.HttpContext.RequestAborted);
+                    context.Identity!.AddClaim(new Claim(SessionIdentity.UserIdClaim, userId));
+                    context.Identity.AddClaim(new Claim(SessionIdentity.ProviderClaim, Scheme));
                 };
                 options.Events.OnRemoteFailure = async context =>
                 {

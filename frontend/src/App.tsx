@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { AppLayout } from './components/layout/AppLayout';
 import { PageState } from './components/ui/PageState/PageState';
@@ -21,9 +21,8 @@ const WelcomePreviewPage = import.meta.env.DEV
   : null;
 
 function App() {
-  const { user, isLoading, sessionError, refresh } = useAuthSession();
+  const { isLoading, sessionError, refresh } = useAuthSession();
   const { t } = useTranslation();
-  const { pathname } = useLocation();
 
   if (!isLoading && sessionError) {
     return (
@@ -34,10 +33,6 @@ function App() {
         onRetry={() => { void refresh(); }}
       />
     );
-  }
-
-  if (!isLoading && user?.isNewUser === true && pathname !== '/learning-profile') {
-    return <Navigate to="/learning-profile" replace />;
   }
 
   return (

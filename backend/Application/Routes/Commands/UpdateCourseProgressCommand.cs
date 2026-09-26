@@ -6,7 +6,7 @@ namespace CodeQuest2026.Server.Application.Routes.Commands;
 
 public enum UpdateCourseProgressStatus { Updated, NotFound, InvalidProgress }
 public sealed record UpdateCourseProgressResult(UpdateCourseProgressStatus Status, LearningRouteDto? Route = null);
-public sealed record UpdateCourseProgressCommand(string DiscordId, Guid RouteId, long CourseId,
+public sealed record UpdateCourseProgressCommand(string UserId, Guid RouteId, long CourseId,
     UpdateCourseProgressRequest Request) : IRequest<UpdateCourseProgressResult>;
 
 public sealed class UpdateCourseProgressCommandHandler(AppDbContext db)
@@ -25,7 +25,7 @@ public sealed class UpdateCourseProgressCommandHandler(AppDbContext db)
             // Mismo bloqueo de la fila padre que usa la edición de la ruta: evita perder
             // progreso si sus asociaciones se reemplazan mientras se actualiza el avance.
             var ownedRoute = await db.LearningRoutes
-                .Where(route => route.RouteId == command.RouteId && route.User.DiscordId == command.DiscordId)
+                .Where(route => route.RouteId == command.RouteId && route.UserId == command.UserId)
                 .ExecuteUpdateAsync(setters => setters.SetProperty(route => route.Goal, route => route.Goal),
                     cancellationToken);
             if (ownedRoute == 0) return new UpdateCourseProgressResult(UpdateCourseProgressStatus.NotFound);

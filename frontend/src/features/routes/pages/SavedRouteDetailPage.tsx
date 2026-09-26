@@ -61,7 +61,7 @@ export function SavedRouteDetailPage() {
   }, [refreshSession, t]);
 
   useEffect(() => {
-    if (isSessionLoading || !user || user.isNewUser || !routeId) return;
+    if (isSessionLoading || !user || !routeId) return;
     let active = true;
     const savedRouteRequest = getSavedRoute(routeId);
     savedRouteRequest.then(savedRoute => {
@@ -96,7 +96,6 @@ export function SavedRouteDetailPage() {
 
   if (isSessionLoading) return <PageState kind="loading" title={t('myPath.sessionLoading')} />;
   if (user === null) return <Navigate to="/login" replace />;
-  if (user.isNewUser) return <Navigate to="/learning-profile" replace />;
   if (!routeId) return <Navigate to="/my-path" replace />;
 
   if (loadState.status === 'loading') {
