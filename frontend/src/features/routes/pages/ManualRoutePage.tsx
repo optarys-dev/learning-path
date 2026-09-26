@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, BookOpen, Check, Map, Plus, Search, Sparkles, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, BookOpen, Check, Flag, Map, NotebookPen, Paperclip, Plus, Route, Search, Sparkles, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button/Button';
@@ -81,12 +81,13 @@ export function ManualRoutePage() {
 
   return <div className="manual-route-page"><div className="manual-route">
     <header className="manual-route__hero"><div><p>{t('manualRoute.eyebrow')}</p><h1>{t('manualRoute.title')}</h1><span>{t('manualRoute.description')}</span></div>
-      <div className="manual-route__hero-actions"><nav className="manual-route__creation-options" aria-label={t('manualRoute.methodLabel')}><span aria-current="page"><Map size={16} aria-hidden="true" />{t('manualRoute.manualOption')}</span><Link to={hasPendingRecommendation ? '/create-route/proposal' : '/learning-profile'}><Sparkles size={16} aria-hidden="true" />{t(hasPendingRecommendation ? 'manualRoute.resumeRecommended' : 'manualRoute.recommendedOption')}</Link></nav><strong><Map size={18} aria-hidden="true" />{t('manualRoute.selectedCount', { count: selected.length })}</strong></div>
+      <div className="manual-route__hero-actions"><nav className="manual-route__creation-options" aria-label={t('manualRoute.methodLabel')}><span aria-current="page"><Map size={16} aria-hidden="true" />{t('manualRoute.manualOption')}</span><Link to={hasPendingRecommendation ? '/create-route/proposal' : '/learning-profile'}><Sparkles size={16} aria-hidden="true" />{t(hasPendingRecommendation ? 'manualRoute.resumeRecommended' : 'manualRoute.recommendedOption')}</Link></nav></div>
     </header>
     <section className="manual-route__details" aria-label={t('manualRoute.detailsTitle')}>
       <div className="manual-route__details-heading"><span>{t('manualRoute.detailsStep')}</span><div><h2>{t('manualRoute.detailsTitle')}</h2><p>{t('manualRoute.detailsHint')}</p></div></div>
+      <div className="manual-route__notebook" aria-hidden="true"><Paperclip className="manual-route__clip" size={25} /><NotebookPen size={28} /><span /><span /><Check size={16} /></div>
       <div className="manual-route__fields"><label htmlFor="manual-route-name">{t('manualRoute.nameLabel')}<input id="manual-route-name" value={goal} maxLength={1000} onChange={event => setGoal(event.target.value)} placeholder={t('manualRoute.namePlaceholder')} /></label>
-        <label htmlFor="manual-route-description">{t('manualRoute.descriptionLabel')}<textarea id="manual-route-description" value={explanation} maxLength={4000} onChange={event => setExplanation(event.target.value)} placeholder={t('manualRoute.descriptionPlaceholder')} /></label></div>
+        <label htmlFor="manual-route-description"><span>{t('manualRoute.descriptionLabel')} <small>{t('manualRoute.optional')}</small></span><textarea id="manual-route-description" rows={2} value={explanation} maxLength={4000} onChange={event => setExplanation(event.target.value)} placeholder={t('manualRoute.descriptionPlaceholder')} /></label></div>
     </section>
     <section className="manual-route__workspace">
       <section className="manual-route__catalog" aria-labelledby="manual-route-catalog-title">
@@ -98,9 +99,13 @@ export function ManualRoutePage() {
           </button></li>; })}</ul>}
       </section>
       <aside className="manual-route__selection"><div className="manual-route__section-heading"><span>{t('manualRoute.orderStep')}</span><div><h2>{t('manualRoute.orderTitle')}</h2><p>{t('manualRoute.orderHint')}</p></div></div>
-        {selected.length === 0 ? <p className="manual-route__selection-empty">{t('manualRoute.emptySelection')}</p> : <ol>{selected.map((course, index) => <li key={course.courseId}><span>{index + 1}</span><strong>{course.title}</strong><div><button type="button" onClick={() => moveCourse(index, -1)} disabled={index === 0} aria-label={t('manualRoute.moveUp', { title: course.title })}><ArrowUp /></button><button type="button" onClick={() => moveCourse(index, 1)} disabled={index === selected.length - 1} aria-label={t('manualRoute.moveDown', { title: course.title })}><ArrowDown /></button><button type="button" onClick={() => toggleCourse(course)} aria-label={t('manualRoute.remove', { title: course.title })}><Trash2 /></button></div></li>)}</ol>}
+        <p className="manual-route__count" role="status">{t('manualRoute.selectedCount', { count: selected.length })}</p>
+        {selected.length === 0 ? <div className="manual-route__selection-empty">
+          <div className="manual-route__journey" aria-hidden="true"><BookOpen /><Route /><Flag /></div>
+          <strong>{t('manualRoute.emptyTitle')}</strong><p>{t('manualRoute.emptySelection')}</p>
+        </div> : <ol>{selected.map((course, index) => <li key={course.courseId}><span>{index + 1}</span><strong>{course.title}</strong><div><button type="button" onClick={() => moveCourse(index, -1)} disabled={index === 0} aria-label={t('manualRoute.moveUp', { title: course.title })}><ArrowUp /></button><button type="button" onClick={() => moveCourse(index, 1)} disabled={index === selected.length - 1} aria-label={t('manualRoute.moveDown', { title: course.title })}><ArrowDown /></button><button type="button" onClick={() => toggleCourse(course)} aria-label={t('manualRoute.remove', { title: course.title })}><Trash2 /></button></div></li>)}</ol>}
         {saveError && <p className="manual-route__error" role="alert">{saveError}</p>}
-        <div className="manual-route__selection-action"><Button onClick={() => { void submit(); }} isLoading={saving} loadingLabel={t('manualRoute.saving')} disabled={!goal.trim() || selected.length === 0}>{t('manualRoute.save')}</Button></div>
+        <div className="manual-route__selection-action"><Button onClick={() => { void submit(); }} isLoading={saving} loadingLabel={t('manualRoute.saving')} disabled={!goal.trim() || selected.length === 0}>{t('manualRoute.save')}</Button><p>{t('manualRoute.saveHint')}</p></div>
       </aside>
     </section>
   </div></div>;
