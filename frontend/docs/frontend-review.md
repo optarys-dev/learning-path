@@ -183,7 +183,7 @@ Las referencias de hallazgos corresponden a la **base original**: consultar `git
 - **Comportamiento e impacto:** timers sobreviven cierre manual/desmontaje; tema escribe storage sin catch. Labels del tema y skeleton siguen en español en UI inglesa.
 - **Causa:** sin registro/limpieza de timers y dependencia de almacenamiento disponible; etiquetas literales.
 - **Solución:** timers por ID con cancelación, escritura protegida y etiquetas traducidas.
-- **Estado:** timers y storage corregidos; traducción pendiente.
+- **Estado:** timers, storage y traducciones de tema/skeleton corregidos.
 - **Verificar:** cerrar/desmontar sin callback tardío; bloquear storage y comprobar tema; revisar etiquetas en inglés.
 
 ### P3 - Bajo — F21. Restos y documentación desactualizada
@@ -201,7 +201,7 @@ Las referencias de hallazgos corresponden a la **base original**: consultar `git
 - **Comportamiento e impacto:** la misma restricción de 30 cursos aparece en validación/selección y controles de dos páginas; una actualización parcial permite discrepancias entre creación y edición.
 - **Causa:** regla compartida expresada como literales locales, sin nombre de dominio.
 - **Solución:** constante pequeña MAX_ROUTE_COURSES en el dominio de rutas, reutilizada por esos controles; no unirla al límite de tecnologías del cuestionario, que significa otra cosa.
-- **Estado:** pendiente de la siguiente extracción, sin cambiar el límite actual.
+- **Estado:** corregido con routeLimits.courses, compartido entre creación y edición; límite sin cambios.
 - **Verificar:** creación y edición aceptan hasta el mismo límite y rechazan uno adicional; no afecta tecnologías del perfil.
 
 ## 2. Bugs corregidos
@@ -302,3 +302,8 @@ Las pruebas asistidas usaron exclusivamente datos ficticios en memoria.  Instala
 | 8. Rendimiento/UX | App, imágenes, LanguageSelector, captura, caché de catálogo | Menos carga inicial, accesibilidad y tareas limpias | Bajo/medio | Lazy aplicado y medido; medir red/LCP antes de imágenes/caché. |
 
 Prioridad siguiente: aislar borradores y resolver generación → reordenar por teclado → automatizar integración/sesión → dividir controladores/CSS → imágenes/caché medidas → eliminar restos confirmados.
+
+
+## Seguimiento: constantes, imports y traducciones
+
+La extracción posterior a 19ec6e4 está documentada en [frontend-conventions.md](frontend-conventions.md). F15 tiene una primera división verificable de páginas y del componente de curso; F20 y F22 están completos. Las referencias anteriores describen la base de cada hallazgo. El seguimiento registra 30 pruebas, las comprobaciones actuales y los límites que todavía quedan.

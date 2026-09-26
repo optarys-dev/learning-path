@@ -17,3 +17,10 @@ Ejecutar Vite y abrir `/tests/dialogs.html`. Es una entrada de desarrollo, fuera
 7. Compartir ruta genera un PNG en memoria. No usar share del sistema ni descargar para verificar la preview.
 
 Las comprobaciones de navegador documentadas se hicieron manualmente con esta fixture. No son E2E automatizados. El mock no prueba OAuth, autorización del servidor ni concurrencia real de base de datos.
+
+## Regresiones de la extracción
+
+- Editar ruta → Simular arrastre: intercambia los dos primeros cursos, anuncia la nueva posición y habilita Guardar cambios. El botón despacha eventos HTML sobre los componentes reales; no modifica el estado de React directamente.
+- Ruta manual: escribir nombre, elegir dos cursos y mover uno; alternar idioma conserva nombre y orden, y traduce Intermedio/Intermediate. Guardar ruta vuelve a la colección con el orden elegido.
+- La simulación complementa la prueba física de arrastre; no verifica su implementación nativa en todos los navegadores.
+- La suite automática cubre imports/ciclos, traducciones/placeholders, restricciones de selección, orden y payloads, almacenamiento compatible y errores 401/403/códigos del servidor.

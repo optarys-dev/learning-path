@@ -17,4 +17,3 @@ export function isStepComplete(step: number, answers: QuestionnaireAnswers): boo
 export function toggleTechnology(items: TechnologyId[], item: TechnologyId): TechnologyId[] {
   return items.includes(item) ? items.filter(value => value !== item) : [...items, item];
 }
-

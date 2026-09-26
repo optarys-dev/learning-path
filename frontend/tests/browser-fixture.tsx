@@ -11,9 +11,12 @@ import { SavedRouteDetailPage } from '../src/features/routes/pages/SavedRouteDet
 import { RouteNoteDialog } from '../src/features/routes/components/RouteNoteDialog';
 import { Route, Routes } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { ManualRoutePage } from '../src/features/routes/pages/ManualRoutePage';
+import { MyPathPage } from '../src/features/routes/pages/MyPathPage';
 
 const courses = [1, 2, 3].map(courseId => ({ courseId, slug: 'course-' + courseId, title: 'Curso ' + courseId,
-  level: null, imageAlt: '', imageUrl: '', courseUrl: 'https://example.com/course-' + courseId }));
+  level: 'Intermedio', imageAlt: '', imageUrl: '', courseUrl: 'https://example.com/course-' + courseId }));
 let saved = { routeId: 'fixture', goal: 'Ruta de prueba', recommendationMethod: 'manual', explanation: 'Datos ficticios',
   createdAt: '2026-09-26T12:00:00Z', courses: courses.slice(0, 2).map((course, index) => ({ ...course, courseId: String(course.courseId), position: index + 1, reason: null, progressPercentage: 0 })) };
 let catalogFails = false;
@@ -38,6 +41,15 @@ window.fetch = async (input, options = {}) => {
     saved = { ...saved, courses: saved.courses.map(course => course.courseId === courseId ? { ...course, progressPercentage: body.progressPercentage } : course) };
     return Response.json(saved);
   }
+  if (url.pathname === '/routes' && options.method === 'POST') {
+    const body = JSON.parse(String(options.body)) as { goal: string; explanation: string; courses: { courseId: string; reason: null }[] };
+    saved = { ...saved, goal: body.goal, explanation: body.explanation, courses: body.courses.map((item, index) => {
+      const catalog = courses.find(course => String(course.courseId) === item.courseId)!;
+      return { ...catalog, ...item, position: index + 1, progressPercentage: 0 };
+    }) };
+    return Response.json(saved);
+  }
+  if (url.pathname === '/routes') return Response.json([saved]);
   if (url.pathname === '/routes/fixture') {
     if (options.method === 'PUT') {
       const body = JSON.parse(String(options.body)) as { goal: string; explanation: string; courses: { courseId: string; reason: null }[] };
@@ -51,6 +63,21 @@ window.fetch = async (input, options = {}) => {
   return Response.json({ detail: 'Unconfigured fixture request' }, { status: 404 });
 };
 
+/** Exercises the real React handlers when the browser driver cannot deliver HTML dragover. */
+async function simulateDrag() {
+  const articles = document.querySelectorAll<HTMLElement>('article[draggable="true"]');
+  const source = articles[0], target = articles[1]?.closest('li');
+  if (!source || !target) return;
+  const dataTransfer = new DataTransfer();
+  const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+  source.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }));
+  await frame();
+  target.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer }));
+  await frame();
+  target.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer }));
+  source.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer }));
+}
+
 export function Fixture() {
   const { i18n } = useTranslation();
   const [dark, setDark] = useState(false);
@@ -63,9 +90,13 @@ export function Fixture() {
     <button onClick={() => { catalogFails = !failure; setFailure(!failure); }}>Catálogo: {failure ? 'error' : 'correcto'}</button>
     <button onClick={() => setBlockedNote(true)}>Nota sin almacenamiento</button>
     <button onClick={() => setLog(requests.join('\n'))}>Ver solicitudes</button>
+    <button onClick={() => { void simulateDrag(); }}>Simular arrastre</button>
+    <Link to="/create-route">Ruta manual</Link>
   </nav><pre aria-label="Requests">{log}</pre><Routes>
     <Route path="*" element={<SavedRouteDetailPage />} />
     <Route path="/tests/routes/:routeId" element={<SavedRouteDetailPage />} />
+    <Route path="/create-route" element={<ManualRoutePage />} />
+    <Route path="/my-path" element={<MyPathPage mode="collection" />} />
   </Routes>{blockedNote && <RouteNoteDialog courseTitle="Nota de prueba" onClose={() => setBlockedNote(false)} onSave={() => { throw new Error('Storage blocked'); }} onDelete={() => { throw new Error('Storage blocked'); }} />}</>;
 }
 const root = createRoot(document.getElementById('root')!);
