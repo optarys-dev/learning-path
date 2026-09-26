@@ -1,3 +1,4 @@
+import { appRoutes } from '@/config/navigation';
 import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
@@ -23,22 +24,22 @@ function App() {
     <Routes>
       <Route element={<AppLayout variant="welcome" />}>
         <Route index element={<WelcomePage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="login/callback" element={<LoginCallbackPage />} />
+        <Route path={appRoutes.login} element={<LoginPage />} />
+        <Route path={appRoutes.loginCallback} element={<LoginCallbackPage />} />
         {WelcomePreviewPage && <Route path="dev/welcome" element={<WelcomePreviewPage />} />}
       </Route>
       <Route element={<AppLayout />}>
-        <Route path="catalog" element={<CatalogPage />} />
+        <Route path={appRoutes.catalog} element={<CatalogPage />} />
         <Route path="*" element={<SectionPage section="notFound" />} />
       </Route>
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="create-route" element={<ManualRoutePage />} />
-          <Route path="create-route/manual" element={<ManualRoutePage />} />
-          <Route path="create-route/proposal" element={<MyPathPage mode="proposal" autoGenerate />} />
-          <Route path="my-path" element={<MyPathPage mode="collection" />} />
-          <Route path="my-path/:routeId" element={<SavedRouteDetailPage />} />
-          <Route path="learning-profile" element={<QuestionnairePage />} />
+          <Route path={appRoutes.createRoute} element={<ManualRoutePage />} />
+          <Route path={appRoutes.manualRoute} element={<ManualRoutePage />} />
+          <Route path={appRoutes.proposal} element={<MyPathPage mode="proposal" autoGenerate />} />
+          <Route path={appRoutes.savedRoutes} element={<MyPathPage mode="collection" />} />
+          <Route path={appRoutes.savedRoutePattern} element={<SavedRouteDetailPage />} />
+          <Route path={appRoutes.learningProfile} element={<QuestionnairePage />} />
         </Route>
       </Route>
     </Routes>

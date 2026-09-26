@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { endSession, getCurrentSession, type AuthenticatedUser } from '../api/session';
+import { endSession, getCurrentSession, type AuthenticatedUser } from '@/features/auth/api/session';
 import { AuthSessionContext } from './authSessionContext';
-import { ApiError, subscribeToUnauthenticated } from '../../../lib/api';
-import { createLatestRequest } from '../../../lib/api/latestRequest';
+import { ApiError, subscribeToUnauthenticated } from '@/lib/api';
+import { createLatestRequest } from '@/lib/api/latestRequest';
 
 export function AuthSessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);

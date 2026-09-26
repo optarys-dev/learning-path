@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getAllCatalogCourses } from '../api/getCatalogCourses';
-import type { CatalogCourse } from '../types';
+import { getAllCatalogCourses } from '@/features/catalog/api/getCatalogCourses';
+import type { CatalogCourse } from '@/features/catalog/types';
 
 const EMPTY_COURSES: CatalogCourse[] = [];
 

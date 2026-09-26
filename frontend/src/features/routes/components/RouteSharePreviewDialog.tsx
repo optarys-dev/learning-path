@@ -1,13 +1,13 @@
-import { Dialog } from '../../../components/ui/Dialog/Dialog';
+import { Dialog } from '@/components/ui';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronLeft, ChevronRight, Download, Share2, X } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { useTranslation } from 'react-i18next';
-import { routeStats } from '../model/routeLocalState';
-import type { RouteCourseLocalState, SavedRoute } from '../model/types';
-import devTallesDark from '../../../assets/brand/logo-b.svg';
-import devTallesLight from '../../../assets/brand/logo-n.svg';
+import { routeStats } from '@/features/routes/model/routeLocalState';
+import type { RouteCourseLocalState, SavedRoute } from '@/features/routes/model/types';
+import devTallesDark from '@/assets/brand/logo-b.svg';
+import devTallesLight from '@/assets/brand/logo-n.svg';
 import './RouteShareDialog.css';
 
 interface RouteShareDialogProps { route: SavedRoute; localState: RouteCourseLocalState; onClose: () => void; }

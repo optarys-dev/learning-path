@@ -15,8 +15,8 @@ function loadCatalogApi(requestJson) {
   }).outputText;
   const exports = {};
   const requireDependency = name => {
-    if (name === '../../../lib/api') return { ApiError, requestJson };
-    if (name === '../model/parseCatalogPage') return { parseCatalogPage };
+    if (name === '@/lib/api') return { ApiError, requestJson };
+    if (name === '@/features/catalog/model/parseCatalogPage') return { parseCatalogPage };
     throw new Error(`Unexpected dependency: ${name}`);
   };
   vm.runInNewContext(compiled, { exports, require: requireDependency, URLSearchParams }, { filename });

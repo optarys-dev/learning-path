@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getCatalogCourses } from '../api/getCatalogCourses';
-import type { CatalogPageResult } from '../types';
+import { getCatalogCourses } from '@/features/catalog/api/getCatalogCourses';
+import type { CatalogPageResult } from '@/features/catalog/types';
 
 export function useCatalogCourses(search = '') {
   const [page, setPage] = useState(1);

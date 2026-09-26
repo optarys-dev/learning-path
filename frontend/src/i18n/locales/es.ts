@@ -2,6 +2,12 @@ import { landingEs } from './landing.es';
 import { loginEs } from './login.es';
 
 export const es = {
+  theme: { switchToLight: 'Cambiar a modo claro', switchToDark: 'Cambiar a modo oscuro', light: 'Modo claro', dark: 'Modo oscuro' },
+  course: { inProgress: 'En progreso', completed: 'Completado', progress: 'Progreso de {{title}}',
+    levels: { beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado' } },
+  devPreview: { label: 'DEV · Vista visual, sin sesión real',
+    idle: 'Inicial', loading: 'Cargando', error: 'Error', cancelled: 'Cancelado', authenticated: 'Sesión iniciada', unavailable: 'No disponible' },
+
   landing: landingEs,
   login: loginEs,
   welcome: {
@@ -283,6 +289,13 @@ export const es = {
     actionTitle: 'Tu potencial no tiene límites.',
     actionDescription: 'Guarda esta ruta y empieza cuando quieras.',
     errors: {
+      preferencesRequired: 'Completá tu perfil para solicitar una recomendación de ruta.',
+      embeddingsUnavailable: 'El catálogo de recomendaciones todavía no está disponible. Intentá nuevamente más tarde.',
+      embeddingUnavailable: 'No pudimos preparar la recomendación. Intentá nuevamente en unos momentos.',
+      invalidRoute: 'Indica un objetivo válido y entre 1 y 30 cursos sin repetir.',
+      courseUnavailable: 'Uno o más cursos ya no están disponibles. Revisá tu selección.',
+      invalidProgress: 'No pudimos validar el progreso del curso. Intentá nuevamente.',
+
       unauthorized: 'Tu sesión expiró. Inicia sesión nuevamente para continuar.',
       forbidden: 'Tu sesión está activa, pero no tienes permiso para realizar esta acción.',
       validation: 'La solicitud no pudo validarse. Revisa la propuesta e inténtalo de nuevo.',

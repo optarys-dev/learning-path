@@ -1,6 +1,6 @@
-import { ApiError, requestJson } from '../../../lib/api';
-import { parseCatalogPage } from '../model/parseCatalogPage';
-import type { CatalogCourse, CatalogPageResult } from '../types';
+import { ApiError, requestJson } from '@/lib/api';
+import { parseCatalogPage } from '@/features/catalog/model/parseCatalogPage';
+import type { CatalogCourse, CatalogPageResult } from '@/features/catalog/types';
 
 export const catalogPageSize = 12;
 

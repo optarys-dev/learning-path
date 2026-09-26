@@ -1,6 +1,6 @@
-import codeQuestLogo from '../../../assets/brand/codequest-logo.svg';
-import isologoB from '../../../assets/brand/isologo-b.svg';
-import isologoN from '../../../assets/brand/isologo-n.svg';
+import codeQuestLogo from '@/assets/brand/codequest-logo.svg';
+import isologoB from '@/assets/brand/isologo-b.svg';
+import isologoN from '@/assets/brand/isologo-n.svg';
 import './BrandLogo.css';
 
 export type BrandLogoBackground = 'dark' | 'light';

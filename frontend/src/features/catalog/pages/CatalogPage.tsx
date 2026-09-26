@@ -1,13 +1,14 @@
+import { appRoutes } from '@/config/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Check, CircleDot, Compass, Flag, Lightbulb, RefreshCw, Search, Sparkles, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { QuestDivider, QuestDoodle, QuestMetric, QuestSticker, QuestTab } from '../../../components/ui';
-import { useAuthSession } from '../../auth/hooks/useAuthSession';
-import catalogPanel from '../../../assets/codequest/scenes/14_panel_informativo_futurista_morado.png';
-import { CatalogCourseCard } from '../components/CatalogCourseCard';
-import { CatalogPagination } from '../components/CatalogPagination';
-import { useCatalogCourses } from '../hooks/useCatalogCourses';
+import { QuestDivider, QuestDoodle, QuestMetric, QuestSticker, QuestTab } from '@/components/ui';
+import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
+import catalogPanel from '@/assets/codequest/scenes/14_panel_informativo_futurista_morado.png';
+import { CatalogCourseCard } from '@/features/catalog/components/CatalogCourseCard';
+import { CatalogPagination } from '@/features/catalog/components/CatalogPagination';
+import { useCatalogCourses } from '@/features/catalog/hooks/useCatalogCourses';
 import './CatalogPage.css';
 
 export function CatalogPage() {
@@ -17,7 +18,7 @@ export function CatalogPage() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { data, error, isLoading, page, reload, setPage } = useCatalogCourses(debouncedSearchQuery);
-  const createPathTarget = user ? '/learning-profile' : '/login';
+  const createPathTarget = user ? appRoutes.learningProfile : appRoutes.login;
 
   useEffect(() => {
     document.title = `${t('catalog.pageTitle')} · CODE QUEST 2026`;
@@ -155,5 +156,6 @@ export function CatalogPage() {
 }
 
 function CatalogSkeleton() {
-  return <div className="catalog-grid" aria-label="Cargando cursos" aria-busy="true">{Array.from({ length: 12 }, (_, index) => <div className="catalog-skeleton" key={index} />)}</div>;
+  const { t } = useTranslation();
+  return <div className="catalog-grid" aria-label={t('manualRoute.loadingCourses')} aria-busy="true">{Array.from({ length: 12 }, (_, index) => <div className="catalog-skeleton" key={index} />)}</div>;
 }

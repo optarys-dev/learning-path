@@ -1,5 +1,5 @@
-import { isRecord } from '../../../lib/validation';
-import { safeExternalUrl } from '../../../lib/urls';
+import { isRecord } from '@/lib/validation';
+import { safeExternalUrl } from '@/lib/urls';
 import type { RecommendationCourse, RouteRecommendation, SavedRoute, SavedRouteCourse } from './types';
 
 function normalizeNumber(value: unknown): number | null {

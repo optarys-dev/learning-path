@@ -1,5 +1,5 @@
 import { ApiError, type ApiValidationErrors } from './ApiError';
-import { isRecord } from '../validation';
+import { isRecord } from '@/lib/validation';
 
 function readValidationErrors(value: unknown): ApiValidationErrors {
   if (!isRecord(value)) return {};

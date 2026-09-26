@@ -1,8 +1,9 @@
+import { appRoutes } from '@/config/navigation';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { PageState } from '../../../components/ui/PageState/PageState';
-import { useAuthSession } from '../hooks/useAuthSession';
+import { PageState } from '@/components/ui';
+import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 
 export function ProtectedRoute() {
   const { t } = useTranslation();
@@ -17,7 +18,7 @@ export function ProtectedRoute() {
     description={t('errors.sessionUnavailableDescription')} onRetry={() => { void refresh(); }} />;
 
   if (!user) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to={appRoutes.login} replace state={{ from: location.pathname }} />;
   }
 
   return <Outlet />;

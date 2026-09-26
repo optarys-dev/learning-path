@@ -1,6 +1,6 @@
-import { isRecord } from '../../../lib/validation';
-import { safeExternalUrl } from '../../../lib/urls';
-import type { CatalogCourse, CatalogPageResult } from '../types';
+import { isRecord } from '@/lib/validation';
+import { safeExternalUrl } from '@/lib/urls';
+import type { CatalogCourse, CatalogPageResult } from '@/features/catalog/types';
 
 function parseCourse(value: unknown): CatalogCourse | null {
   if (!isRecord(value) || typeof value.courseId !== 'number' || !Number.isSafeInteger(value.courseId) || value.courseId <= 0 ||

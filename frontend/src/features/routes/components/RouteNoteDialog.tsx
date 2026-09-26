@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { FileText, Trash2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { CourseNote } from '../model/types';
-import { Dialog } from '../../../components/ui/Dialog/Dialog';
+import type { CourseNote } from '@/features/routes/model/types';
+import { Dialog } from '@/components/ui';
 
 interface RouteNoteDialogProps {
   courseTitle: string;

@@ -1,5 +1,5 @@
-import { isRecord } from '../../../lib/validation';
-import { safeExternalUrl } from '../../../lib/urls';
+import { isRecord } from '@/lib/validation';
+import { safeExternalUrl } from '@/lib/urls';
 
 export interface AuthenticatedUser {
   id: string;

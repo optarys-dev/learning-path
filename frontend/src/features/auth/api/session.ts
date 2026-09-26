@@ -1,8 +1,9 @@
-import { apiUrl } from '../../../config/api';
-import { ApiError, requestJson, requestVoid } from '../../../lib/api';
-import { parseSession, type AuthenticatedUser } from '../model/parseSession';
-import { isRecord } from '../../../lib/validation';
-export type { AuthenticatedUser } from '../model/parseSession';
+import { appRoutes } from '@/config/navigation';
+import { apiUrl } from '@/config/api';
+import { ApiError, requestJson, requestVoid } from '@/lib/api';
+import { parseSession, type AuthenticatedUser } from '@/features/auth/model/parseSession';
+import { isRecord } from '@/lib/validation';
+export type { AuthenticatedUser } from '@/features/auth/model/parseSession';
 
 export async function getCurrentSession(signal?: AbortSignal): Promise<AuthenticatedUser | null> {
   try {
@@ -21,7 +22,7 @@ export function endSession(): Promise<void> {
 
 export function startDiscordLogin() {
   const loginUrl = new URL(`${apiUrl}/auth/discord`, window.location.origin);
-  const returnUrl = import.meta.env.VITE_DISCORD_RETURN_URL?.trim() || '/login/callback';
+  const returnUrl = import.meta.env.VITE_DISCORD_RETURN_URL?.trim() || appRoutes.loginCallback;
 
   loginUrl.searchParams.set('returnUrl', returnUrl);
 
@@ -39,6 +40,6 @@ export async function getLoginProviders(signal?: AbortSignal): Promise<{ google:
 export function startGoogleLogin() {
   const loginUrl = new URL(`${apiUrl}/auth/google`, window.location.origin);
   loginUrl.searchParams.set('returnUrl', import.meta.env.VITE_GOOGLE_RETURN_URL?.trim()
-    || import.meta.env.VITE_DISCORD_RETURN_URL?.trim() || '/login/callback');
+    || import.meta.env.VITE_DISCORD_RETURN_URL?.trim() || appRoutes.loginCallback);
   window.location.assign(loginUrl.toString());
 }

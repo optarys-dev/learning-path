@@ -1,13 +1,15 @@
+import { courseLevelTranslationKey } from '@/i18n/courseLevel';
 import { useState } from 'react';
 import { ArrowUpRight, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { QuestTab } from '../../../components/ui';
-import type { CatalogCourse } from '../types';
+import { QuestTab } from '@/components/ui';
+import type { CatalogCourse } from '@/features/catalog/types';
 
 interface CatalogCourseCardProps { course: CatalogCourse; }
 
 export function CatalogCourseCard({ course }: CatalogCourseCardProps) {
   const { t } = useTranslation();
+  function levelLabel(level: string) { const key = courseLevelTranslationKey(level); return key ? t(key) : level; }
   const [imageFailed, setImageFailed] = useState(false);
 
   return <article className="catalog-course-card">
@@ -17,7 +19,7 @@ export function CatalogCourseCard({ course }: CatalogCourseCardProps) {
     <div className="catalog-course-card__content">
       <div className="catalog-course-card__meta">
         <QuestTab tone="violet">DevTalles</QuestTab>
-        {course.level && <QuestTab tone="paper">{course.level}</QuestTab>}
+        {course.level && <QuestTab tone="paper">{levelLabel(course.level)}</QuestTab>}
       </div>
       <h3>{course.title}</h3>
       {course.courseUrl && <a className="catalog-course-card__link" href={course.courseUrl} target="_blank" rel="noreferrer" aria-label={`${t('catalog.openCourse')}: ${course.title}`}>

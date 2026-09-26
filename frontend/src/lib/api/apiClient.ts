@@ -1,4 +1,4 @@
-import { apiUrl } from '../../config/api';
+import { apiUrl } from '@/config/api';
 import { ApiError } from './ApiError';
 import { parseApiError } from './parseProblemDetails';
 

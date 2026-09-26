@@ -1,7 +1,8 @@
+import { routeStorage } from './constants';
 import type { CourseNote, CoursePriority, RouteCourseLocalState, SavedRoute } from './types';
-import { isRecord } from '../../../lib/validation';
+import { isRecord } from '@/lib/validation';
 
-const storageKey = 'learning-path:course-state';
+const storageKey = routeStorage.courseState;
 const emptyState = (): RouteCourseLocalState => ({ notes: {}, priorities: {} });
 const courseKey = (routeId: string, courseId: string) => `${routeId}:${courseId}`;
 
@@ -32,7 +33,7 @@ function write(state: RouteCourseLocalState) {
   if (typeof window !== 'undefined') {
     // Callers display the failure and keep the editor open; never claim a failed write succeeded.
     window.localStorage.setItem(storageKey, JSON.stringify(state));
-    window.dispatchEvent(new Event('learning-path:course-state-change'));
+    window.dispatchEvent(new Event(routeStorage.courseStateChanged));
   }
 }
 
