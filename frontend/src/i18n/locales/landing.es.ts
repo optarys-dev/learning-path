@@ -57,7 +57,7 @@ export const landingEs = {
   faq: {
     eyebrow: 'ANTES DEL PRIMER PASO', title: 'Las cosas claras, <accent>desde el inicio.</accent>',
     description: 'Un poco más sobre tu cuenta, tus cursos y cómo funciona la experiencia.',
-    login: { question: '¿Necesito Discord para entrar?', answer: 'En esta primera versión utilizamos Discord para identificar tu cuenta y conservar tus rutas y progreso.' },
+    login: { question: '¿Cómo inicio sesión?', answer: 'Podés usar Discord o Google cuando esté habilitado. Cada cuenta conserva sus propias rutas y progreso.' },
     courses: { question: '¿Los cursos se ven dentro de CODE QUEST?', answer: 'Sí. CODE QUEST muestra los cursos que forman tu ruta, su orden, el motivo de cada recomendación y tu progreso. Cuando quieras comenzar uno, podrás abrir el curso oficial en DevTalles.' },
     beginner: { question: '¿Me sirve si estoy empezando?', answer: 'Sí. El cuestionario toma en cuenta tu experiencia y conocimientos actuales para encontrar un punto de partida adecuado y añadir los fundamentos que necesites.' },
     areas: { question: '¿Qué rutas están disponibles?', answer: 'La primera versión comienza con Frontend React y Backend con C# / ASP.NET Core. El sistema está preparado para incorporar nuevas metas y cursos posteriormente.' },

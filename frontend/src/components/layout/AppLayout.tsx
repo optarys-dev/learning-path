@@ -75,11 +75,11 @@ export function AppLayout({
   const displayName =
     user?.displayName || user?.username;
 
-  const avatarUrl = user?.avatar
+  const avatarUrl = user?.avatarUrl ?? (user?.avatar && user.provider !== 'Google'
     ? `https://cdn.discordapp.com/avatars/${encodeURIComponent(
         user.id,
       )}/${encodeURIComponent(user.avatar)}.png?size=80`
-    : null;
+    : null);
 
   async function handleLogout() {
     if (isLoggingOut) return;
@@ -146,7 +146,7 @@ export function AppLayout({
 
   return (
     <div
-      className={`app-shell app-shell--${variant}`}
+      className={`app-shell app-shell--${variant}${pathname === '/login' ? ' app-shell--login' : ''}`}
     >
       <a
         className="skip-link"

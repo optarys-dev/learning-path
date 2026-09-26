@@ -1,23 +1,27 @@
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, CircleAlert, Compass, Route, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, CircleAlert, Compass, Route, type LucideIcon } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { DiscordIcon } from '../../../components/ui/DiscordIcon/DiscordIcon';
 import deviReady from '../../../assets/portal/10_continuar_aprendiendo.png';
 import deviLoading from '../../../assets/portal/01_cargando.png';
 import deviError from '../../../assets/portal/04_error_suave.png';
 import { DiscordLoginButton } from '../../welcome/components/DiscordLoginButton';
 import type { DiscordLoginState } from '../hooks/useDiscordLogin';
 import './login.css';
+import { Button } from '../../../components/ui/Button/Button';
+import { GoogleIcon } from './GoogleIcon';
 
-export function LoginView({ state, onLogin }: {
+export function LoginView({ state, onLogin, onGoogleLogin, googleLoading = false, googleError = false }: {
   state: DiscordLoginState;
   onLogin: () => void;
+  onGoogleLogin?: () => void;
+  googleLoading?: boolean;
+  googleError?: boolean;
 }) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const { status } = state;
-  const benefitIcons: LucideIcon[] = [Route, Compass];
+  const benefitIcons: LucideIcon[] = [Route, CheckCircle2, Compass];
   const feedback = status === 'error' ? t('welcome.error')
     : status === 'cancelled' ? t('welcome.cancelled')
     : status === 'unavailable' ? t('welcome.unavailable')
@@ -37,8 +41,13 @@ export function LoginView({ state, onLogin }: {
           <h1 id="login-title">{t('login.title')}</h1>
           <p className="login-card__intro">{t('login.description')}</p>
           {status !== 'authenticated' && <>
-            <DiscordLoginButton loading={status === 'loading'} retry={status === 'error' || status === 'cancelled'} onClick={onLogin} />
-            <p id="discord-purpose" className="login-card__purpose">{t('welcome.purpose')}</p>
+            <DiscordLoginButton loading={status === 'loading'} retry={status === 'error' || status === 'cancelled'} onClick={onLogin} disabled={googleLoading} />
+            {onGoogleLogin && <Button className="login-google" variant="secondary" isLoading={googleLoading}
+              loadingLabel={t('login.googleConnecting')} disabled={status === 'loading'} onClick={onGoogleLogin}>
+              <GoogleIcon />{t('login.googleContinue')}
+            </Button>}
+            {googleError && <p className="login-feedback" data-error="true" role="alert">{t('login.googleError')}</p>}
+            <p id="discord-purpose" className="login-card__purpose">{t('login.privacy')}</p>
           </>}
           <div className="login-card__flow">
             <p>{t('login.flowTitle')}</p>
@@ -59,8 +68,8 @@ export function LoginView({ state, onLogin }: {
           <h2 id="login-aside-title"><Trans i18nKey="login.asideTitle" components={{ accent: <span className="text-accent" /> }} /></h2>
           <p>{t('login.asideDescription')}</p>
           <ul>{(['benefitOne', 'benefitTwo', 'benefitThree'] as const).map((key, index) => {
-            const Icon = index === 0 ? null : benefitIcons[index - 1];
-            return <li key={key}><span aria-hidden="true">{Icon ? <Icon size={16} /> : <DiscordIcon size={17} />}</span>{t(`login.${key}`)}</li>;
+            const Icon = benefitIcons[index];
+            return <li key={key}><span aria-hidden="true"><Icon size={16} /></span>{t(`login.${key}`)}</li>;
           })}</ul>
         </div>
         <div className="login-aside__scene" aria-hidden="true">
