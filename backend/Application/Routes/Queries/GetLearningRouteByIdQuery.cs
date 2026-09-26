@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeQuest2026.Server.Application.Routes.Queries;
 
-public sealed record GetLearningRouteByIdQuery(string DiscordId, Guid RouteId) : IRequest<LearningRouteDto?>;
+public sealed record GetLearningRouteByIdQuery(string UserId, Guid RouteId) : IRequest<LearningRouteDto?>;
 
 public sealed class GetLearningRouteByIdQueryHandler(AppDbContext db)
     : IRequestHandler<GetLearningRouteByIdQuery, LearningRouteDto?>
@@ -13,7 +13,7 @@ public sealed class GetLearningRouteByIdQueryHandler(AppDbContext db)
         GetLearningRouteByIdQuery request, CancellationToken cancellationToken)
     {
         var route = await db.LearningRoutes.AsNoTracking()
-            .Where(x => x.User.DiscordId == request.DiscordId)
+            .Where(x => x.UserId == request.UserId)
             .Include(x => x.Courses).ThenInclude(x => x.Course)
             .SingleOrDefaultAsync(x => x.RouteId == request.RouteId, cancellationToken);
         return route is null ? null : LearningRouteMapping.ToDto(route);

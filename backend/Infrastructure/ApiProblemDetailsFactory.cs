@@ -55,7 +55,7 @@ public static class ApiProblemDetailsFactory
     private static (string Title, string Detail) Describe(int statusCode, string code) => code switch
     {
         ApiErrorCodes.Unauthenticated => ("Autenticación requerida", "Inicia sesión con Discord para continuar."),
-        ApiErrorCodes.UserNotRegistered => ("Sesión no disponible", "Inicia sesión nuevamente con Discord."),
+        ApiErrorCodes.UserNotRegistered => ("Sesión no disponible", "Inicia sesión nuevamente."),
         ApiErrorCodes.Forbidden => ("Acceso denegado", "No tienes acceso a este recurso."),
         ApiErrorCodes.Internal => ("Error inesperado", "Ocurrió un error inesperado. Inténtalo nuevamente."),
         ApiErrorCodes.InvalidPreferences => ("Preferencias inválidas", "Revisa el objetivo, intereses y habilidades enviados."),
