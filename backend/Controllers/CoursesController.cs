@@ -22,9 +22,10 @@ public sealed class CoursesController(ISender sender) : ControllerBase
     public async Task<ActionResult<PagedResultDto<CourseDto>>> List(
         [FromQuery, Range(1, int.MaxValue)] int page = GetCoursesQuery.DefaultPage,
         [FromQuery, Range(1, GetCoursesQuery.MaxPageSize)] int pageSize = GetCoursesQuery.DefaultPageSize,
+        [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
-        var courses = await sender.Send(new GetCoursesQuery(page, pageSize), cancellationToken);
+        var courses = await sender.Send(new GetCoursesQuery(page, pageSize, search), cancellationToken);
 
         return Ok(courses);
     }

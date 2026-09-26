@@ -34,23 +34,23 @@ Las clases se estudian en DevTalles. Aquí organizas tu aprendizaje; el progreso
 
 ## 🧠 Cómo recomendamos tu ruta
 
-Combinamos **búsqueda semántica, información del catálogo y refinamiento opcional con IA**.
+Partimos de lo que quieres aprender y buscamos cursos reales del catálogo que te ayuden a conseguirlo.
 
 ```mermaid
 flowchart TD
-    A["Tu objetivo y perfil"] --> B["Embeddings: comparar significado"]
-    B --> C["Motor híbrido: seleccionar y ordenar"]
-    C --> D["IA opcional: refinar orden y razones"]
+    A["Tu objetivo y perfil"] --> B["Buscar cursos relacionados con tu objetivo"]
+    B --> C["Elegir cursos y proponer un orden"]
+    C --> D["IA opcional: mejorar orden y explicaciones"]
     D --> E["Propuesta editable · tú decides guardar"]
 ```
 
-1. **Entendemos lo que buscas.** Un modelo local convierte objetivo, intereses y experiencia en un vector; PostgreSQL con pgvector lo compara con cursos activos y compatibles.
-2. **Construimos el recorrido.** El motor combina **82 % de similitud semántica y 18 % de asociación temática**. Selecciona hasta seis cursos, favoreciendo relevancia y variedad, y propone un orden según nivel y requisitos verificados, considerando tus conocimientos previos.
-3. **Explicamos la propuesta.** Groq puede mejorar el orden y las razones usando exclusivamente los cursos seleccionados. Si el refinamiento falla, conservamos la propuesta original.
+1. **Buscamos por significado.** Comparamos tu objetivo, intereses y experiencia con el contenido de los cursos. No hace falta que el título repita exactamente tus palabras.
+2. **Elegimos y ordenamos.** Proponemos hasta seis cursos relacionados, considerando sus temas, nivel y requisitos verificados, además de lo que ya sabes. Buscamos variedad sin alejarnos de tu objetivo.
+3. **Explicamos por qué.** La IA puede ajustar el orden y explicar el aporte de cada curso. Solo utiliza los cursos que el motor eligió; si falla, conservamos la propuesta original.
 
 > **Ejemplo:** para «web con Python», el motor prioriza fundamentos y cursos del tema. Puede proponer menos de seis para evitar rellenar la ruta con tecnologías ajenas al objetivo. Los requisitos orientan; no bloquean cursos.
 
-La recomendación es un **borrador**, no un guardado automático. Al confirmar, persistimos cursos, orden y una copia de las preferencias utilizadas.
+La recomendación es una **propuesta que puedes revisar y ajustar**. Tú decides cuándo guardarla.
 
 ## 🛠️ Dentro del proyecto
 

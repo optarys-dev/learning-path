@@ -10,6 +10,16 @@
 .catalog-hero__visual { position: relative; z-index: 1; width: min(100%, 22rem); justify-self: end; filter: drop-shadow(0 1.2rem 2rem var(--cq-color-illustration-shadow)); transform: rotate(3deg); }
 
 .catalog-results { display: grid; gap: var(--cq-space-8); }
+.catalog-search { display: flex; align-items: center; gap: var(--cq-space-3); width: min(100%, 46rem); min-width: 0; padding: 0 var(--cq-space-4); border: 1px solid var(--cq-color-border-default); border-radius: var(--cq-radius-card); background: var(--cq-color-bg-elevated); color: var(--cq-color-text-secondary); box-shadow: var(--cq-shadow-card); transition: border-color var(--cq-transition-base), box-shadow var(--cq-transition-base); }
+.catalog-search:focus-within { border-color: var(--cq-color-brand-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--cq-color-brand-primary) 24%, transparent); }
+.catalog-search > svg { flex: none; color: var(--cq-color-brand-primary); }
+.catalog-search input { width: 100%; min-width: 0; min-height: 3.5rem; border: 0; outline: 0; appearance: none; background: transparent; color: var(--cq-color-text-primary); font: inherit; }
+.catalog-search input:focus-visible { box-shadow: none; }
+.catalog-search input::placeholder { color: var(--cq-color-text-secondary); opacity: .82; }
+.catalog-search input::-webkit-search-cancel-button { display: none; }
+.catalog-search button { display: grid; flex: none; width: 2rem; height: 2rem; padding: 0; place-items: center; border: 0; border-radius: var(--cq-radius-pill); background: transparent; color: var(--cq-color-text-secondary); cursor: pointer; }
+.catalog-search button:hover { background: var(--cq-color-surface-tint); color: var(--cq-color-text-primary); }
+.catalog-search button:focus-visible { box-shadow: var(--cq-focus-ring); outline: none; }
 .catalog-results__header { display: flex; align-items: end; justify-content: space-between; gap: var(--cq-space-6); }
 .catalog-results h2 { font-size: clamp(2rem, 3.4vw, 3.2rem); }
 .catalog-results__count { display: inline-flex; align-items: center; gap: var(--cq-space-2); margin: 0; padding: var(--cq-space-3) var(--cq-space-4); border: 1px solid var(--cq-color-border-default); border-radius: var(--cq-radius-pill); color: var(--cq-color-text-secondary); font-size: var(--cq-font-size-label); }
@@ -33,6 +43,7 @@
 .catalog-pagination { display: flex; align-items: center; justify-content: center; gap: var(--cq-space-4); }
 .catalog-pagination > span { min-width: 9rem; color: var(--cq-color-text-secondary); font-size: var(--cq-font-size-label); text-align: center; }
 .catalog-state { display: grid; min-height: 17rem; place-items: center; justify-items: center; padding: var(--cq-space-12); border: 1px dashed var(--cq-color-border-default); border-radius: var(--cq-radius-card); text-align: center; }
+.catalog-state--search { min-height: 11rem; padding: var(--cq-space-8); }
 .catalog-state > svg { color: var(--cq-color-brand-primary); }
 .catalog-state h2 { margin: var(--cq-space-4) 0 var(--cq-space-2); font-family: var(--cq-font-heading); }
 .catalog-state p { max-width: 42ch; margin: 0 0 var(--cq-space-5); color: var(--cq-color-text-secondary); }
@@ -44,7 +55,7 @@
 @keyframes catalog-shimmer { to { background-position: -200% 0; } }
 @media (max-width: 64rem) { .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .catalog-hero__visual { width: 17rem; } }
 @media (max-width: 45rem) { .catalog-hero { grid-template-columns: 1fr; min-height: auto; } .catalog-hero__visual { width: 13rem; justify-self: end; margin-top: var(--cq-space-4); } .catalog-results__header, .catalog-cta { align-items: flex-start; flex-direction: column; } .catalog-grid { grid-template-columns: 1fr; } .catalog-pagination { width: 100%; gap: var(--cq-space-2); } .catalog-pagination > span { min-width: 0; } .catalog-pagination .cq-button { padding-inline: var(--cq-space-3); } }
-@media (prefers-reduced-motion: reduce) { .catalog-course-card, .catalog-course-card__media img, .catalog-skeleton { transition: none; animation: none; } }
+@media (prefers-reduced-motion: reduce) { .catalog-search, .catalog-course-card, .catalog-course-card__media img, .catalog-skeleton { transition: none; animation: none; } }
 
 
 /* Quest asset kit: these accents classify content without replacing text or actions. */

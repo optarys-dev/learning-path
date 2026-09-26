@@ -4,8 +4,11 @@ import type { CatalogCourse, CatalogPageResult } from '../types';
 
 export const catalogPageSize = 12;
 
-export async function getCatalogCourses(page: number, signal?: AbortSignal, pageSize = catalogPageSize): Promise<CatalogPageResult> {
+export async function getCatalogCourses(page: number, signal?: AbortSignal, pageSize = catalogPageSize, search?: string): Promise<CatalogPageResult> {
   const parameters = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  const normalizedSearch = search?.trim();
+  if (normalizedSearch) parameters.set('search', normalizedSearch);
+
   const pageResult = parseCatalogPage(await requestJson<unknown>(`/courses?${parameters}`, { signal, notifyOnUnauthenticated: false }));
   if (!pageResult) throw new ApiError({ message: 'El catálogo devolvió un formato inesperado.', kind: 'invalid-response' });
   return pageResult;
