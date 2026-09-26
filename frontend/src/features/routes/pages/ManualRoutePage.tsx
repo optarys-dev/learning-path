@@ -76,7 +76,6 @@ export function ManualRoutePage() {
 
   if (sessionLoading) return <PageState kind="loading" title={t('myPath.sessionLoading')} />;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.isNewUser) return <Navigate to="/learning-profile" replace />;
 
   const hasPendingRecommendation = loadPendingRoute(user.id) !== null;
 
