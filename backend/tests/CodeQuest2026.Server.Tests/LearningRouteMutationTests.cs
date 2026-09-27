@@ -349,6 +349,49 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
     }
 
     [Theory]
+    [InlineData("free")]
+    [InlineData("mini-course")]
+    public async Task CatalogCategoryIncludesOverlappingCategoriesAndCombinesWithSearch(string kind)
+    {
+        var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
+        var response = await controller.List(search: "python", catalogKind: kind);
+        var page = Assert.IsType<PagedResultDto<CourseDto>>(Assert.IsType<OkObjectResult>(response.Result).Value);
+        Assert.Equal(new long[] { 1 }, page.Items.Select(course => course.CourseId));
+        Assert.Equal(1, page.TotalCount);
+
+        var emptyResponse = await controller.List(search: "backend", catalogKind: kind);
+        var empty = Assert.IsType<PagedResultDto<CourseDto>>(Assert.IsType<OkObjectResult>(emptyResponse.Result).Value);
+        Assert.Empty(empty.Items);
+        Assert.Equal(0, empty.TotalPages);
+    }
+
+    [Fact]
+    public async Task CatalogCategoryFiltersBeforeCountingAndPaginatingAndExcludesInactiveCourses()
+    {
+        var extra = await Db.Courses.SingleAsync(course => course.CourseId == 3);
+        extra.CatalogKinds = ["pro-exclusive"];
+        var inactive = await Db.Courses.SingleAsync(course => course.CourseId == 4);
+        inactive.CatalogKinds = ["pro-exclusive"];
+        await Db.SaveChangesAsync();
+        Db.ChangeTracker.Clear();
+        var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
+        var response = await controller.List(page: 2, pageSize: 1, catalogKind: "pro-exclusive");
+        var page = Assert.IsType<PagedResultDto<CourseDto>>(Assert.IsType<OkObjectResult>(response.Result).Value);
+        Assert.Equal(new long[] { 3 }, page.Items.Select(course => course.CourseId));
+        Assert.Equal(2, page.TotalCount);
+        Assert.Equal(2, page.TotalPages);
+        Assert.True(page.HasPreviousPage);
+        Assert.False(page.HasNextPage);
+    }
+
+    [Fact]
+    public async Task CatalogRejectsUnknownCategory()
+    {
+        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+        await Assert.ThrowsAsync<ArgumentException>(() => sender.Send(new CodeQuest2026.Server.Application.Courses.Queries.GetCoursesQuery(1, 12, CatalogKind: "unknown")));
+    }
+
+    [Theory]
     [InlineData("Python")]
     [InlineData("yth")]
     [InlineData("PYTHON")]
@@ -546,9 +589,6 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
             }
             course.HasKey(course => course.CourseId);
             course.Property(course => course.CourseId).ValueGeneratedNever();
-            course.Property(course => course.CatalogKinds).HasConversion(
-                value => System.Text.Json.JsonSerializer.Serialize(value, (System.Text.Json.JsonSerializerOptions?)null),
-                value => System.Text.Json.JsonSerializer.Deserialize<string[]>(value, (System.Text.Json.JsonSerializerOptions?)null)!);
             var category = modelBuilder.Entity<Category>();
             category.HasKey(item => item.CategoryId);
             category.Property(item => item.CategoryId).ValueGeneratedNever();

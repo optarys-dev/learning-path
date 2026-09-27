@@ -6,8 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeQuest2026.Server.Application.Courses.Queries;
 
-public sealed record GetCoursesQuery(int Page, int PageSize, string? Search = null) : IRequest<PagedResultDto<CourseDto>>
+public sealed record GetCoursesQuery(int Page, int PageSize, string? Search = null, string? CatalogKind = null) : IRequest<PagedResultDto<CourseDto>>
 {
+    public const string CatalogKindPattern = "^(course|free|mini-course|pro-exclusive|legacy|in-development)$";
     public const int DefaultPage = 1;
     public const int DefaultPageSize = 20;
     public const int MaxPageSize = 100;
@@ -27,6 +28,13 @@ public sealed class GetCoursesQueryHandler(AppDbContext db)
         IQueryable<Course> activeCourses = db.Courses
             .AsNoTracking()
             .Where(course => course.IsActive);
+
+        if (request.CatalogKind is not null)
+        {
+            if (!System.Text.RegularExpressions.Regex.IsMatch(request.CatalogKind, GetCoursesQuery.CatalogKindPattern))
+                throw new ArgumentException("Unknown catalog category.", nameof(request.CatalogKind));
+            activeCourses = activeCourses.Where(course => course.CatalogKinds.Contains(request.CatalogKind));
+        }
 
         var search = string.IsNullOrWhiteSpace(request.Search) ? null : request.Search.Trim();
         if (search is not null)

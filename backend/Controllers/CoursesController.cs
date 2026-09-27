@@ -23,9 +23,10 @@ public sealed class CoursesController(ISender sender) : ControllerBase
         [FromQuery, Range(1, int.MaxValue)] int page = GetCoursesQuery.DefaultPage,
         [FromQuery, Range(1, GetCoursesQuery.MaxPageSize)] int pageSize = GetCoursesQuery.DefaultPageSize,
         [FromQuery] string? search = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        [FromQuery, RegularExpression(GetCoursesQuery.CatalogKindPattern)] string? catalogKind = null)
     {
-        var courses = await sender.Send(new GetCoursesQuery(page, pageSize, search), cancellationToken);
+        var courses = await sender.Send(new GetCoursesQuery(page, pageSize, search, catalogKind), cancellationToken);
 
         return Ok(courses);
     }
