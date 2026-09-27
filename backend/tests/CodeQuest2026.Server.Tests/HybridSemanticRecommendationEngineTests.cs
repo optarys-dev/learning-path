@@ -25,6 +25,25 @@ public sealed class HybridSemanticRecommendationEngineTests
     }
 
     [Fact]
+    public void ThumbnailsAreReturnedWithoutChangingRecommendationOrderOrScores()
+    {
+        var category = new Category { CategoryId = 1, Name = "Backend" };
+        var candidates = new[] { Candidate(1, "APIs con Go", 0.85, category), Candidate(2, "Backend", 0.75, category) };
+        var preference = new UserPreference { Goal = "Aprender Backend" };
+        var before = engine.Recommend(preference, candidates);
+        candidates[0].Course.ImageUrl = "https://example.test/course.jpg";
+        var after = engine.Recommend(preference, candidates);
+
+        Assert.Equal(before.Courses, after.Courses.Select(course => course with { ImageUrl = null }));
+        Assert.Equal(candidates[0].Course.ImageUrl, after.Courses.Single(course => course.CourseId == 1).ImageUrl);
+        Assert.Null(after.Courses.Single(course => course.CourseId == 2).ImageUrl);
+        var json = System.Text.Json.JsonSerializer.SerializeToElement(after,
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+        Assert.Equal(candidates[0].Course.ImageUrl, json.GetProperty("courses").EnumerateArray()
+            .Single(course => course.GetProperty("courseId").GetInt64() == 1).GetProperty("imageUrl").GetString());
+    }
+
+    [Fact]
     public void CategoryMatchRaisesCoursesFromTheRequestedArea()
     {
         var backend = new Category { CategoryId = 1, Name = "Backend" };

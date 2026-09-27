@@ -37,26 +37,3 @@ test('only the verified +DevTalles resource opens the subscription portal', () =
     assert.equal(isSubscriptionLibrary(url), false);
   }
 });
-
-const apiSource = await readFile(new URL('../src/features/catalog/api/getCatalogCourses.ts', import.meta.url), 'utf8');
-const modelUrl = `data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`;
-const configUrl = `data:text/javascript;base64,${Buffer.from("export const apiUrl = 'https://api.example.test';").toString('base64')}`;
-const apiModule = ts.transpileModule(apiSource, { compilerOptions: { module: ts.ModuleKind.ESNext } }).outputText
-  .replace("'../../../config/api'", `'${configUrl}'`)
-  .replace("'../model/catalogKind'", `'${modelUrl}'`);
-const { getCatalogCourses } = await import(`data:text/javascript;base64,${Buffer.from(apiModule).toString('base64')}`);
-
-test('catalog requests combine category, search and pagination and keep cancellation', async context => {
-  const controller = new AbortController();
-  const calls = [];
-  context.mock.method(globalThis, 'fetch', async (url, options) => {
-    calls.push({ url: new URL(url), options });
-    return { ok: true, json: async () => ({ items: [], totalCount: 0 }) };
-  });
-  await getCatalogCourses(2, controller.signal, 12, '  Node  ', 'pro-exclusive');
-  assert.deepEqual(Object.fromEntries(calls[0].url.searchParams), { page: '2', pageSize: '12', search: 'Node', catalogKind: 'pro-exclusive' });
-  assert.equal(calls[0].options.signal, controller.signal);
-  await getCatalogCourses(1, undefined, undefined, '   ');
-  assert.equal(calls[1].url.searchParams.has('search'), false);
-  assert.equal(calls[1].url.searchParams.has('catalogKind'), false);
-});

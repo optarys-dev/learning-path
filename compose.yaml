@@ -2,11 +2,11 @@ services:
   postgres:
     image: pgvector/pgvector:0.8.6-pg17-bookworm
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-codequest2026}
-      POSTGRES_USER: ${POSTGRES_USER:-codequest}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Define POSTGRES_DB en .env con un valor no vacio}
+      POSTGRES_USER: ${POSTGRES_USER:?Define POSTGRES_USER en .env con un valor no vacio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env con un valor no vacio}
     ports:
-      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:?Define POSTGRES_PORT en .env con un valor no vacio}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -21,12 +21,12 @@ services:
       context: ./backend/embedding-worker
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "host=postgres port=5432 dbname=${POSTGRES_DB:-codequest2026} user=${POSTGRES_USER:-codequest}"
-      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      DATABASE_URL: "host=postgres port=5432 dbname=${POSTGRES_DB:?Define POSTGRES_DB en .env con un valor no vacio} user=${POSTGRES_USER:?Define POSTGRES_USER en .env con un valor no vacio}"
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env con un valor no vacio}
       EMBEDDING_HOST: 0.0.0.0
       EMBEDDING_PORT: 8765
-      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-Qwen/Qwen3-Embedding-0.6B}
-      EMBEDDING_REVISION: ${EMBEDDING_REVISION:-main}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:?Define EMBEDDING_MODEL en .env con un valor no vacio}
+      EMBEDDING_REVISION: ${EMBEDDING_REVISION:?Define EMBEDDING_REVISION en .env con un valor no vacio}
       EMBEDDING_DEVICE: cpu
     volumes:
       - huggingface_cache:/home/app/.cache/huggingface
@@ -41,19 +41,27 @@ services:
       retries: 20
     restart: unless-stopped
 
-  api:
+  web-app:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_HTTP_PORTS: 8080
-      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-codequest2026};Username=${POSTGRES_USER:-codequest};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
-      EmbeddingService__Url: ${EMBEDDING_SERVICE_URL:-http://embeddings:8765/}
-      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
-      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection:?Define ConnectionStrings__DefaultConnection en .env con un valor no vacio}
+      DatabaseInitialization__Enabled: 'true'
+      DatabaseInitialization__SeedDirectory: /seeds
+      EmbeddingService__Url: ${EMBEDDING_SERVICE_URL:?Define EMBEDDING_SERVICE_URL en .env con un valor no vacio}
+      Discord__DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:?Define DISCORD_CLIENT_ID en .env con un valor no vacio}
+      Discord__DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:?Define DISCORD_CLIENT_SECRET en .env con un valor no vacio}
+      Discord__DISCORD_CALLBACK_PATH: ${DISCORD_CALLBACK_PATH:?Define DISCORD_CALLBACK_PATH en .env con un valor no vacio}
+      Discord__DISCORD_FORCE_HTTPS_CALLBACK: ${DISCORD_FORCE_HTTPS_CALLBACK:-false}
+      Google__ClientId: ${GOOGLE_CLIENT_ID:-}
+      Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
+      Groq__ApiKey: ${Groq__ApiKey:?Define Groq__ApiKey en .env con un valor no vacio}
+      Groq__Model: ${Groq__Model:?Define Groq__Model en .env con un valor no vacio}
     ports:
-      - "127.0.0.1:${API_PORT:-8080}:8080"
+      - "8080:8080"
+    volumes:
+      - ./database/seeds:/seeds:ro
     depends_on:
       postgres:
         condition: service_healthy

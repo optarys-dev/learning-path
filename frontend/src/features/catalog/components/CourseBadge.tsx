@@ -1,6 +1,6 @@
 import { BookOpen, Crown, Gift, Hammer, History, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { parseCatalogKind, visibleCatalogKinds, type CatalogKind } from '../model/catalogKind';
+import { parseCatalogKind, visibleCatalogKinds, type CatalogKind } from '@/features/catalog/model/catalogKind';
 import './CourseBadge.css';
 
 const icons = {

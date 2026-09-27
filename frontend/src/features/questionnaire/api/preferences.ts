@@ -1,4 +1,4 @@
-import { requestVoid } from '../../../lib/api';
+import { requestVoid } from '@/lib/api';
 
 export interface PreferencesDto {
   goal: string;

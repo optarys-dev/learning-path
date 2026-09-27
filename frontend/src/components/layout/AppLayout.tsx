@@ -1,19 +1,18 @@
+import { appRoutes } from '@/config/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, LogOut, Menu, X } from 'lucide-react';
 
-import { BrandLogo } from '../ui/BrandLogo/BrandLogo';
-import { Button } from '../ui/Button/Button';
-import { LanguageSelector } from '../ui/LanguageSelector/LanguageSelector';
-import { ThemeToggle } from '../ui/ThemeToggle/ThemeToggle';
+import { BrandLogo, Button, PageState } from '@/components/ui';
+import { LanguageSelector } from '@/components/ui/LanguageSelector/LanguageSelector';
+import { ThemeToggle } from '@/components/ui/ThemeToggle/ThemeToggle';
 import { ContentBoundary } from './ContentBoundary';
-import { PageState } from '../ui/PageState/PageState';
-import { useNotifications } from '../notifications';
-import { useAuthSession } from '../../features/auth/hooks/useAuthSession';
+import { useNotifications } from '@/components/notifications';
+import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 
 import './AppLayout.css';
-import '../../features/welcome/styles/landing.css';
+import '@/features/welcome/styles/landing.css';
 
 export function AppLayout({
   variant = 'application',
@@ -52,7 +51,7 @@ export function AppLayout({
   }, [pathname]);
 
   useEffect(() => {
-    if (pathname !== '/' || !hash) return;
+    if (pathname !== appRoutes.home || !hash) return;
     const frame = window.requestAnimationFrame(() => {
       document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' });
       setMenuOpen(false);
@@ -92,7 +91,7 @@ export function AppLayout({
 
   function scrollToLandingSection(section: string) {
     setMenuOpen(false);
-    if (pathname === '/') {
+    if (pathname === appRoutes.home) {
       window.requestAnimationFrame(() => document.getElementById(section)?.scrollIntoView({ block: 'start' }));
     }
   }
@@ -106,7 +105,7 @@ export function AppLayout({
       setMenuOpen(false);
       notify({ tone: 'success', title: t('auth.logoutSuccess') });
       setProfileMenuOpen(false);
-      navigate('/', { replace: true });
+      navigate(appRoutes.home, { replace: true });
     } catch {
       notify({ tone: 'error', title: t('auth.logoutError') });
     } finally {
@@ -147,7 +146,7 @@ export function AppLayout({
           <div className="profile-menu__panel" id="profile-menu" role="menu" aria-label={t('auth.profile')}>
             <p className="profile-menu__heading">{displayName}</p>
             <div className="profile-menu__separator" role="separator" />
-            <NavLink to="/my-path" role="menuitem" onClick={() => { setProfileMenuOpen(false); setMenuOpen(false); }}>
+            <NavLink to={appRoutes.savedRoutes} role="menuitem" onClick={() => { setProfileMenuOpen(false); setMenuOpen(false); }}>
               {t('layout.myPaths')}
             </NavLink>
             <div className="profile-menu__separator" role="separator" />
@@ -162,7 +161,7 @@ export function AppLayout({
 
   return (
     <div
-      className={`app-shell app-shell--${variant}${pathname === '/login' ? ' app-shell--login' : ''}`}
+      className={`app-shell app-shell--${variant}${pathname === appRoutes.login ? ' app-shell--login' : ''}`}
     >
       <a
         className="skip-link"
@@ -174,7 +173,7 @@ export function AppLayout({
       <header className="app-header">
         <div className="app-header__inner">
           <Link
-            to="/"
+            to={appRoutes.home}
             className="app-brand"
             onClick={() => setMenuOpen(false)}
           >
@@ -225,7 +224,7 @@ export function AppLayout({
                   )}
                 >
                   <NavLink
-                    to="/"
+                    to={appRoutes.home}
                     end
                     onClick={() =>
                       setMenuOpen(false)
@@ -235,7 +234,7 @@ export function AppLayout({
                   </NavLink>
 
                   <NavLink
-                    to="/create-route"
+                    to={appRoutes.createRoute}
                     onClick={() =>
                       setMenuOpen(false)
                     }
@@ -244,7 +243,7 @@ export function AppLayout({
                   </NavLink>
 
                   <NavLink
-                    to="/my-path"
+                    to={appRoutes.savedRoutes}
                     onClick={() =>
                       setMenuOpen(false)
                     }
@@ -253,7 +252,7 @@ export function AppLayout({
                   </NavLink>
 
                   <NavLink
-                    to="/catalog"
+                    to={appRoutes.catalog}
                     onClick={() =>
                       setMenuOpen(false)
                     }
@@ -281,13 +280,13 @@ export function AppLayout({
                   'landing.navigation',
                 )}
               >
-                <NavLink to="/" end onClick={() => setMenuOpen(false)}>
+                <NavLink to={appRoutes.home} end onClick={() => setMenuOpen(false)}>
                   {t('layout.home')}
                 </NavLink>
                 <Link to="/#how-it-works" onClick={() => scrollToLandingSection('how-it-works')}>{t('landing.howLink')}</Link>
                 <Link to="/#your-experience" onClick={() => scrollToLandingSection('your-experience')}>{t('landing.insideLink')}</Link>
                 <Link to="/#questions" onClick={() => scrollToLandingSection('questions')}>{t('landing.faqLink')}</Link>
-                <NavLink to="/catalog" onClick={() => setMenuOpen(false)}>
+                <NavLink to={appRoutes.catalog} onClick={() => setMenuOpen(false)}>
                   {t('layout.catalog')}
                 </NavLink>
 
@@ -298,7 +297,7 @@ export function AppLayout({
 
               <NavLink
                 className="welcome-navigation__login"
-                to="/login"
+                to={appRoutes.login}
                 onClick={() => setMenuOpen(false)}
               >
                 {t('login.navigation')}

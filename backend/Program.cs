@@ -1,8 +1,8 @@
-using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Oauth2.Discord;
 using CodeQuest2026.Server.Application.Oauth2.Google;
 using CodeQuest2026.Server.Extensions;
 using CodeQuest2026.Server.Infrastructure;
+using CodeQuest2026.Server.Infrastructure.DataSource;
 using CodeQuest2026.Server.Infrastructure.OpenApi;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +10,13 @@ using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var initializeOnly = args.Contains("--initialize-db");
+if (initializeOnly || builder.Configuration.GetValue<bool>("DatabaseInitialization:Enabled"))
+{
+    await DatabaseInitializer.RunAsync(builder.Configuration);
+    if (initializeOnly) return;
+}
 
 builder.Services.AddControllers(options => options.Filters.Add<ApiErrorResponseFilter>());
 builder.Services.Configure<ApiBehaviorOptions>(options =>

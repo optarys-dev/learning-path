@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { courseLevelTranslationKey } from '@/i18n/courseLevel';
 
 import './CourseCard.css';
 
@@ -15,10 +17,10 @@ interface CourseCardProps {
   title: string;
 }
 
-const stateLabels: Record<Exclude<CourseCardState, 'default'>, string> = {
-  'in-progress': 'En progreso',
-  completed: 'Completado',
-};
+const stateLabels = {
+  'in-progress': 'course.inProgress',
+  completed: 'course.completed',
+} as const;
 
 export function CourseCard({
   action,
@@ -30,8 +32,10 @@ export function CourseCard({
   state = 'default',
   title,
 }: CourseCardProps) {
+  const { t } = useTranslation();
+  const levelKey = courseLevelTranslationKey(level);
   const normalizedProgress = Math.max(0, Math.min(100, progress));
-  const stateLabel = state === 'default' ? undefined : stateLabels[state];
+  const stateLabel = state === 'default' ? undefined : t(stateLabels[state]);
 
   return (
     <article className="cq-course-card">
@@ -42,7 +46,7 @@ export function CourseCard({
       )}
 
       <div className="cq-course-card__content">
-        <p className="cq-course-card__metadata">{area} · {level}</p>
+        <p className="cq-course-card__metadata">{area} · {levelKey ? t(levelKey) : level}</p>
         <h3 className="cq-course-card__title">{title}</h3>
 
         {stateLabel && (
@@ -55,7 +59,7 @@ export function CourseCard({
           <div
             className="cq-course-card__progress"
             role="progressbar"
-            aria-label={`Progreso de ${title}`}
+            aria-label={t('course.progress', { title })}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={normalizedProgress}

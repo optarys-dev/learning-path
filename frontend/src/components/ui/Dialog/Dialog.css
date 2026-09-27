@@ -1,0 +1,11 @@
+dialog.cq-dialog-backdrop {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  color: var(--cq-color-text-primary);
+}
+dialog.cq-dialog-backdrop:not([open]) { display: none; }
+dialog.cq-dialog-backdrop::backdrop { background: transparent; }

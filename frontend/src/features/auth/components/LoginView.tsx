@@ -1,14 +1,15 @@
+import { appRoutes } from '@/config/navigation';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, ChevronDown, CircleAlert, Compass, FolderOpen, Paperclip, Route, type LucideIcon } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
-import deviReady from '../../../assets/portal/10_continuar_aprendiendo.png';
-import deviLoading from '../../../assets/portal/01_cargando.png';
-import deviError from '../../../assets/portal/04_error_suave.png';
-import { DiscordLoginButton } from '../../welcome/components/DiscordLoginButton';
-import type { DiscordLoginState } from '../hooks/useDiscordLogin';
+import deviReady from '@/assets/portal/10_continuar_aprendiendo.png';
+import deviLoading from '@/assets/portal/01_cargando.png';
+import deviError from '@/assets/portal/04_error_suave.png';
+import { DiscordLoginButton } from '@/features/welcome/components/DiscordLoginButton';
+import type { DiscordLoginState } from '@/features/auth/hooks/useDiscordLogin';
 import './login.css';
-import { Button } from '../../../components/ui/Button/Button';
+import { Button } from '@/components/ui';
 import { GoogleIcon } from './GoogleIcon';
 
 export function LoginView({ state, onLogin, onGoogleLogin, googleLoading = false, googleError = false }: {
@@ -35,7 +36,7 @@ export function LoginView({ state, onLogin, onGoogleLogin, googleLoading = false
         initial={reduceMotion ? false : { opacity: 0, x: -14 }}
         animate={reduceMotion ? undefined : { opacity: 1, x: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}>
-        <Link className="login-back" to="/"><ArrowLeft size={17} aria-hidden="true" /> {t('login.back')}</Link>
+        <Link className="login-back" to={appRoutes.home}><ArrowLeft size={17} aria-hidden="true" /> {t('login.back')}</Link>
         <section className="login-card" aria-labelledby="login-title">
           <p className="landing-eyebrow">{t('login.eyebrow')}</p>
           <h1 id="login-title">{t('login.title')}</h1>

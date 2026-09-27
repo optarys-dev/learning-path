@@ -1,25 +1,24 @@
-import { useEffect, useLayoutEffect, useRef, useState, type DragEvent } from 'react';
+import { useCourseReorder } from '@/features/routes/hooks/useCourseReorder';
+import { appRoutes } from '@/config/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Map as MapIcon, Rocket, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import deviProgress from '../../../assets/assessment/07_progreso_de_la_ruta.svg';
-import { Button } from '../../../components/ui/Button/Button';
-import { PageState } from '../../../components/ui/PageState/PageState';
-import { QuestSticker } from '../../../components/ui';
-import { useAuthSession } from '../../auth/hooks/useAuthSession';
-import { generateRouteRecommendation, saveRoute } from '../api/routes';
-import { RouteCourseItem } from '../components/RouteCourseItem';
-import { RouteRaceTrack } from '../components/RouteRaceTrack';
-import { SavedRoutesSection } from '../components/SavedRoutesSection';
-import { buildSaveRouteRequest, clearPendingRoute, createDraftRoute, loadPendingRoute, savePendingRoute } from '../model/draftRoute';
+import deviProgress from '@/assets/assessment/07_progreso_de_la_ruta.svg';
+import { Button, PageState, QuestSticker } from '@/components/ui';
+import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
+import { generateRouteRecommendation, saveRoute } from '@/features/routes/api/routes';
+import { RouteCourseItem } from '@/features/routes/components/RouteCourseItem';
+import { RouteRaceTrack } from '@/features/routes/components/RouteRaceTrack';
+import { SavedRoutesSection } from '@/features/routes/components/SavedRoutesSection';
+import { buildSaveRouteRequest, clearPendingRoute, createDraftRoute, loadPendingRoute, savePendingRoute } from '@/features/routes/model/draftRoute';
 import {
-  RouteRequestError,
   type DraftRoute,
   type DraftRouteCourse,
-  type RouteRequestErrorKind,
-} from '../model/types';
-import { useNotifications } from '../../../components/notifications';
-import { clearQuestionnaireDraft } from '../../questionnaire/model/draft';
+} from '@/features/routes/model/types';
+import { useNotifications } from '@/components/notifications';
+import { clearQuestionnaireDraft } from '@/features/questionnaire/model/draft';
+import { useRouteError } from '@/features/routes/hooks/useRouteError';
 import './MyPathPage.css';
 
 interface MyPathPageProps {
@@ -28,9 +27,10 @@ interface MyPathPageProps {
   embedded?: boolean;
 }
 
+const EMPTY_COURSES: DraftRouteCourse[] = [];
+
 type ProposalOperation = 'idle' | 'regenerating' | 'saving';
 type SaveStatus = 'idle' | 'error';
-type DropTarget = { courseKey: string; position: 'before' | 'after' } | null;
 
 type MyPathState =
   | { status: 'idle' }
@@ -52,8 +52,9 @@ function replaceCourseOrder(route: DraftRoute, courses: DraftRouteCourse[]): Dra
 
 export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyPathPageProps) {
   const { t } = useTranslation();
+  const translateError = useRouteError();
   const { notify } = useNotifications();
-  const { user, isLoading: isSessionLoading, refresh: refreshSession } = useAuthSession();
+  const { user, isLoading: isSessionLoading } = useAuthSession();
   const location = useLocation();
   const navigate = useNavigate();
   const [state, setState] = useState<MyPathState>(() => {
@@ -67,15 +68,10 @@ export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyP
     : routeState?.routeCreated ? t('myPath.saveSuccess') : null;
   const generationInFlight = useRef(false);
   const saveInFlight = useRef(false);
-  const draggedCourse = useRef<string | null>(null);
-  const [draggingCourse, setDraggingCourse] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<DropTarget>(null);
-  const [dragCourses, setDragCourses] = useState<DraftRouteCourse[] | null>(null);
-  const dragCoursesRef = useRef<DraftRouteCourse[] | null>(null);
-  const lastDragTarget = useRef<string | null>(null);
-  const reorderRects = useRef<Map<string, DOMRect> | null>(null);
   const courseElements = useRef(new Map<string, HTMLElement>());
   const emptyStateRef = useRef<HTMLDivElement>(null);
+  const { displayedCourses, bindCourse } = useCourseReorder(state.status === 'proposal' ? state.route.courses : EMPTY_COURSES, courseElements,
+    (courses, moved, position) => applyCourseEdit(courses, t('myPath.movedAnnouncement', { title: moved.title, position })));
 
   useEffect(() => {
     document.title = `${t('myPath.pageTitle')} · CODE QUEST 2026`;
@@ -87,52 +83,8 @@ export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyP
     }
   }, [mode, user, state]);
 
-  useLayoutEffect(() => {
-    const previousRects = reorderRects.current;
-    reorderRects.current = null;
-    if (!previousRects || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    courseElements.current.forEach((element, key) => {
-      const previous = previousRects.get(key);
-      if (!previous) return;
-      const current = element.getBoundingClientRect();
-      const offsetY = previous.top - current.top;
-      if (Math.abs(offsetY) < 1) return;
-      element.animate(
-        [{ transform: `translateY(${offsetY}px)` }, { transform: 'translateY(0)' }],
-        { duration: 180, easing: 'ease-out' },
-      );
-    });
-  }, [dragCourses]);
-
-  function fallbackError(kind: RouteRequestErrorKind): string {
-    switch (kind) {
-      case 'unauthorized':
-        return t('myPath.errors.unauthorized');
-      case 'validation':
-        return t('myPath.errors.validation');
-      case 'not-found':
-        return t('myPath.errors.notFound');
-      case 'server':
-        return t('myPath.errors.server');
-      case 'network':
-        return t('myPath.errors.network');
-      case 'invalid-response':
-        return t('myPath.errors.invalidResponse');
-      case 'http':
-        return t('myPath.errors.http');
-    }
-  }
-
-  function errorMessage(error: unknown): string {
-    if (error instanceof RouteRequestError && error.kind === 'unauthorized') {
-      void refreshSession();
-    }
-
-    return error instanceof RouteRequestError
-      ? error.apiMessage ?? fallbackError(error.kind)
-      : t('myPath.errors.http');
-  }
+  function errorMessage(error: unknown): string { return translateError(error).message; }
 
   async function generateRoute(regenerating: boolean) {
     if (generationInFlight.current || saveInFlight.current) return;
@@ -217,7 +169,7 @@ export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyP
       const saved = await saveRoute(buildSaveRouteRequest(currentProposal.route));
       clearPendingRoute();
       clearQuestionnaireDraft();
-      navigate('/my-path', { replace: true, state: { routeCreated: true, routeId: saved.routeId } });
+      navigate(appRoutes.savedRoutes, { replace: true, state: { routeCreated: true, routeId: saved.routeId } });
     } catch (error) {
       const message = errorMessage(error);
       setState({ ...currentProposal, operation: 'idle', saveStatus: 'error', saveError: message });
@@ -240,10 +192,10 @@ export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyP
   if (isSessionLoading) {
     return <PageState kind="loading" title={t('myPath.sessionLoading')} />;
   }
-  if (user === null) return <Navigate to="/login" replace />;
+  if (user === null) return <Navigate to={appRoutes.login} replace />;
   if (mode === 'proposal' && user.isNewUser) return embedded
     ? <PageState kind="loading" title={t('myPath.sessionLoading')} />
-    : <Navigate to="/learning-profile" replace />;
+    : <Navigate to={appRoutes.learningProfile} replace />;
 
   if (mode === 'collection') {
     return (
@@ -299,7 +251,6 @@ export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyP
   const { route, modified, operation, generationError, saveStatus, saveError } = state;
   const locked = operation !== 'idle';
   const empty = route.courses.length === 0;
-  const displayedCourses = dragCourses ?? route.courses;
 
   return (
     <div className={`my-path-page my-path-page--proposal${embedded ? ' my-path-page--embedded' : ''}`}>
@@ -310,7 +261,7 @@ export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyP
           <h1 className="cq-journey-title">{t('myPath.routeTitle')}</h1>
           <p>{t('myPath.routeDescription')}</p>
           {!embedded && <nav className="my-path__creation-options" aria-label={t('manualRoute.methodLabel')}>
-            <Link to="/create-route">{t('manualRoute.manualOption')}</Link>
+            <Link to={appRoutes.createRoute}>{t('manualRoute.manualOption')}</Link>
             <span aria-current="page">{t('manualRoute.recommendedOption')}</span>
           </nav>}
           <span className="my-path__hero-orbit" aria-hidden="true"><Rocket size={18} /></span>
@@ -355,79 +306,8 @@ export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyP
             <ol className="my-path__course-list" aria-label={t('myPath.courseListLabel')}>
             {displayedCourses.map((course, position) => (
               <RouteCourseItem key={course.uiKey} course={course} position={position}
-                canReorder locked={locked} dragging={draggingCourse === course.uiKey}
-                dropPosition={dropTarget?.courseKey === course.uiKey ? dropTarget.position : null}
-                elementRef={element => {
-                  if (element) courseElements.current.set(course.uiKey, element);
-                  else courseElements.current.delete(course.uiKey);
-                }}
-                onRemove={() => removeCourse(course.uiKey)}
-                onDragStart={(event: DragEvent<HTMLElement>) => {
-                  draggedCourse.current = course.uiKey;
-                  const initialCourses = [...route.courses];
-                  dragCoursesRef.current = initialCourses;
-                  setDragCourses(initialCourses);
-                  lastDragTarget.current = null;
-                  setDraggingCourse(course.uiKey);
-                  event.dataTransfer.effectAllowed = 'move';
-                  event.dataTransfer.setData('text/plain', course.uiKey);
-                }}
-                onDragOver={event => {
-                  if (draggedCourse.current) {
-                    event.preventDefault();
-                    event.dataTransfer.dropEffect = 'move';
-                  }
-                  if (draggedCourse.current && draggedCourse.current !== course.uiKey &&
-                    lastDragTarget.current !== course.uiKey) {
-                    const currentCourses = dragCoursesRef.current ?? route.courses;
-                    const sourceIndex = currentCourses.findIndex(item => item.uiKey === draggedCourse.current);
-                    const targetIndex = currentCourses.findIndex(item => item.uiKey === course.uiKey);
-                    if (sourceIndex < 0 || targetIndex < 0) return;
-                    const nextPosition = sourceIndex < targetIndex ? 'after' : 'before';
-                    setDropTarget(previous =>
-                      previous?.courseKey === course.uiKey && previous.position === nextPosition
-                        ? previous
-                        : { courseKey: course.uiKey, position: nextPosition });
-                    lastDragTarget.current = course.uiKey;
-                    reorderRects.current = new Map(
-                      [...courseElements.current].map(([key, element]) => [key, element.getBoundingClientRect()]),
-                    );
-                    const nextCourses = [...currentCourses];
-                    const [dragged] = nextCourses.splice(sourceIndex, 1);
-                    nextCourses.splice(targetIndex, 0, dragged);
-                    dragCoursesRef.current = nextCourses;
-                    setDragCourses(nextCourses);
-                  }
-                }}
-                onDrop={event => {
-                  event.preventDefault();
-                  const source = draggedCourse.current ?? event.dataTransfer.getData('text/plain');
-                  const nextCourses = dragCoursesRef.current;
-                  if (source && nextCourses && nextCourses.some((item, index) => item.uiKey !== route.courses[index]?.uiKey)) {
-                    const moved = nextCourses.find(item => item.uiKey === source);
-                    const finalPosition = nextCourses.findIndex(item => item.uiKey === source);
-                    if (moved && finalPosition >= 0) {
-                      applyCourseEdit(nextCourses, t('myPath.movedAnnouncement', {
-                        title: moved.title,
-                        position: finalPosition + 1,
-                      }));
-                    }
-                  }
-                  draggedCourse.current = null;
-                  dragCoursesRef.current = null;
-                  lastDragTarget.current = null;
-                  setDraggingCourse(null);
-                  setDragCourses(null);
-                  setDropTarget(null);
-                }}
-                onDragEnd={() => {
-                  draggedCourse.current = null;
-                  dragCoursesRef.current = null;
-                  lastDragTarget.current = null;
-                  setDraggingCourse(null);
-                  setDragCourses(null);
-                  setDropTarget(null);
-                }} />
+                canReorder locked={locked} {...bindCourse(course.uiKey)}
+                onRemove={() => removeCourse(course.uiKey)} />
             ))}
           </ol>
           </div>
@@ -450,7 +330,7 @@ export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyP
             <Button variant="ghost" onClick={() => {
               if (!window.confirm(t('myPath.confirmDiscardProposal'))) return;
               clearPendingRoute();
-              navigate('/my-path');
+              navigate(appRoutes.savedRoutes);
             }} disabled={operation !== 'idle'}>{t('myPath.cancelProposal')}</Button>
             <Button variant="secondary" onClick={() => { void generateRoute(true); }}
               isLoading={operation === 'regenerating'} loadingLabel={t('myPath.regenerating')}

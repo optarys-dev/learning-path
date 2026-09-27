@@ -498,6 +498,62 @@ docs/                              Guías específicas
 
 ## Docker
 
+### Arranque completo con Docker Compose
+
+Desde la raíz de la solución, configurar `.env` a partir de `.env.example` y ejecutar:
+
+```powershell
+docker compose up --build -d
+docker compose logs web-app
+```
+
+Las variables de PostgreSQL, embeddings, conexión de la API, Discord (incluido
+el callback) y Groq son obligatorias. Google es opcional y
+`DISCORD_FORCE_HTTPS_CALLBACK` usa `false` si no se define. Compose valida la configuración
+antes de arrancar: si una variable falta o está vacía, indica
+`Define NOMBRE_VARIABLE en .env con un valor no vacio`. Comprobar la configuración
+con `docker compose config --quiet`. El puerto web está fijado en `8080:8080`;
+`API_PORT` no se utiliza. Para HTTP local, seguir la configuración de Development
+del [README principal](../README.md#iniciar-localmente).
+
+Compose espera a que PostgreSQL y el worker estén saludables. El propio contenedor
+`web-app` ejecuta este flujo antes de comenzar a atender peticiones:
+
+1. Aplica las migraciones pendientes de EF Core.
+2. Importa los datos de `database/seeds/Seed DataCourses.sql`.
+3. Importa los datos de `database/seeds/Seed Embeddings.sql`.
+4. Inicia el servidor web con la API y el frontend.
+
+Compose activa este comportamiento con `DatabaseInitialization__Enabled=true` y
+monta los seeds en `/seeds`. Fuera de Compose, la inicialización al arrancar está
+desactivada por defecto. `--initialize-db` sigue disponible para ejecutar solo la
+inicialización y salir. Si falla la inicialización, el proceso termina sin abrir
+el servidor web; Compose lo reintenta con su política de reinicio.
+
+Los archivos SQL se montan en modo lectura. Son dumps completos: el inicializador
+extrae únicamente sus `INSERT`, con el orden de columnas explícito de estos dumps;
+el esquema, las restricciones y los índices los administran las migraciones.
+Esto evita recrear tablas, depender del propietario `postgres` o del esquema
+`extensions` del servidor de origen. El catálogo se combina por ID con el seed
+de las migraciones, actualizando sus datos y las relaciones de los cursos importados.
+Los archivos actuales contienen 91 cursos y 91 embeddings.
+
+Ambos seeds se aplican en una sola transacción y se registran en `app_seed_history`
+con la versión `initial-catalog-2026-09-26-v1`. En siguientes arranques se verifican
+las migraciones y se omite esa carga inicial, conservando las ediciones posteriores,
+usuarios, rutas y progreso. Cambiar los archivos SQL no vuelve a importarlos
+automáticamente. Si falla un seed, ambos se revierten y la API no inicia; corregir
+el problema y repetir `docker compose up --build -d`. Las migraciones ya aplicadas
+permanecen. La primera carga actualiza el catálogo también en volúmenes existentes
+que aún no tengan el registro de inicialización.
+
+El worker sigue siendo necesario para generar los embeddings de las consultas.
+El modelo configurado debe coincidir con el seed: `Qwen/Qwen3-Embedding-0.6B`,
+revisión `main`, formato `course-text-v1`. El servicio puede necesitar descargar
+el modelo al iniciar por primera vez.
+
+### Imagen de la API ejecutada por separado
+
 La imagen reúne frontend y API .NET. **PostgreSQL y el worker se ejecutan por separado.**
 
 <details>

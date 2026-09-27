@@ -1,15 +1,16 @@
+import { appRoutes } from '@/config/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Check, CircleDot, Compass, Flag, Lightbulb, RefreshCw, Search, Sparkles, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { QuestDivider, QuestDoodle, QuestMetric, QuestSticker, QuestTab } from '../../../components/ui';
-import { useAuthSession } from '../../auth/hooks/useAuthSession';
-import catalogPanel from '../../../assets/codequest/scenes/14_panel_informativo_futurista_morado.png';
-import { CatalogCourseCard } from '../components/CatalogCourseCard';
-import { CatalogPagination } from '../components/CatalogPagination';
-import { CatalogKindFilter } from '../components/CatalogKindFilter';
-import type { CatalogKind } from '../model/catalogKind';
-import { useCatalogCourses } from '../hooks/useCatalogCourses';
+import { QuestDivider, QuestDoodle, QuestMetric, QuestSticker, QuestTab } from '@/components/ui';
+import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
+import catalogPanel from '@/assets/codequest/scenes/14_panel_informativo_futurista_morado.png';
+import { CatalogCourseCard } from '@/features/catalog/components/CatalogCourseCard';
+import { CatalogPagination } from '@/features/catalog/components/CatalogPagination';
+import { CatalogKindFilter } from '@/features/catalog/components/CatalogKindFilter';
+import type { CatalogKind } from '@/features/catalog/model/catalogKind';
+import { useCatalogCourses } from '@/features/catalog/hooks/useCatalogCourses';
 import './CatalogPage.css';
 
 export function CatalogPage() {
@@ -20,7 +21,7 @@ export function CatalogPage() {
   const [catalogKind, setCatalogKind] = useState<CatalogKind>();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { data, error, isLoading, page, reload, setPage } = useCatalogCourses(debouncedSearchQuery, catalogKind);
-  const createPathTarget = user ? '/learning-profile' : '/login';
+  const createPathTarget = user ? appRoutes.learningProfile : appRoutes.login;
 
   useEffect(() => {
     document.title = `${t('catalog.pageTitle')} · CODE QUEST 2026`;

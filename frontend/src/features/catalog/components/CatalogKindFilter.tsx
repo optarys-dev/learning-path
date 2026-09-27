@@ -1,6 +1,6 @@
 import { ListFilter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { catalogKinds, parseCatalogKind, type CatalogKind } from '../model/catalogKind';
+import { catalogKinds, parseCatalogKind, type CatalogKind } from '@/features/catalog/model/catalogKind';
 
 export function CatalogKindFilter({ value, onChange }: { value?: CatalogKind; onChange: (kind?: CatalogKind) => void }) {
   const { t } = useTranslation();

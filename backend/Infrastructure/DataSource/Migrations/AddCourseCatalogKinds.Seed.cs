@@ -5,7 +5,7 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations;
 // Match public URLs exactly; preserve unknown courses and any already classified rows.
 public partial class AddCourseCatalogKinds
 {
-    private const string SeedSql = """
+    internal const string SeedSql = """
         UPDATE courses AS target
         SET catalog_kinds = source.kinds
         FROM (VALUES

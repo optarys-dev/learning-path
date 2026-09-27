@@ -1,6 +1,7 @@
-import type { CatalogKind } from '../../catalog/model/catalogKind';
+import type { CatalogKind } from '@/features/catalog/model/catalogKind';
 
 export interface RecommendationCourse {
+  imageUrl?: string | null;
   courseId: string;
   position: number;
   title: string;
@@ -100,6 +101,7 @@ export interface RouteCourseLocalState {
 
 export type RouteRequestErrorKind =
   | 'unauthorized'
+  | 'forbidden'
   | 'validation'
   | 'not-found'
   | 'server'
@@ -110,11 +112,13 @@ export type RouteRequestErrorKind =
 export class RouteRequestError extends Error {
   readonly kind: RouteRequestErrorKind;
   readonly apiMessage: string | null;
+  readonly code: string | null;
 
-  constructor(kind: RouteRequestErrorKind, apiMessage: string | null = null) {
+  constructor(kind: RouteRequestErrorKind, apiMessage: string | null = null, code: string | null = null) {
     super(`Route request failed: ${kind}`);
     this.name = 'RouteRequestError';
     this.kind = kind;
     this.apiMessage = apiMessage;
+    this.code = code;
   }
 }
