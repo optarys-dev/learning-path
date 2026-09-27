@@ -504,15 +504,31 @@ Desde la raíz de la solución, configurar `.env` a partir de `.env.example` y e
 
 ```powershell
 docker compose up --build -d
-docker compose logs db-init
+docker compose logs web-app
 ```
 
-Compose espera a PostgreSQL y ejecuta el servicio temporal `db-init` en este orden:
+Las variables de PostgreSQL, embeddings, conexión de la API, Discord (incluido
+el callback) y Groq son obligatorias. Google es opcional y
+`DISCORD_FORCE_HTTPS_CALLBACK` usa `false` si no se define. Compose valida la configuración
+antes de arrancar: si una variable falta o está vacía, indica
+`Define NOMBRE_VARIABLE en .env con un valor no vacio`. Comprobar la configuración
+con `docker compose config --quiet`. El puerto web está fijado en `8080:8080`;
+`API_PORT` no se utiliza. Para HTTP local, seguir la configuración de Development
+del [README principal](../README.md#iniciar-localmente).
+
+Compose espera a que PostgreSQL y el worker estén saludables. El propio contenedor
+`web-app` ejecuta este flujo antes de comenzar a atender peticiones:
 
 1. Aplica las migraciones pendientes de EF Core.
 2. Importa los datos de `database/seeds/Seed DataCourses.sql`.
 3. Importa los datos de `database/seeds/Seed Embeddings.sql`.
-4. Habilita el worker de embeddings y, cuando está saludable, la API.
+4. Inicia el servidor web con la API y el frontend.
+
+Compose activa este comportamiento con `DatabaseInitialization__Enabled=true` y
+monta los seeds en `/seeds`. Fuera de Compose, la inicialización al arrancar está
+desactivada por defecto. `--initialize-db` sigue disponible para ejecutar solo la
+inicialización y salir. Si falla la inicialización, el proceso termina sin abrir
+el servidor web; Compose lo reintenta con su política de reinicio.
 
 Los archivos SQL se montan en modo lectura. Son dumps completos: el inicializador
 extrae únicamente sus `INSERT`, con el orden de columnas explícito de estos dumps;

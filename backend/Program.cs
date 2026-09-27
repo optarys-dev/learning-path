@@ -11,10 +11,11 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (args.Contains("--initialize-db"))
+var initializeOnly = args.Contains("--initialize-db");
+if (initializeOnly || builder.Configuration.GetValue<bool>("DatabaseInitialization:Enabled"))
 {
     await DatabaseInitializer.RunAsync(builder.Configuration);
-    return;
+    if (initializeOnly) return;
 }
 
 builder.Services.AddControllers(options => options.Filters.Add<ApiErrorResponseFilter>());
