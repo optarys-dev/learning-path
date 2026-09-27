@@ -105,9 +105,12 @@ Groq__Model=openai/gpt-oss-20b
 ```
 
 La API se conecta a `postgres:5432` dentro de Docker. `POSTGRES_PORT` es el puerto
-publicado en tu equipo y no cambia ese puerto interno. Sustituye la conexión
-con `localhost` y los marcadores `{POSTGRES_USER}` del ejemplo original por la
-línea anterior. Añade `DISCORD_CALLBACK_PATH` si falta en `.env.example`.
+publicado en tu equipo y no cambia ese puerto interno. El ejemplo utiliza la base
+local creada por Compose; no necesitas acceso a la base del equipo.
+
+Obtén tus propias credenciales en [Discord Developer Portal](https://discord.com/developers/applications),
+[Google Auth Platform](https://console.cloud.google.com/auth/clients) (opcional) y
+[Groq Console](https://console.groq.com/keys). La contraseña de PostgreSQL la eliges tú.
 
 El Compose actual exige Discord y Groq; Google puede quedar vacío. No subas
 `.env` con credenciales al repositorio. Conserva el modelo y la revisión de

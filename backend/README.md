@@ -22,15 +22,16 @@ del catálogo** y **refinamiento opcional con IA**.
 
 | Capacidad | Implementación |
 | --- | --- |
-| Autenticación | Discord OAuth y cookie de sesión. |
+| Autenticación | Discord o Google OAuth y cookie de sesión. |
 | Preferencias | Objetivo, intereses, experiencia, habilidades, idioma y tiempo disponible. |
-| Catálogo inicial | 72 cursos de DevTalles, 9 categorías y 96 tags. |
+| Catálogo inicial | 91 cursos de DevTalles en los dumps de inicialización. |
 | Recomendación | Embeddings locales, pgvector y asociaciones categoría–tag. |
 | Refinamiento V2 | Groq organiza los cursos y personaliza las razones con JSON Schema estricto. |
 | Rutas | Guardado explícito, consulta y copia de las preferencias utilizadas. |
 
-El cuestionario aún no está implementado. Cada curso de una ruta guardada incluye
-su progreso como porcentaje entero de 0 a 100.
+El cuestionario guarda el perfil utilizado para recomendar cursos. No es obligatorio
+para explorar la plataforma ni crear una ruta manual. Cada curso de una ruta guardada
+incluye su progreso como porcentaje entero de 0 a 100.
 
 <details>
 <summary>Tecnologías y procedencia de los datos</summary>
@@ -66,8 +67,8 @@ Ejecutar los comandos en **PowerShell desde `backend/`**, salvo donde se indique
 - SDK de .NET 10.
 - PostgreSQL con `vector` y `pg_trgm`, y permisos para aplicar las migraciones.
 - Python 3.10+ y [dependencias del worker](embedding-worker/README.md#instalación).
-- [Credenciales de Discord](docs/DISCORD_OAUTH.md) para las rutas autenticadas.
-- Clave de Groq si se desea aplicar el refinamiento V2.
+- [Credenciales de Discord](docs/DISCORD_OAUTH.md) o [Google](docs/GOOGLE_OAUTH.md) para iniciar sesión.
+- [Clave de Groq](https://console.groq.com/keys) si se desea aplicar el refinamiento V2 sin Docker.
 
 Node.js y npm son necesarios solo para ejecutar o compilar el frontend.
 Instalar el paquete NuGet de pgvector no instala la extensión de PostgreSQL.
@@ -84,23 +85,27 @@ $env:Groq__ApiKey = 'TU_CLAVE_GROQ'
 $env:Groq__Model = 'openai/gpt-oss-20b'
 ```
 
-Configurar también Discord según [su guía](docs/DISCORD_OAUTH.md). La URL del worker
+Configurar Discord según [su guía](docs/DISCORD_OAUTH.md) y, opcionalmente,
+Google según [su guía](docs/GOOGLE_OAUTH.md). La URL del worker
 y el modelo de Groq del ejemplo son los predeterminados. Las variables de entorno
 prevalecen sobre `appsettings.json`; también se puede usar .NET User Secrets.
 El backend no carga archivos `.env` automáticamente. No guardar claves reales en el repositorio.
 
-### 3. Compilar y aplicar las migraciones
+### 3. Compilar e inicializar una base local
 
 ```powershell
 dotnet tool restore --tool-manifest dotnet-tools.json
 dotnet restore CodeQuest2026.Server.csproj
 dotnet build CodeQuest2026.Server.csproj --no-restore
-dotnet ef database update --context AppDbContext --no-build
+dotnet run --project CodeQuest2026.Server.csproj --no-build --no-launch-profile -- --initialize-db --DatabaseInitialization:SeedDirectory=../database/seeds
 ```
 
-Las migraciones crean el esquema y los seeds. La aplicación no migra al iniciar.
-El archivo histórico `../database/seeds/Seed Courses.sql` no debe ejecutarse sobre
-el esquema actual. Más información en [Migraciones](docs/MIGRATIONS.md).
+El comando aplica las migraciones y carga los dumps de 91 cursos y 91 embeddings
+en la base configurada, y luego termina. Úsalo con tu propia base local.
+No ejecutes los dumps SQL manualmente: el inicializador importa los datos y EF
+administra el esquema. Fuera de Compose, la inicialización al arrancar está desactivada
+por defecto; Compose la activa con `DatabaseInitialization__Enabled=true`.
+Más información en [Migraciones](docs/MIGRATIONS.md).
 
 ### 4. Indexar cursos e iniciar el worker
 
@@ -145,11 +150,14 @@ El frontend se ejecuta por separado desde `frontend/` con `npm install` y
 
 ## API y flujo de uso
 
-**Iniciar sesión → guardar preferencias → consultar una propuesta → guardar la ruta.**
+**Ruta recomendada:** iniciar sesión → guardar preferencias → consultar una propuesta → guardar la ruta.
+**Ruta manual:** iniciar sesión → seleccionar y ordenar cursos → guardar la ruta.
 
 | Método | Endpoint | Función |
 | --- | --- | --- |
 | GET | `/auth/discord` | Iniciar sesión con Discord. |
+| GET | `/auth/google` | Iniciar sesión con Google si está configurado. |
+| GET | `/auth/providers` | Consultar la disponibilidad de los proveedores. |
 | GET | `/auth/me` | Consultar la sesión. |
 | GET | `/courses?page=1&pageSize=20` | Listar públicamente cursos activos paginados, ordenados por título e ID. |
 | GET | `/courses/{courseId}` | Consultar públicamente un curso activo, sin metadatos de aprendizaje. |
@@ -628,6 +636,7 @@ validación en el entorno de destino.
 | Guía | Contenido |
 | --- | --- |
 | [Discord OAuth](docs/DISCORD_OAUTH.md) | Credenciales, sesión y pruebas. |
+| [Google OAuth](docs/GOOGLE_OAUTH.md) | Credenciales, cuentas independientes y callbacks. |
 | [Migraciones](docs/MIGRATIONS.md) | Crear, aplicar y revertir cambios de base de datos. |
 | [Metadatos](Infrastructure/DataSource/CourseMetadata.md) | Procedencia y datos inferidos de prueba. |
 | [Embeddings](Infrastructure/DataSource/CourseEmbeddings.md) | Configuración, indexación y consulta por coseno. |

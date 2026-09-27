@@ -20,10 +20,13 @@ logins simultáneos; las restricciones únicas son la protección final.
 
 ## Configuración de Google Cloud
 
-1. Crear un cliente OAuth de tipo aplicación web y configurar la pantalla de consentimiento.
+1. Abrir [Google Auth Platform](https://console.cloud.google.com/auth/clients) en tu propio proyecto,
+   configurar la pantalla de consentimiento y crear un cliente OAuth de tipo aplicación web.
+   Obtener **Client ID** y **Client Secret** del cliente creado.
 2. Registrar exactamente la URL de retorno del middleware:
    - Desarrollo mediante Vite: http://localhost:5173/auth/google/callback
    - API local directa: http://localhost:5107/auth/google/callback
+   - Docker Compose local: http://localhost:8080/auth/google/callback
    - Producción: https://TU_DOMINIO/auth/google/callback
 3. Si la aplicación Google está en modo de prueba, agregar las cuentas de prueba.
 4. Configurar Google:ClientId y Google:ClientSecret con user-secrets localmente,
@@ -60,8 +63,9 @@ dotnet ef migrations has-pending-model-changes --context AppDbContext --no-build
 dotnet ef database update AddExternalAuthentication --context AppDbContext --no-build
 ```
 
-Aplicar la migración antes de desplegar este backend. No se ejecutan migraciones
-automáticamente al arrancar. Probar primero en desarrollo/staging: Discord actual,
+Aplicar la migración antes de desplegar este backend. Fuera de Compose, no se ejecutan
+migraciones al arrancar salvo que se active `DatabaseInitialization:Enabled`.
+El Compose del proyecto activa esa inicialización. Probar primero en desarrollo/staging: Discord actual,
 Google nuevo/repetido, logout, preferencias y rutas, y acceso con otra cuenta.
 Para desactivar Google basta retirar sus credenciales y reiniciar; sus datos quedan.
 Down rechaza la reversión si hay usuarios Google o avatares que no caben en el
