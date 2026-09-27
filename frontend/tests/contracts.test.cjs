@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { parseCatalogPage } = require('../.test-build/features/catalog/model/parseCatalogPage');
 const { parseSession } = require('../.test-build/features/auth/model/parseSession');
 const { parseSavedRoute } = require('../.test-build/features/routes/model/parseRoutes');
+const { parseRouteRecommendation } = require('../.test-build/features/routes/model/parseRoutes');
 const { parseApiError } = require('../.test-build/lib/api/parseProblemDetails');
 const { safeExternalUrl } = require('../.test-build/lib/urls');
 const catalogCourse = { courseId: 1, title: 'React', slug: 'react', level: null, imageUrl: 'https://example.com/image.png', imageAlt: 'React', courseUrl: 'https://example.com/react' };
@@ -11,13 +12,30 @@ const session = { id: 'google-subject', userId: 'internal-id', username: 'Ana', 
 const route = { routeId: 'route-1', goal: 'Learn', recommendationMethod: 'manual', explanation: null, createdAt: '2026-09-26T12:00:00Z', courses: [{ courseId: 1, position: 1, title: 'React' }] };
 
 test('catalog accepts its documented nullable level and rejects malformed items or pagination', () => {
-  assert.deepEqual(parseCatalogPage(page), page);
+  assert.deepEqual(parseCatalogPage(page), { ...page, items: [{ ...catalogCourse, catalogKinds: [] }] });
   for (const invalid of [null, {}, { ...page, page: 0 }, { ...page, items: [{ ...catalogCourse, courseId: '1' }] }, { ...page, items: [null] }]) assert.equal(parseCatalogPage(invalid), null);
 });
 test('untrusted external protocols never reach catalog links and images', () => {
   for (const url of ['javascript:alert(1)', 'data:text/html,hello', 'file:///tmp', '//example.com', '', null]) assert.equal(safeExternalUrl(url), null);
   const result = parseCatalogPage({ ...page, items: [{ ...catalogCourse, imageUrl: 'javascript:alert(1)', courseUrl: 'data:text/html,hello' }] });
   assert.equal(result.items[0].imageUrl, ''); assert.equal(result.items[0].courseUrl, '');
+});
+
+test('catalog and saved-route parsers preserve verified categories and discard unknown values', () => {
+  const kinds = ['free', 'mini-course', 'free', 'unknown'];
+  const catalog = parseCatalogPage({ ...page, items: [{ ...catalogCourse, catalogKinds: kinds }] });
+  const saved = parseSavedRoute({ ...route, courses: [{ ...route.courses[0], catalogKinds: kinds }] });
+  assert.deepEqual(catalog.items[0].catalogKinds, ['free', 'mini-course']);
+  assert.deepEqual(saved.courses[0].catalogKinds, ['free', 'mini-course']);
+});
+
+test('recommendation parsing keeps thumbnails and badges together without accepting unsafe URLs', () => {
+  const recommendation = { method: 'semantic', goal: 'Learn', explanation: null, refinementStatus: 'ok', courses: [{ courseId: 1, position: 1, title: 'React', reason: 'Start here', score: 0.8, estimatedWeeks: 2, imageUrl: 'https://example.test/react.png', catalogKinds: ['pro-exclusive'] }] };
+  const parsed = parseRouteRecommendation(recommendation);
+  assert.equal(parsed.courses[0].imageUrl, recommendation.courses[0].imageUrl);
+  assert.deepEqual(parsed.courses[0].catalogKinds, ['pro-exclusive']);
+  const unsafe = parseRouteRecommendation({ ...recommendation, courses: [{ ...recommendation.courses[0], imageUrl: 'javascript:alert(1)' }] });
+  assert.equal(unsafe.courses[0].imageUrl, null);
 });
 test('session accepts either provider and nullable display names; rejects unknown identities', () => {
   assert.deepEqual(parseSession(session), session);

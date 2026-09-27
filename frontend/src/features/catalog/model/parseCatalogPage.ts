@@ -1,6 +1,7 @@
 import { isRecord } from '@/lib/validation';
 import { safeExternalUrl } from '@/lib/urls';
 import type { CatalogCourse, CatalogPageResult } from '@/features/catalog/types';
+import { parseCatalogKinds } from './catalogKind';
 
 function parseCourse(value: unknown): CatalogCourse | null {
   if (!isRecord(value) || typeof value.courseId !== 'number' || !Number.isSafeInteger(value.courseId) || value.courseId <= 0 ||
@@ -8,7 +9,7 @@ function parseCourse(value: unknown): CatalogCourse | null {
     (value.level !== null && typeof value.level !== 'string') || typeof value.imageUrl !== 'string' ||
     typeof value.imageAlt !== 'string' || typeof value.courseUrl !== 'string') return null;
   return { courseId: value.courseId, slug: value.slug, title: value.title, level: value.level,
-    imageUrl: safeExternalUrl(value.imageUrl) ?? '', imageAlt: value.imageAlt, courseUrl: safeExternalUrl(value.courseUrl) ?? '' };
+    imageUrl: safeExternalUrl(value.imageUrl) ?? '', imageAlt: value.imageAlt, courseUrl: safeExternalUrl(value.courseUrl) ?? '', catalogKinds: parseCatalogKinds(value.catalogKinds) };
 }
 
 export function parseCatalogPage(value: unknown): CatalogPageResult | null {

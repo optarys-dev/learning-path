@@ -25,6 +25,9 @@ public static class DatabaseInitializer
             Console.WriteLine("Applying EF Core migrations...");
             await db.Database.MigrateAsync();
             await ApplySeedsAsync(connection, directory);
+            // On a fresh database the migration runs before courses are inserted by the dump.
+            // Reapply the frozen classifications after seeding; existing categories are preserved.
+            await ExecuteAsync(connection, Migrations.AddCourseCatalogKinds.SeedSql);
         }
         finally
         {
@@ -76,7 +79,8 @@ public static class DatabaseInitializer
         {
             if (!inserts.Any(insert => insert.Table == table))
                 throw new InvalidDataException($"Missing data for {table} in {path}.");
-            await ExecuteAsync(connection, $"CREATE TEMP TABLE seed_{table} (LIKE public.{table}) ON COMMIT DROP;");
+            // New non-null columns such as catalog_kinds may not exist in the older dump.
+            await ExecuteAsync(connection, $"CREATE TEMP TABLE seed_{table} (LIKE public.{table} INCLUDING DEFAULTS) ON COMMIT DROP;");
         }
         foreach (var insert in inserts) await ExecuteAsync(connection, insert.Sql);
 

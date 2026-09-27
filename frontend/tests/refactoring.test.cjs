@@ -7,6 +7,19 @@ const { routeErrorDescriptor } = require('../.test-build/features/routes/model/r
 const { RouteRequestError } = require('../.test-build/features/routes/model/types');
 const { appRoutes } = require('../.test-build/config/navigation');
 const { isStepComplete, toggleTechnology } = require('../.test-build/features/questionnaire/model/validation');
+const { replaceSavedRouteCourse } = require('../.test-build/features/routes/model/editSavedRoute');
+
+test('course replacement swaps categories and images without inheriting the old course progress', () => {
+  const original = { courses: [{ uiKey: 'slot-1', courseId: '1', title: 'Old', imageUrl: 'https://example.test/old.png', catalogKinds: ['free'], progressPercentage: 100, reason: 'Old reason' }] };
+  const replacement = { courseId: 2, title: 'New', imageUrl: 'https://example.test/new.png', courseUrl: 'https://example.test/new', catalogKinds: ['pro-exclusive'] };
+  const updated = replaceSavedRouteCourse(original, 'slot-1', replacement);
+  assert.deepEqual(updated.courses[0].catalogKinds, ['pro-exclusive']);
+  assert.equal(updated.courses[0].imageUrl, replacement.imageUrl);
+  assert.equal(updated.courses[0].uiKey, 'slot-1');
+  assert.equal(updated.courses[0].progressPercentage, 0);
+  assert.equal(updated.courses[0].reason, null);
+  assert.deepEqual(original.courses[0].catalogKinds, ['free']);
+});
 
 test('drag reordering moves either direction without mutating items or duplicating them', () => {
   const courses = ['a', 'b', 'c'].map(uiKey => ({ uiKey, title: uiKey }));

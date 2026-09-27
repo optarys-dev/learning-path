@@ -2,6 +2,14 @@ import { landingEs } from './landing.es';
 import { loginEs } from './login.es';
 
 export const es = {
+  courseBadges: {
+    course: 'Curso',
+    free: 'Gratuito',
+    'mini-course': 'Mini-curso',
+    'pro-exclusive': 'Exclusivo Pro',
+    legacy: 'Legacy',
+    'in-development': 'En construcción',
+  },
   theme: { switchToLight: 'Cambiar a modo claro', switchToDark: 'Cambiar a modo oscuro', light: 'Modo claro', dark: 'Modo oscuro' },
   course: { inProgress: 'En progreso', completed: 'Completado', progress: 'Progreso de {{title}}',
     levels: { beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado' } },
@@ -51,7 +59,9 @@ export const es = {
     missionNote: 'Podés abrir un curso, compararlo y volver cuando quieras: tu ruta se construye con tus decisiones.',
     resultsEyebrow: 'Explorar por tu cuenta', resultsTitle: 'Cursos disponibles', totalCourses: '{{count}} cursos disponibles', courseCountLabel: 'cursos disponibles', listLabel: 'Cursos disponibles en DevTalles',
     searchLabel: 'Buscar en el catálogo de cursos', searchPlaceholder: 'Buscar cursos por nombre, tecnología o tema…', clearSearch: 'Limpiar búsqueda',
-    noResultsTitle: 'No encontramos cursos para "{{query}}"', noResultsDescription: 'Probá con otro nombre, tecnología o tema.',
+    noResultsTitle: 'No encontramos cursos para "{{query}}"', noResultsDescription: 'Probá con otro nombre, tecnología o categoría.',
+    categoryFilterLabel: 'Filtrar por categoría', allCategories: 'Todas las categorías', noCategoryResultsTitle: 'No hay resultados en esta categoría', loading: 'Cargando cursos',
+    subscriptionLibrary: 'Sesiones y grabaciones para suscriptores DevTalles PRO.', openPortal: 'Acceder desde tu portal',
     paginationLabel: 'Paginación del catálogo', previousPage: 'Anterior', nextPage: 'Siguiente', pageStatus: 'Página {{page}} de {{total}}',
     openCourse: 'Ver en DevTalles', errorTitle: 'No pudimos cargar el catálogo', errorDescription: 'Intentá nuevamente en unos instantes.', retry: 'Reintentar',
     emptyTitle: 'Aún no hay cursos disponibles', emptyDescription: 'Volvé a intentarlo más tarde.',

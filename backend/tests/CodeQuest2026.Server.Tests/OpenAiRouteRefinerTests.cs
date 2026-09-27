@@ -13,7 +13,7 @@ namespace CodeQuest2026.Server.Tests;
 public sealed class OpenAiRouteRefinerTests
 {
     private static readonly SemanticRecommendationDto Original = new("semantic-graph-v6", "Aprender Python",
-        "Original", [new(1, 1, "Python", 0.9, "Original 1", 2), new(2, 2, "Backend", 0.8, "Original 2", 3)]);
+        "Original", [new(1, 1, "Python", 0.9, "Original 1", 2, ["free", "mini-course"]), new(2, 2, "Backend", 0.8, "Original 2", 3, ["pro-exclusive"])]);
     private static readonly Course[] Courses = [new() { CourseId = 1, Title = "Python" },
         new() { CourseId = 2, Title = "Backend", SkillsTaught = ["Unverified skill"] }];
     private const string Valid = """{"explanation":"Tu ruta personalizada","courses":[{"courseId":2,"reason":"Tu objetivo backend"},{"courseId":1,"reason":"Tu interés Python"}]}""";
@@ -30,6 +30,8 @@ public sealed class OpenAiRouteRefinerTests
         Assert.Equal(Original.Courses[1].Score, result.Courses[0].Score);
         Assert.Equal(Original.Courses[1].EstimatedWeeks, result.Courses[0].EstimatedWeeks);
         Assert.Equal(Original.Courses[1].Title, result.Courses[0].Title);
+        Assert.Equal(new[] { "pro-exclusive" }, result.Courses[0].CatalogKinds);
+        Assert.Equal(new[] { "free", "mini-course" }, result.Courses[1].CatalogKinds);
         Assert.Equal("/v1/responses", handler.Path);
         Assert.Equal("Bearer test-key", handler.Authorization);
         using var body = JsonDocument.Parse(handler.Body!);

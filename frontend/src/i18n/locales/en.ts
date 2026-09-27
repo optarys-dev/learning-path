@@ -3,6 +3,14 @@ import { landingEn } from './landing.en';
 import { loginEn } from './login.en';
 
 export const en = {
+  courseBadges: {
+    course: 'Course',
+    free: 'Free',
+    'mini-course': 'Mini-course',
+    'pro-exclusive': 'Pro exclusive',
+    legacy: 'Legacy',
+    'in-development': 'In development',
+  },
   theme: { switchToLight: 'Switch to light mode', switchToDark: 'Switch to dark mode', light: 'Light mode', dark: 'Dark mode' },
   course: { inProgress: 'In progress', completed: 'Completed', progress: 'Progress for {{title}}',
     levels: { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' } },
@@ -51,7 +59,9 @@ export const en = {
     missionNote: 'Open a course, compare it, and come back whenever you want: your path is built from your decisions.',
     resultsEyebrow: 'Explore on your own', resultsTitle: 'Available courses', totalCourses: '{{count}} courses available', courseCountLabel: 'courses available', listLabel: 'Available DevTalles courses',
     searchLabel: 'Search the course catalog', searchPlaceholder: 'Search courses by name, technology, or topic…', clearSearch: 'Clear search',
-    noResultsTitle: 'We could not find courses for "{{query}}"', noResultsDescription: 'Try another name, technology, or topic.',
+    noResultsTitle: 'We could not find courses for "{{query}}"', noResultsDescription: 'Try another name, technology, or category.',
+    categoryFilterLabel: 'Filter by category', allCategories: 'All categories', noCategoryResultsTitle: 'No results in this category', loading: 'Loading courses',
+    subscriptionLibrary: 'Sessions and recordings for DevTalles PRO subscribers.', openPortal: 'Access your portal',
     paginationLabel: 'Catalog pagination', previousPage: 'Previous', nextPage: 'Next', pageStatus: 'Page {{page}} of {{total}}',
     openCourse: 'View on DevTalles', errorTitle: 'We could not load the catalog', errorDescription: 'Please try again in a moment.', retry: 'Retry',
     emptyTitle: 'There are no courses available yet', emptyDescription: 'Please come back later.',

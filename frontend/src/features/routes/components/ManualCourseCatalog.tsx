@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui';
 import { useAllCatalogCourses, courseLevelTranslationKey, type CatalogCourse } from '@/features/catalog';
 import { routeLimits } from '@/features/routes/model/constants';
+import { CourseBadges } from '@/features/catalog/components/CourseBadge';
 
 interface Props { selected: CatalogCourse[]; onToggle: (course: CatalogCourse) => void; }
 
@@ -33,7 +34,7 @@ export function ManualCourseCatalog({ selected, onToggle }: Props) {
         return <li key={course.courseId}>
           <button type="button" className={active ? 'is-selected' : ''} onClick={() => onToggle(course)} aria-pressed={active} disabled={!active && selected.length >= routeLimits.courses}>
             <span className="manual-route__course-image">{course.imageUrl ? <img src={course.imageUrl} alt="" /> : <BookOpen aria-hidden="true" />}</span>
-            <span><strong>{course.title}</strong>{course.level && <small>{levelKey ? t(levelKey) : course.level}</small>}</span>
+            <span><strong>{course.title}</strong><CourseBadges kinds={course.catalogKinds} />{course.level && <small>{levelKey ? t(levelKey) : course.level}</small>}</span>
             <i>{active ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}</i>
           </button>
         </li>;

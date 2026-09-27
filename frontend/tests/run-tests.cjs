@@ -20,6 +20,6 @@ function resolveTestAliases(directory) {
 }
 resolveTestAliases(path.join(root, '.test-build'));
 fs.writeFileSync(path.join(root, '.test-build/package.json'), JSON.stringify({ type: 'commonjs' }));
-const tests = fs.readdirSync(__dirname).filter(file => file.endsWith('.test.cjs')).map(file => path.join(__dirname, file));
+const tests = fs.readdirSync(__dirname).filter(file => file.endsWith('.test.cjs') || file.endsWith('.test.mjs')).map(file => path.join(__dirname, file));
 const result = spawnSync(process.execPath, ['--test', ...tests], { cwd: root, stdio: 'inherit' });
 process.exit(result.status ?? 1);
