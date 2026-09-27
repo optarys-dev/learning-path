@@ -9,6 +9,8 @@ public class Course
     public string ImageUrl { get; set; } = string.Empty;
     public string ImageAlt { get; set; } = string.Empty;
     public string? Level { get; set; }
+    /// <summary>Categorías verificadas del catálogo; vacías si aún se desconocen. Pueden solaparse.</summary>
+    public string[] CatalogKinds { get; set; } = [];
     public string Topics { get; set; } = "[]";
     public string? Description { get; set; }
     public string? Syllabus { get; set; }

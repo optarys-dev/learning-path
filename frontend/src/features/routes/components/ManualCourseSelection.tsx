@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp, BookOpen, Flag, Route, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui';
 import type { CatalogCourse } from '@/features/catalog';
+import { CourseBadges } from '@/features/catalog/components/CourseBadge';
 
 interface Props {
   courses: CatalogCourse[];
@@ -26,7 +27,7 @@ export function ManualCourseSelection({ courses, canSave, saving, error, onMove,
       <strong>{t('manualRoute.emptyTitle')}</strong><p>{t('manualRoute.emptySelection')}</p>
     </div>
       : <ol>{courses.map((course, index) => <li key={course.courseId}>
-        <span>{index + 1}</span><strong>{course.title}</strong>
+        <span>{index + 1}</span><div className="manual-route__selected-course"><strong>{course.title}</strong><CourseBadges kinds={course.catalogKinds} /></div>
         <div>
           <button type="button" onClick={() => onMove(index, -1)} disabled={index === 0} aria-label={t('manualRoute.moveUp', { title: course.title })}><ArrowUp /></button>
           <button type="button" onClick={() => onMove(index, 1)} disabled={index === courses.length - 1} aria-label={t('manualRoute.moveDown', { title: course.title })}><ArrowDown /></button>

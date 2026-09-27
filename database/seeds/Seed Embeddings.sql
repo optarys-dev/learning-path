@@ -185,4 +185,3 @@ GRANT ALL ON TABLE public.course_embeddings TO service_role;
 --
 -- PostgreSQL database dump complete
 --
-

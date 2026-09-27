@@ -28,15 +28,17 @@ test('catalog search retains encoded search, pagination, cancellation and valida
   const requests = [];
   const api = loadCatalogApi(async (url, options) => { requests.push({ url, options }); return emptyPage; });
   const signal = new AbortController().signal;
-  assert.deepEqual(await api.getCatalogCourses(2, signal, undefined, '  C# & .NET  '), emptyPage);
+  assert.deepEqual(await api.getCatalogCourses(2, signal, undefined, '  C# & .NET  ', 'pro-exclusive'), emptyPage);
   const url = new URL(requests[0].url, 'https://example.test');
   assert.equal(url.searchParams.get('search'), 'C# & .NET');
   assert.equal(url.searchParams.get('page'), '2');
   assert.equal(url.searchParams.get('pageSize'), '12');
+  assert.equal(url.searchParams.get('catalogKind'), 'pro-exclusive');
   assert.equal(requests[0].options.signal, signal);
   assert.equal(requests[0].options.notifyOnUnauthenticated, false);
   await api.getCatalogCourses(1, signal, 100, '   ');
   assert.equal(new URL(requests[1].url, 'https://example.test').searchParams.has('search'), false);
+  assert.equal(new URL(requests[1].url, 'https://example.test').searchParams.has('catalogKind'), false);
   assert.equal(new URL(requests[1].url, 'https://example.test').searchParams.get('pageSize'), '100');
 });
 

@@ -379,7 +379,8 @@
   overflow-wrap: anywhere;
 }
 
-.manual-route__selection li div { display: flex; grid-column: 2; justify-content: end; gap: var(--cq-space-1); }
+.manual-route__selection li > div:not(.manual-route__selected-course) { display: flex; grid-column: 2; justify-content: end; gap: var(--cq-space-1); }
+.manual-route__selected-course { display: grid; gap: var(--cq-space-1); min-width: 0; }
 .manual-route__selection li button {
   display: grid;
   width: 2.75rem;

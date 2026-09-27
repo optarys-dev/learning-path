@@ -1,8 +1,11 @@
+import type { CatalogKind } from './model/catalogKind';
+
 export interface CatalogCourse {
   courseId: number;
   slug: string;
   title: string;
   level: string | null;
+  catalogKinds?: CatalogKind[];
   imageUrl: string;
   imageAlt: string;
   courseUrl: string;

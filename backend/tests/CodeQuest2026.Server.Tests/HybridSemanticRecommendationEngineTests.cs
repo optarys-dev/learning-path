@@ -9,6 +9,22 @@ public sealed class HybridSemanticRecommendationEngineTests
     private readonly HybridSemanticRecommendationEngine engine = new();
 
     [Fact]
+    public void CatalogBadgesArePreservedWithoutChangingRecommendationRanking()
+    {
+        var candidates = new[] { Candidate(1, "APIs con Go", 0.85), Candidate(2, "APIs con Python", 0.75) };
+        var preference = new UserPreference { Goal = "Aprender APIs" };
+        var original = engine.Recommend(preference, candidates);
+        candidates[0].Course.CatalogKinds = ["pro-exclusive"];
+        candidates[1].Course.CatalogKinds = ["free", "mini-course"];
+
+        var result = engine.Recommend(preference, candidates);
+
+        Assert.Equal(original.Courses.Select(course => (course.CourseId, course.Score)), result.Courses.Select(course => (course.CourseId, course.Score)));
+        Assert.Equal(new[] { "pro-exclusive" }, result.Courses.Single(course => course.CourseId == 1).CatalogKinds);
+        Assert.Equal(new[] { "free", "mini-course" }, result.Courses.Single(course => course.CourseId == 2).CatalogKinds);
+    }
+
+    [Fact]
     public void ThumbnailsAreReturnedWithoutChangingRecommendationOrderOrScores()
     {
         var category = new Category { CategoryId = 1, Name = "Backend" };

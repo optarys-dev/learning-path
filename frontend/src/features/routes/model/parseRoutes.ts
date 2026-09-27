@@ -1,5 +1,6 @@
 import { isRecord } from '@/lib/validation';
 import { safeExternalUrl } from '@/lib/urls';
+import { parseCatalogKinds } from '@/features/catalog/model/catalogKind';
 import type { RecommendationCourse, RouteRecommendation, SavedRoute, SavedRouteCourse } from './types';
 
 function normalizeNumber(value: unknown): number | null {
@@ -32,7 +33,7 @@ function parseRecommendationCourse(value: unknown): RecommendationCourse | null 
   const estimatedWeeks = normalizeNumber(value.estimatedWeeks);
   if (courseId === null || position === null || !Number.isSafeInteger(position) || position < 1 || score === null || estimatedWeeks === null || estimatedWeeks < 0) return null;
   const imageUrl = typeof value.imageUrl === 'string' ? safeExternalUrl(value.imageUrl) : null;
-  return { courseId, position, title: value.title, score, reason: value.reason, estimatedWeeks, imageUrl };
+  return { courseId, position, title: value.title, score, reason: value.reason, estimatedWeeks, imageUrl, catalogKinds: parseCatalogKinds(value.catalogKinds) };
 }
 
 export function parseRouteRecommendation(value: unknown): RouteRecommendation | null {
@@ -60,7 +61,7 @@ function parseSavedRouteCourse(value: unknown): SavedRouteCourse | null {
   const courseUrl = value.courseUrl === undefined ? null : optionalUrl(value.courseUrl);
   const progressPercentage = value.progressPercentage === undefined ? 0 : normalizeNumber(value.progressPercentage);
   if (courseId === null || position === null || !Number.isSafeInteger(position) || position < 1 || reason === undefined || imageUrl === undefined || courseUrl === undefined || progressPercentage === null || progressPercentage < 0 || progressPercentage > 100) return null;
-  return { courseId, position, title: value.title, reason, imageUrl, courseUrl, progressPercentage };
+  return { courseId, position, title: value.title, reason, imageUrl, courseUrl, progressPercentage, catalogKinds: parseCatalogKinds(value.catalogKinds) };
 }
 
 export function parseSavedRoute(value: unknown): SavedRoute | null {

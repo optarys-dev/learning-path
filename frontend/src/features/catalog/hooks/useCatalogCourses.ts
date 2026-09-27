@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getCatalogCourses } from '@/features/catalog/api/getCatalogCourses';
 import type { CatalogPageResult } from '@/features/catalog/types';
+import type { CatalogKind } from '@/features/catalog/model/catalogKind';
 
-export function useCatalogCourses(search = '') {
+export function useCatalogCourses(search = '', catalogKind?: CatalogKind) {
   const [page, setPage] = useState(1);
   const [refreshIndex, setRefreshIndex] = useState(0);
-  const requestKey = `${page}:${search}:${refreshIndex}`;
+  const requestKey = JSON.stringify([page, search, catalogKind, refreshIndex]);
   const [result, setResult] = useState<{ key: string; data: CatalogPageResult | null; error: Error | null }>({ key: '', data: null, error: null });
 
   useEffect(() => {
     const controller = new AbortController();
 
-    void getCatalogCourses(page, controller.signal, undefined, search)
+    void getCatalogCourses(page, controller.signal, undefined, search, catalogKind)
       .then(data => { if (!controller.signal.aborted) setResult({ key: requestKey, data, error: null }); })
       .catch(reason => {
         if (controller.signal.aborted) return;
@@ -19,7 +20,7 @@ export function useCatalogCourses(search = '') {
       });
 
     return () => controller.abort();
-  }, [page, requestKey, search]);
+  }, [page, requestKey, search, catalogKind]);
 
   const reload = useCallback(() => setRefreshIndex(current => current + 1), []);
   return { data: result.key === requestKey ? result.data : null, error: result.key === requestKey ? result.error : null, isLoading: result.key !== requestKey, page, reload, setPage };

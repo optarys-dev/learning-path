@@ -43,6 +43,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
             {
                 CourseId = 1,
                 Title = "Python",
+                CatalogKinds = ["free", "mini-course"],
                 Slug = "python",
                 Description = "Build reliable data pipelines",
                 ImageUrl = "https://example.test/python.png",
@@ -55,6 +56,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
             {
                 CourseId = 2,
                 Title = "Backend",
+                CatalogKinds = ["pro-exclusive"],
                 ImageUrl = "https://example.test/backend.png",
                 CourseUrl = "https://example.test/backend"
             },
@@ -97,6 +99,8 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.Equal("Backend desde cero", route.Goal);
         Assert.Equal("manual-v1", route.RecommendationMethod);
         Assert.Equal(new long[] { 2, 1 }, route.Courses.Select(course => course.CourseId));
+        Assert.Equal(new[] { "pro-exclusive" }, route.Courses[0].CatalogKinds);
+        Assert.Equal(new[] { "free", "mini-course" }, route.Courses[1].CatalogKinds);
     }
 
     [Fact]
@@ -112,6 +116,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.Equal("semantic-groq-v2", route.RecommendationMethod);
         Assert.Equal("https://example.test/backend.png", route.Courses[0].ImageUrl);
         Assert.Equal("https://example.test/backend", route.Courses[0].CourseUrl);
+        Assert.Equal(new[] { "pro-exclusive" }, route.Courses[0].CatalogKinds);
 
         var stored = await Db.LearningRoutes.AsNoTracking().Include(route => route.Courses).SingleAsync();
         Assert.Equal("{\"goal\":\"Original\"}", stored.PreferencesSnapshot);
@@ -322,10 +327,11 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.Equal("python", courses[1].Slug);
         Assert.Equal("https://example.test/python.png", courses[1].ImageUrl);
         Assert.Equal("https://example.test/python", courses[1].CourseUrl);
+        Assert.Equal(new[] { "free", "mini-course" }, courses[1].CatalogKinds);
 
         var json = System.Text.Json.JsonSerializer.SerializeToElement(courses[1]);
         Assert.Equal(
-            new[] { "CourseId", "Slug", "Title", "Level", "ImageUrl", "ImageAlt", "CourseUrl" },
+            new[] { "CourseId", "Slug", "Title", "Level", "ImageUrl", "ImageAlt", "CourseUrl", "CatalogKinds" },
             json.EnumerateObject().Select(property => property.Name));
     }
 
@@ -340,6 +346,49 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.Equal(new long[] { 3 }, page.Items.Select(course => course.CourseId));
         Assert.True(page.HasPreviousPage);
         Assert.False(page.HasNextPage);
+    }
+
+    [Theory]
+    [InlineData("free")]
+    [InlineData("mini-course")]
+    public async Task CatalogCategoryIncludesOverlappingCategoriesAndCombinesWithSearch(string kind)
+    {
+        var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
+        var response = await controller.List(search: "python", catalogKind: kind);
+        var page = Assert.IsType<PagedResultDto<CourseDto>>(Assert.IsType<OkObjectResult>(response.Result).Value);
+        Assert.Equal(new long[] { 1 }, page.Items.Select(course => course.CourseId));
+        Assert.Equal(1, page.TotalCount);
+
+        var emptyResponse = await controller.List(search: "backend", catalogKind: kind);
+        var empty = Assert.IsType<PagedResultDto<CourseDto>>(Assert.IsType<OkObjectResult>(emptyResponse.Result).Value);
+        Assert.Empty(empty.Items);
+        Assert.Equal(0, empty.TotalPages);
+    }
+
+    [Fact]
+    public async Task CatalogCategoryFiltersBeforeCountingAndPaginatingAndExcludesInactiveCourses()
+    {
+        var extra = await Db.Courses.SingleAsync(course => course.CourseId == 3);
+        extra.CatalogKinds = ["pro-exclusive"];
+        var inactive = await Db.Courses.SingleAsync(course => course.CourseId == 4);
+        inactive.CatalogKinds = ["pro-exclusive"];
+        await Db.SaveChangesAsync();
+        Db.ChangeTracker.Clear();
+        var controller = new CoursesController(scope.ServiceProvider.GetRequiredService<ISender>());
+        var response = await controller.List(page: 2, pageSize: 1, catalogKind: "pro-exclusive");
+        var page = Assert.IsType<PagedResultDto<CourseDto>>(Assert.IsType<OkObjectResult>(response.Result).Value);
+        Assert.Equal(new long[] { 3 }, page.Items.Select(course => course.CourseId));
+        Assert.Equal(2, page.TotalCount);
+        Assert.Equal(2, page.TotalPages);
+        Assert.True(page.HasPreviousPage);
+        Assert.False(page.HasNextPage);
+    }
+
+    [Fact]
+    public async Task CatalogRejectsUnknownCategory()
+    {
+        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+        await Assert.ThrowsAsync<ArgumentException>(() => sender.Send(new CodeQuest2026.Server.Application.Courses.Queries.GetCoursesQuery(1, 12, CatalogKind: "unknown")));
     }
 
     [Theory]
@@ -532,6 +581,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
                     nameof(Course.CourseId) or nameof(Course.Title) or nameof(Course.IsActive)
                     or nameof(Course.Slug) or nameof(Course.Level) or nameof(Course.ImageUrl)
                     or nameof(Course.ImageAlt) or nameof(Course.CourseUrl) or nameof(Course.Description)
+                    or nameof(Course.CatalogKinds)
                     or nameof(Course.Categories) or nameof(Course.Tags)))
                 {
                     course.Ignore(property.Name);

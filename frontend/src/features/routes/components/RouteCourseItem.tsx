@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { QuestMetric, QuestTab } from '@/components/ui';
 import type { CoursePriority, EditableRouteCourse } from '@/features/routes/model/types';
 import { safeExternalUrl } from '@/lib/urls';
+import { CourseBadges } from '@/features/catalog/components/CourseBadge';
 
 interface RouteCourseItemProps {
   course: EditableRouteCourse;
@@ -110,6 +111,7 @@ export function RouteCourseItem({
         <div className="my-path__course-copy">
           <div className="my-path__course-signals">
             <QuestTab tone="paper">{t('myPath.stepLabel', { position: position + 1 })}</QuestTab>
+            <CourseBadges kinds={course.catalogKinds} />
             <span className={`my-path__course-status${completed ? ' is-completed' : ''}`}>
               {completed ? <CheckCircle2 size={15} aria-hidden="true" /> : <span aria-hidden="true">○</span>}
               {t(completed ? 'myPath.completed' : 'myPath.notStarted')}

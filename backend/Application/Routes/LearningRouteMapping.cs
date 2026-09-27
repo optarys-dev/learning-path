@@ -15,7 +15,8 @@ internal static class LearningRouteMapping
                     x.Reason,
                     x.Course.ImageUrl,
                     x.Course.CourseUrl,
-                    x.ProgressPercentage))
+                    x.ProgressPercentage,
+                    x.Course.CatalogKinds))
                 .ToList());
 
     public static LearningRouteDto ToDto(LearningRoute route, IReadOnlyDictionary<long, CourseDto> courses) =>
@@ -28,6 +29,7 @@ internal static class LearningRouteMapping
                     x.Reason,
                     courses[x.CourseId].ImageUrl,
                     courses[x.CourseId].CourseUrl,
-                    x.ProgressPercentage))
+                    x.ProgressPercentage,
+                    courses[x.CourseId].CatalogKinds))
                 .ToList());
 }

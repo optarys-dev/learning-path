@@ -8,6 +8,8 @@ import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 import catalogPanel from '@/assets/codequest/scenes/14_panel_informativo_futurista_morado.png';
 import { CatalogCourseCard } from '@/features/catalog/components/CatalogCourseCard';
 import { CatalogPagination } from '@/features/catalog/components/CatalogPagination';
+import { CatalogKindFilter } from '@/features/catalog/components/CatalogKindFilter';
+import type { CatalogKind } from '@/features/catalog/model/catalogKind';
 import { useCatalogCourses } from '@/features/catalog/hooks/useCatalogCourses';
 import './CatalogPage.css';
 
@@ -16,8 +18,9 @@ export function CatalogPage() {
   const { user } = useAuthSession();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [catalogKind, setCatalogKind] = useState<CatalogKind>();
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const { data, error, isLoading, page, reload, setPage } = useCatalogCourses(debouncedSearchQuery);
+  const { data, error, isLoading, page, reload, setPage } = useCatalogCourses(debouncedSearchQuery, catalogKind);
   const createPathTarget = user ? appRoutes.learningProfile : appRoutes.login;
 
   useEffect(() => {
@@ -89,21 +92,24 @@ export function CatalogPage() {
       <QuestDivider className="catalog-mission-divider" label={t('catalog.resultsEyebrow')} />
 
       <section className="catalog-results" aria-labelledby="catalog-results-title">
-        <div className="catalog-search">
-          <Search size={20} aria-hidden="true" />
-          <input
-            ref={searchInputRef}
-            type="search"
-            value={searchQuery}
-            onChange={event => updateSearchQuery(event.target.value)}
-            aria-label={t('catalog.searchLabel')}
-            placeholder={t('catalog.searchPlaceholder')}
-          />
-          {searchQuery && (
-            <button type="button" onClick={clearSearch} aria-label={t('catalog.clearSearch')}>
-              <X size={18} aria-hidden="true" />
-            </button>
-          )}
+        <div className="catalog-toolbar">
+          <div className="catalog-search">
+            <Search size={20} aria-hidden="true" />
+            <input
+              ref={searchInputRef}
+              type="search"
+              value={searchQuery}
+              onChange={event => updateSearchQuery(event.target.value)}
+              aria-label={t('catalog.searchLabel')}
+              placeholder={t('catalog.searchPlaceholder')}
+            />
+            {searchQuery && (
+              <button type="button" onClick={clearSearch} aria-label={t('catalog.clearSearch')}>
+                <X size={18} aria-hidden="true" />
+              </button>
+            )}
+          </div>
+          <CatalogKindFilter value={catalogKind} onChange={kind => { setCatalogKind(kind); setPage(1); }} />
         </div>
 
         <div className="catalog-results__header">
@@ -114,7 +120,7 @@ export function CatalogPage() {
           {!isLoading && !error && data && <QuestMetric className="catalog-results__count" value={data.totalCount} label={t('catalog.courseCountLabel')} />}
         </div>
 
-        {isLoading && <CatalogSkeleton />}
+        {isLoading && <CatalogSkeleton label={t('catalog.loading')} />}
 
         {!isLoading && error && (
           <section className="catalog-state" aria-live="polite">
@@ -127,10 +133,10 @@ export function CatalogPage() {
 
         {!isLoading && !error && data && (
           data.totalCount === 0 ? (
-            <section className={debouncedSearchQuery ? 'catalog-state catalog-state--search' : 'catalog-state'} aria-live="polite">
+            <section className={debouncedSearchQuery || catalogKind ? 'catalog-state catalog-state--search' : 'catalog-state'} aria-live="polite">
               <BookOpen size={30} aria-hidden="true" />
-              <h2>{debouncedSearchQuery ? t('catalog.noResultsTitle', { query: debouncedSearchQuery }) : t('catalog.emptyTitle')}</h2>
-              <p>{debouncedSearchQuery ? t('catalog.noResultsDescription') : t('catalog.emptyDescription')}</p>
+              <h2>{debouncedSearchQuery ? t('catalog.noResultsTitle', { query: debouncedSearchQuery }) : t(catalogKind ? 'catalog.noCategoryResultsTitle' : 'catalog.emptyTitle')}</h2>
+              <p>{debouncedSearchQuery || catalogKind ? t('catalog.noResultsDescription') : t('catalog.emptyDescription')}</p>
             </section>
           ) : (
             <>
@@ -155,7 +161,6 @@ export function CatalogPage() {
   );
 }
 
-function CatalogSkeleton() {
-  const { t } = useTranslation();
-  return <div className="catalog-grid" aria-label={t('manualRoute.loadingCourses')} aria-busy="true">{Array.from({ length: 12 }, (_, index) => <div className="catalog-skeleton" key={index} />)}</div>;
+function CatalogSkeleton({ label }: { label: string }) {
+  return <div className="catalog-grid" aria-label={label} aria-busy="true">{Array.from({ length: 12 }, (_, index) => <div className="catalog-skeleton" key={index} />)}</div>;
 }

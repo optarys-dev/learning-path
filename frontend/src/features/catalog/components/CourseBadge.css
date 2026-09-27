@@ -1,0 +1,56 @@
+.course-badges { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .3rem; min-width: 0; }
+
+.course-badge {
+  --badge-ink: #5b3994;
+  --badge-paper: #f0eafa;
+  --badge-edge: #d9cbee;
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  flex: 0 0 auto;
+  gap: .35rem;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 1.55rem;
+  padding: .2rem .55rem;
+  border: 1px solid var(--badge-edge);
+  border-radius: .5rem;
+  background: var(--badge-paper);
+  color: var(--badge-ink);
+  font-family: var(--cq-font-heading);
+  font-size: .67rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.3;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.course-badge > svg { flex: none; width: .8rem; height: .8rem; }
+.course-badge > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.course-badge--free { --badge-ink: #17634c; --badge-paper: #e5f5ee; --badge-edge: #b5dbcb; }
+.course-badge--mini-course { --badge-ink: #155e75; --badge-paper: #e6f4fa; --badge-edge: #badce8; }
+.course-badge--legacy,
+.course-badge--unknown { --badge-ink: #5c556d; --badge-paper: #f0edf4; --badge-edge: #d9d3e3; }
+.course-badge--in-development { --badge-ink: #7b4d16; --badge-paper: #fff2dd; --badge-edge: #e8c99f; }
+.course-badge--pro-exclusive {
+  --badge-ink: #6b4710;
+  --badge-edge: #d9b773;
+  background: linear-gradient(110deg, #fff0cd, #faf0ff);
+  box-shadow: inset 0 0 0 1px #fff9ed;
+  letter-spacing: .015em;
+}
+
+[data-theme="dark"] .course-badge { --badge-ink: #d8c5ff; --badge-paper: #302641; --badge-edge: #65517d; }
+[data-theme="dark"] .course-badge--free { --badge-ink: #a0e6c8; --badge-paper: #193c32; --badge-edge: #3d7663; }
+[data-theme="dark"] .course-badge--mini-course { --badge-ink: #a5def1; --badge-paper: #203b49; --badge-edge: #497485; }
+[data-theme="dark"] .course-badge--legacy,
+[data-theme="dark"] .course-badge--unknown { --badge-ink: #d0c9de; --badge-paper: #302c39; --badge-edge: #615b70; }
+[data-theme="dark"] .course-badge--in-development { --badge-ink: #f5d29b; --badge-paper: #433321; --badge-edge: #8c6a38; }
+[data-theme="dark"] .course-badge--pro-exclusive {
+  --badge-ink: #ffe3a3;
+  --badge-edge: #b79456;
+  background: linear-gradient(110deg, #45351e, #362840);
+  box-shadow: inset 0 0 0 1px #655031;
+}

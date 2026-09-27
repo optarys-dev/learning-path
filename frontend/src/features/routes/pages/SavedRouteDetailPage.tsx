@@ -145,6 +145,7 @@ function SavedRouteDetail({ routeId }: { routeId: string }) {
       reason: null,
       imageUrl: course.imageUrl,
       courseUrl: course.courseUrl,
+      catalogKinds: course.catalogKinds,
       progressPercentage: 0,
     }], t('manualRoute.addedAnnouncement', { title: course.title }));
     setCoursePickerOpen(false);
@@ -178,7 +179,7 @@ function SavedRouteDetail({ routeId }: { routeId: string }) {
     catch { setActionError(t('myPath.storageError')); }
   }
 
-  async function replaceCourse(course: DraftSavedRouteCourse, alternative: { courseId: number; title: string; imageUrl: string; courseUrl: string }) {
+  async function replaceCourse(course: DraftSavedRouteCourse, alternative: CatalogCourse) {
     if (!route || !draft || locked || mutationInFlight.current) return;
     const next = replaceSavedRouteCourse(editing ? draft : route, course.uiKey, alternative);
     if (editing) {
