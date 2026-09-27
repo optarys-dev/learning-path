@@ -330,6 +330,7 @@ export function MyPathPage({ mode, autoGenerate = false, embedded = false }: MyP
             <Button variant="ghost" onClick={() => {
               if (!window.confirm(t('myPath.confirmDiscardProposal'))) return;
               clearPendingRoute();
+              clearQuestionnaireDraft();
               navigate(appRoutes.savedRoutes);
             }} disabled={operation !== 'idle'}>{t('myPath.cancelProposal')}</Button>
             <Button variant="secondary" onClick={() => { void generateRoute(true); }}

@@ -35,6 +35,7 @@
     "src/i18n/courseLevel.ts",
     "src/i18n/locales/*.ts",
     "src/features/questionnaire/model/validation.ts",
+    "src/features/questionnaire/model/draft.ts",
     "src/features/routes/api/paths.ts"
   ]
 }
