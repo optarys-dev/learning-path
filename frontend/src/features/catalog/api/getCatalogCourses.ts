@@ -1,5 +1,6 @@
 import { apiUrl } from '../../../config/api';
 import type { CatalogCourse, CatalogPageResult } from '../types';
+import { parseCatalogKinds } from '../model/catalogKind';
 
 export const catalogPageSize = 12;
 
@@ -13,7 +14,8 @@ export async function getCatalogCourses(page: number, signal?: AbortSignal, page
 
   if (!response.ok) throw new Error(`Unable to load catalog: ${response.status}`);
 
-  return response.json() as Promise<CatalogPageResult>;
+  const result: CatalogPageResult = await response.json();
+  return { ...result, items: result.items.map(course => ({ ...course, catalogKinds: parseCatalogKinds(course.catalogKinds) })) };
 }
 
 export async function getAllCatalogCourses(signal?: AbortSignal): Promise<CatalogCourse[]> {

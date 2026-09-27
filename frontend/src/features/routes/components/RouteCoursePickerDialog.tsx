@@ -3,6 +3,7 @@ import { BookOpen, Plus, Search, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getAllCatalogCourses } from '../../catalog/api/getCatalogCourses';
 import type { CatalogCourse } from '../../catalog/types';
+import { CourseBadges } from '../../catalog/components/CourseBadge';
 
 interface RouteCoursePickerDialogProps {
   excludedCourseIds: string[];
@@ -37,7 +38,7 @@ export function RouteCoursePickerDialog({ excludedCourseIds, onAdd, onClose }: R
       {loading ? <p role="status">{t('manualRoute.loadingCourses')}</p> : available.length === 0 ? <p className="route-picker-dialog__empty">{t('manualRoute.noCourses')}</p> :
         <ul className="route-picker-dialog__list">{available.map(course => <li key={course.courseId}><button type="button" onClick={() => onAdd(course)}>
           {course.imageUrl ? <img src={course.imageUrl} alt="" /> : <span><BookOpen aria-hidden="true" /></span>}
-          <div><strong>{course.title}</strong>{course.level && <small>{course.level}</small>}</div><Plus aria-hidden="true" />
+          <div><strong>{course.title}</strong><CourseBadges kinds={course.catalogKinds} />{course.level && <small>{course.level}</small>}</div><Plus aria-hidden="true" />
         </button></li>)}</ul>}
     </section>
   </div>;

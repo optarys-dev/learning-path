@@ -3,6 +3,7 @@ import { CheckCircle2, Code2, ExternalLink, FileText, GripVertical, MoreHorizont
 import { useTranslation } from 'react-i18next';
 import { QuestMetric, QuestTab } from '../../../components/ui';
 import type { CoursePriority, EditableRouteCourse } from '../model/types';
+import { CourseBadges } from '../../catalog/components/CourseBadge';
 
 const desktopRouteMinWidthRem = 64;
 
@@ -257,6 +258,7 @@ export function RouteCourseItem({
         <div className="my-path__course-copy">
           <div className="my-path__course-signals">
             <QuestTab tone="paper">{t('myPath.stepLabel', { position: position + 1 })}</QuestTab>
+            <CourseBadges kinds={course.catalogKinds} />
             <span className={`my-path__course-status${completed ? ' is-completed' : ''}`}>
               {completed ? <CheckCircle2 size={15} aria-hidden="true" /> : <span aria-hidden="true">○</span>}
               {t(completed ? 'myPath.completed' : 'myPath.notStarted')}

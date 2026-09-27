@@ -3,6 +3,7 @@ import { ArrowRightLeft, Search, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getCatalogCourses } from '../../catalog/api/getCatalogCourses';
 import type { CatalogCourse } from '../../catalog/types';
+import { CourseBadges } from '../../catalog/components/CourseBadge';
 import type { DraftSavedRouteCourse } from '../model/types';
 
 interface RouteReplaceDialogProps {
@@ -48,7 +49,7 @@ export function RouteReplaceDialog({ course, routeCourseIds, onClose, onReplace 
       <div className="route-replace-dialog__filters"><label><Search size={16} aria-hidden="true" /><input value={query} onChange={event => setQuery(event.target.value)} placeholder={t('myPath.searchCourses')} /></label>
         {query && <button type="button" onClick={() => setQuery('')}>{t('myPath.clearFilters')}</button>}
       </div>
-      <div className="route-replace-dialog__list" aria-live="polite">{loading ? <p>{t('myPath.loadingAlternatives')}</p> : candidates.map(item => <button type="button" key={item.courseId} className={selected?.courseId === item.courseId ? 'is-selected' : ''} onClick={() => setSelected(item)}>{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <b>{item.title.slice(0, 2)}</b>}<span><strong>{item.title}</strong>{item.level && <small>{item.level}</small>}</span></button>)}</div>
+      <div className="route-replace-dialog__list" aria-live="polite">{loading ? <p>{t('myPath.loadingAlternatives')}</p> : candidates.map(item => <button type="button" key={item.courseId} className={selected?.courseId === item.courseId ? 'is-selected' : ''} onClick={() => setSelected(item)}>{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <b>{item.title.slice(0, 2)}</b>}<span><strong>{item.title}</strong><CourseBadges kinds={item.catalogKinds} />{item.level && <small>{item.level}</small>}</span></button>)}</div>
       <footer><button type="button" className="cq-button cq-button--secondary" onClick={onClose}>{t('myPath.cancel')}</button><button type="button" className="cq-button cq-button--primary" disabled={!selected} onClick={() => selected && onReplace(selected)}>{t('myPath.confirmReplacement')}</button></footer>
     </section>
   </div>;

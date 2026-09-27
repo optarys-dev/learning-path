@@ -2,6 +2,14 @@ import { landingEs } from './landing.es';
 import { loginEs } from './login.es';
 
 export const es = {
+  courseBadges: {
+    course: 'Curso',
+    free: 'Gratuito',
+    'mini-course': 'Mini-curso',
+    'pro-exclusive': 'Exclusivo Pro',
+    legacy: 'Legacy',
+    'in-development': 'En construcción',
+  },
   landing: landingEs,
   login: loginEs,
   welcome: {

@@ -1,4 +1,5 @@
 import { apiUrl } from '../../../config/api';
+import { parseCatalogKinds } from '../../catalog/model/catalogKind';
 import type {
   CreateRouteDto,
   RecommendationCourse,
@@ -42,7 +43,7 @@ function parseRecommendationCourse(value: unknown): RecommendationCourse | null 
   const score = normalizeNumber(value.score);
   const estimatedWeeks = normalizeNumber(value.estimatedWeeks);
   if (courseId === null || position === null || score === null || estimatedWeeks === null) return null;
-  return { courseId, position, title: value.title, score, reason: value.reason, estimatedWeeks };
+  return { courseId, position, title: value.title, score, reason: value.reason, estimatedWeeks, catalogKinds: parseCatalogKinds(value.catalogKinds) };
 }
 
 export function parseRouteRecommendation(value: unknown): RouteRecommendation | null {
@@ -70,7 +71,7 @@ function parseSavedRouteCourse(value: unknown): SavedRouteCourse | null {
   const courseUrl = value.courseUrl === undefined ? null : optionalUrl(value.courseUrl);
   const progressPercentage = normalizeNumber(value.progressPercentage) ?? 0;
   if (courseId === null || position === null || reason === undefined || imageUrl === undefined || courseUrl === undefined || progressPercentage < 0 || progressPercentage > 100) return null;
-  return { courseId, position, title: value.title, reason, imageUrl, courseUrl, progressPercentage };
+  return { courseId, position, title: value.title, reason, imageUrl, courseUrl, progressPercentage, catalogKinds: parseCatalogKinds(value.catalogKinds) };
 }
 
 export function parseSavedRoute(value: unknown): SavedRoute | null {

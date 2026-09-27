@@ -3,6 +3,14 @@ import { landingEn } from './landing.en';
 import { loginEn } from './login.en';
 
 export const en = {
+  courseBadges: {
+    course: 'Course',
+    free: 'Free',
+    'mini-course': 'Mini-course',
+    'pro-exclusive': 'Pro exclusive',
+    legacy: 'Legacy',
+    'in-development': 'In development',
+  },
   landing: landingEn,
   login: loginEn,
   welcome: {

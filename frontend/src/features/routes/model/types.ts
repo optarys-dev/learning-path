@@ -1,3 +1,5 @@
+import type { CatalogKind } from '../../catalog/model/catalogKind';
+
 export interface RecommendationCourse {
   courseId: string;
   position: number;
@@ -5,6 +7,7 @@ export interface RecommendationCourse {
   score: number;
   reason: string;
   estimatedWeeks: number;
+  catalogKinds?: CatalogKind[];
 }
 
 export interface RouteRecommendation {
@@ -35,6 +38,7 @@ export interface CreateRouteDto {
 }
 
 export interface SavedRouteCourse {
+  catalogKinds?: CatalogKind[];
   courseId: string;
   position: number;
   title: string;
@@ -71,6 +75,7 @@ export interface UpdateRouteDto {
 }
 
 export interface EditableRouteCourse {
+  catalogKinds?: CatalogKind[];
   courseId: string;
   uiKey: string;
   title: string;

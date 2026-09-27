@@ -361,7 +361,8 @@
   white-space: nowrap;
 }
 
-.manual-route__selection li div { display: flex; gap: var(--cq-space-1); }
+.manual-route__selection li > div:not(.manual-route__selected-course) { display: flex; gap: var(--cq-space-1); }
+.manual-route__selected-course { display: grid; gap: var(--cq-space-1); min-width: 0; }
 .manual-route__selection li button {
   display: grid;
   width: 1.8rem;

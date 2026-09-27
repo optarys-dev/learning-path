@@ -155,6 +155,7 @@ export function SavedRouteDetailPage() {
       reason: null,
       imageUrl: course.imageUrl,
       courseUrl: course.courseUrl,
+      catalogKinds: course.catalogKinds,
       progressPercentage: 0,
     }], t('manualRoute.addedAnnouncement', { title: course.title }));
     setCoursePickerOpen(false);
@@ -183,10 +184,10 @@ export function SavedRouteDetailPage() {
     if (route) setLocalState(setCoursePriority(route.routeId, course.courseId, priority));
   }
 
-  async function replaceCourse(course: DraftSavedRouteCourse, alternative: { courseId: number; title: string; imageUrl: string; courseUrl: string }) {
+  async function replaceCourse(course: DraftSavedRouteCourse, alternative: CatalogCourse) {
     if (!route || locked) return;
     const base = editing ? draft! : route;
-    const next = { ...base, courses: base.courses.map(item => item.uiKey === course.uiKey ? { ...item, courseId: String(alternative.courseId), title: alternative.title, imageUrl: alternative.imageUrl, courseUrl: alternative.courseUrl } : item) };
+    const next = { ...base, courses: base.courses.map(item => item.uiKey === course.uiKey ? { ...item, courseId: String(alternative.courseId), title: alternative.title, imageUrl: alternative.imageUrl, courseUrl: alternative.courseUrl, catalogKinds: alternative.catalogKinds } : item) };
     setOperation('saving');
     try {
       const updated = createSavedRouteDraft(await updateRoute(route.routeId, buildUpdateRouteRequest(next)));

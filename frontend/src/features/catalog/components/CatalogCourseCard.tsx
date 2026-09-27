@@ -3,6 +3,7 @@ import { ArrowUpRight, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { QuestTab } from '../../../components/ui';
 import type { CatalogCourse } from '../types';
+import { CourseBadges } from './CourseBadge';
 
 interface CatalogCourseCardProps { course: CatalogCourse; }
 
@@ -16,7 +17,7 @@ export function CatalogCourseCard({ course }: CatalogCourseCardProps) {
     </div>
     <div className="catalog-course-card__content">
       <div className="catalog-course-card__meta">
-        <QuestTab tone="violet">DevTalles</QuestTab>
+        <CourseBadges kinds={course.catalogKinds} />
         {course.level && <QuestTab tone="paper">{course.level}</QuestTab>}
       </div>
       <h3>{course.title}</h3>
