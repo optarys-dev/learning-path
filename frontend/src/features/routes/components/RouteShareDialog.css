@@ -13,7 +13,6 @@
 .learning-share-dialog__top,
 .learning-share-dialog__bottom,
 .learning-share-dialog__actions,
-.learning-share-dialog__pages,
 .learning-share-dialog__formats {
   display: flex;
   align-items: center;
@@ -23,8 +22,7 @@
 .learning-share-dialog__bottom { justify-content: space-between; gap: 1rem; }
 .learning-share-dialog__top h2 { margin: .2rem 0 0; font-size: clamp(1.2rem, 2vw, 1.7rem); }
 .learning-share-dialog__eyebrow { color: var(--cq-color-brand-primary); font-size: .75rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-.learning-share-dialog__close,
-.learning-share-dialog__pages button {
+.learning-share-dialog__close {
   display: grid;
   flex: none;
   place-items: center;
@@ -36,9 +34,7 @@
   color: var(--cq-color-text-primary);
   cursor: pointer;
 }
-.learning-share-dialog__close svg,
-.learning-share-dialog__pages svg { width: 1.15rem; height: 1.15rem; }
-.learning-share-dialog__pages button:disabled { opacity: .35; cursor: default; }
+.learning-share-dialog__close svg { width: 1.15rem; height: 1.15rem; }
 .learning-share-dialog__formats { gap: .6rem; flex-wrap: wrap; }
 .learning-share-dialog__formats button {
   display: inline-flex;
@@ -76,7 +72,7 @@
 .learning-share-dialog__canvas img { display: block; width: auto; height: auto; max-width: 100%; max-height: min(62dvh, 44rem); box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 20%); }
 .learning-share-dialog__loading { color: var(--cq-color-text-secondary); font-weight: 700; }
 .learning-share-dialog__error { color: var(--cq-color-error); }
-.learning-share-dialog__pages { gap: .75rem; font-size: .875rem; font-weight: 700; white-space: nowrap; }
+.learning-share-dialog__hint { margin: 0; color: var(--cq-color-text-secondary); font-size: var(--cq-font-size-label); }
 .learning-share-dialog__actions { gap: .65rem; flex-wrap: wrap; justify-content: flex-end; }
 .learning-share-dialog__actions button { display: inline-flex; align-items: center; gap: .5rem; }
 
@@ -141,8 +137,7 @@
 .learning-share-art--portrait .learning-share-art__intro h3 { -webkit-line-clamp: 3; }
 .learning-share-art--square .learning-share-art__intro p,
 .learning-share-art--portrait .learning-share-art__intro p { -webkit-line-clamp: 2; }
-.learning-share-art--square .learning-share-art__map { grid-template-rows: repeat(2, 270px); align-content: center; gap: 18px; padding-bottom: 32px; }
-.learning-share-art--square .learning-share-art__map.is-short { grid-template-rows: 270px; }
+.learning-share-art--square .learning-share-art__map { gap: 18px; padding-bottom: 32px; }
 .learning-share-art__map.is-short li:only-child { grid-column: 1 / -1; }
 .learning-share-art--square .learning-share-art__map li { grid-template-columns: 110px minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; padding: 22px; gap: 16px 22px; }
 .learning-share-art--square .learning-share-art__map img, .learning-share-art--square .learning-share-art__fallback { width: 110px; height: 110px; }
@@ -157,7 +152,6 @@
 .learning-share-art--portrait .learning-share-art__progress div { margin: 0; }
 .learning-share-art--portrait .learning-share-art__map-heading { padding: 22px 68px 24px; font-size: 20px; }
 .learning-share-art--portrait .learning-share-art__map { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-rows: minmax(0, 1fr); gap: 18px; padding: 0 68px 28px; }
-.learning-share-art--portrait .learning-share-art__map.is-short { grid-auto-rows: 250px; align-content: center; }
 .learning-share-art--portrait .learning-share-art__map li { grid-template-columns: 120px minmax(0, 1fr); gap: 9px 22px; padding: 19px 23px; }
 .learning-share-art--portrait .learning-share-art__map img, .learning-share-art--portrait .learning-share-art__fallback { width: 120px; height: 120px; }
 .learning-share-art--portrait .learning-share-art__course-copy strong { font-size: 26px; }
@@ -167,7 +161,6 @@
 @media (max-width: 42rem) {
   .route-dialog.learning-share-dialog { max-height: 96dvh; }
   .learning-share-dialog__bottom { align-items: stretch; flex-direction: column; }
-  .learning-share-dialog__pages { justify-content: center; }
   .learning-share-dialog__actions { justify-content: center; }
   .learning-share-dialog__actions button { flex: 1; justify-content: center; }
   .learning-share-dialog__canvas { min-height: 12rem; padding: .5rem; }

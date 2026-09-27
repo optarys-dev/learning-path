@@ -4,6 +4,7 @@
     "incremental": false
   },
   "include": [
-    "tests/browser-fixture.tsx"
+    "tests/browser-fixture.tsx",
+    "tests/navigation-fixture.tsx"
   ]
 }

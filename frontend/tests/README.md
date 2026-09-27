@@ -18,6 +18,20 @@ Ejecutar Vite y abrir `/tests/dialogs.html`. Es una entrada de desarrollo, fuera
 
 Las comprobaciones de navegador documentadas se hicieron manualmente con esta fixture. No son E2E automatizados. El mock no prueba OAuth, autorización del servidor ni concurrencia real de base de datos.
 
+## Menú público móvil y exportación
+
+Abrir `/tests/navigation.html` en Vite. Monta el layout y la landing reales en un iframe
+de ancho configurable, con sesión ficticia y sin peticiones a la API.
+
+- Sin sesión, a 320/390px: abrir el menú muestra Inicio, Cómo funciona, Tu experiencia,
+  Preguntas y Catálogo; tema e idioma quedan agrupados y el login está visible.
+- El menú no desplaza el contenido. Cierra al navegar, tocar fuera o pulsar Escape;
+  Escape devuelve el foco al botón. Pasar a 1440px y volver no conserva el menú abierto.
+- Repetir en español/inglés, claro/oscuro y con sesión ficticia para comparar la navegación.
+- «Preview six-course image» genera un único PNG con seis cursos. Probar los tres
+  formatos, cerrar el modal, alternar idioma y volver a abrirlo: objetivo, resumen y estados cambian;
+  los nombres oficiales se conservan. No pulsar compartir ni descargar para verificar.
+
 ## Regresiones de la extracción
 
 - Editar ruta → Simular arrastre: intercambia los dos primeros cursos, anuncia la nueva posición y habilita Guardar cambios. El botón despacha eventos HTML sobre los componentes reales; no modifica el estado de React directamente.
