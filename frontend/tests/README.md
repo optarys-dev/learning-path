@@ -39,3 +39,12 @@ de ancho configurable, con sesión ficticia y sin peticiones a la API.
 - Ruta manual: escribir nombre, elegir dos cursos y mover uno; alternar idioma conserva nombre y orden, y traduce Intermedio/Intermediate. Guardar ruta vuelve a la colección con el orden elegido.
 - La simulación complementa la prueba física de arrastre; no verifica su implementación nativa en todos los navegadores.
 - La suite automática cubre imports/ciclos, traducciones/placeholders, restricciones de selección, orden y payloads, almacenamiento compatible y errores 401/403/códigos del servidor.
+
+## Arranque inicial
+
+Abrir `/tests/startup.html`: usa el HTML y los estilos reales de arranque. Alternar tema
+e idioma permite revisar los cuatro casos, también a 320px. «Start React» carga la
+entrada real y debe reemplazar el loader por la página; no hay una demora artificial
+ni dependencia de la petición de sesión. La fixture simula una sesión anónima.
+Las pruebas automáticas comprueban preferencias persistidas, valores desconocidos
+y almacenamiento bloqueado. El loader no tiene tiempo mínimo: con caché puede verse apenas un instante.

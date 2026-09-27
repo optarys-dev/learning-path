@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <script>
-      // Resolve the initial theme before styles and React can paint.
+      // Resolve appearance before styles and React can paint.
       (() => {
         let storedTheme;
         try {
@@ -17,14 +17,35 @@
             ? 'dark'
             : 'light';
         document.documentElement.dataset.theme = theme;
+        let storedLanguage;
+        try {
+          storedLanguage = window.localStorage.getItem('codequest-language');
+        } catch {
+          // Match i18n's Spanish fallback when storage is unavailable.
+        }
+        document.documentElement.lang = storedLanguage?.split('-')[0].toLowerCase() === 'en' ? 'en' : 'es';
       })();
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/startup.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CODE QUEST 2026</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- React replaces this fallback on its first commit; no timer or session request blocks the landing. -->
+      <section class="app-startup" role="status" aria-live="polite">
+        <div class="app-startup__brand">
+          <img src="/src/assets/brand/codequest-logo.svg" alt="CODE QUEST 2026" width="192" height="86" />
+        </div>
+        <div class="app-startup__orbit" aria-hidden="true"><span></span></div>
+        <p class="app-startup__copy">
+          <span lang="es">Preparando tu siguiente paso…</span>
+          <span lang="en">Preparing your next step…</span>
+        </p>
+        <noscript><p class="app-startup__no-script"><span lang="es">Activá JavaScript para entrar a la plataforma.</span><span lang="en">Enable JavaScript to enter the platform.</span></p></noscript>
+      </section>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

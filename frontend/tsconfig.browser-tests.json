@@ -5,6 +5,7 @@
   },
   "include": [
     "tests/browser-fixture.tsx",
-    "tests/navigation-fixture.tsx"
+    "tests/navigation-fixture.tsx",
+    "tests/startup-fixture.ts"
   ]
 }
