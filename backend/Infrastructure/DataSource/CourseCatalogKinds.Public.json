@@ -1,0 +1,857 @@
+{
+  "verifiedAt": "2026-09-27T04:46:12.396Z",
+  "courses": [
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/angular",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/Angular_socket_bun",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/angular-avanzado",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/angular-cero-experto",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/angular-moderno",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/angular-pro",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/Astro",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/claude-code-guia-completa",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/codex",
+      "catalogKinds": [
+        "in-development"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-en-construccion"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/csharp",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/dart-cero-hasta-detalles",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/django",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/docker-guia-practica",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/expo-gemini",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/fastapi",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/flutter-avanzado",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/flutter-bloc",
+      "catalogKinds": [
+        "course",
+        "mini-course",
+        "pro-exclusive"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-minicursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-exclusivos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/Flutter-Gemini",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/flutter-Intermedio",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/flutter-movil-cero-a-experto",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/flutter-movil-intermedio",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/flutter-web",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/git-github-control-versiones",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/git-github-control-versiones-desde-cero",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/go-microservicios",
+      "catalogKinds": [
+        "in-development"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-en-construccion"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/golang-backend-profesional",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/golang-fundamentos-lenguaje",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/ia-para-developers",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/Ingenier%C3%ADa-de-prompts",
+      "catalogKinds": [
+        "course",
+        "mini-course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-minicursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/Java",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/java-avanzado",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/javascript-moderno",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/kafka-springboot-event-driven",
+      "catalogKinds": [
+        "in-development"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-en-construccion"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/laravel-ai",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/legacy-react-cero-a-experto",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/legacy-react-native",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/mas-DevTalles",
+      "catalogKinds": [
+        "pro-exclusive"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-exclusivos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/n8n-mcp",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/nest",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/nest-graphql",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/nestjs-microservicios",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/nestjs-reportes",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/NestJS-Testing",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/NET-Backend",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/net-pruebascompletas",
+      "catalogKinds": [
+        "course",
+        "mini-course",
+        "pro-exclusive"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-minicursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-exclusivos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/netfullstack",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/nextjs",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/nextpagesrouter",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/node-cero-experto",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/node-clean-architecture",
+      "catalogKinds": [
+        "course",
+        "mini-course",
+        "pro-exclusive"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-minicursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-exclusivos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/nodejs-de-cero-a-experto",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/nuxt",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/open-code-guia-completa",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/openai",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/openai-angular-nestjs",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/patrones-diseno",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/patrones-diseno-agentico",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/PHP-moderno",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/programacion-para-principiantes",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/PWA",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/python",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/python-ia-aplicada",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/python-n8n-automatiza-rutinas",
+      "catalogKinds": [
+        "course",
+        "mini-course",
+        "pro-exclusive"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-minicursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-exclusivos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/qwik-introduccion",
+      "catalogKinds": [
+        "course",
+        "free"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-gratuitos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/react-cero-experto",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/React-con-Socket-io",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/react-de-cero",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/react-native",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/react-native-expo",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/react-pro",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/react-router",
+      "catalogKinds": [
+        "course",
+        "free"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-gratuitos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/react-sockets",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/reactivex-rxjs",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/riverpod-con-anotaciones",
+      "catalogKinds": [
+        "course",
+        "free",
+        "mini-course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-gratuitos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-minicursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/shadcn-ui",
+      "catalogKinds": [
+        "course",
+        "free"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-gratuitos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/solid-clean-code",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/spring-AI",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/spring-boot",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/spring-boot-microservicios",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/spring-boot-patrones-arquitectura",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/springboot-mvc-hexagonal",
+      "catalogKinds": [
+        "course",
+        "mini-course",
+        "pro-exclusive"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-minicursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-exclusivos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/sql-con-postgres",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/tailwindcss-para-desarrolladores",
+      "catalogKinds": [
+        "course",
+        "mini-course",
+        "pro-exclusive"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-minicursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-exclusivos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/tanstack-query",
+      "catalogKinds": [
+        "course",
+        "free"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-gratuitos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/typescript-guia-completa",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/vibe-coding",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/visual-studio-code",
+      "catalogKinds": [
+        "course",
+        "free"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-gratuitos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/vue-cero-a-experto",
+      "catalogKinds": [
+        "course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/vue-js",
+      "catalogKinds": [
+        "legacy"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos-legacy"
+      ]
+    },
+    {
+      "courseUrl": "https://cursos.devtalles.com/courses/zustand-gestor-de-estado-para-react",
+      "catalogKinds": [
+        "course",
+        "mini-course"
+      ],
+      "sourceUrls": [
+        "https://cursos.devtalles.com/pages/todos-los-cursos",
+        "https://cursos.devtalles.com/pages/todos-los-cursos-minicursos"
+      ]
+    }
+  ]
+}

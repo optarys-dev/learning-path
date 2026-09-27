@@ -341,7 +341,8 @@ public sealed partial class HybridSemanticRecommendationEngine
                 item.Course.Title,
                 Math.Round(item.Score, 4),
                 reason,
-                estimatedWeeks);
+                estimatedWeeks,
+                item.Course.CatalogKinds);
         }).ToArray();
 
         var explanation = focusedIntent && coreCount > 0

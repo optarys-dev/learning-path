@@ -43,6 +43,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
             {
                 CourseId = 1,
                 Title = "Python",
+                CatalogKinds = ["free", "mini-course"],
                 Slug = "python",
                 Description = "Build reliable data pipelines",
                 ImageUrl = "https://example.test/python.png",
@@ -55,6 +56,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
             {
                 CourseId = 2,
                 Title = "Backend",
+                CatalogKinds = ["pro-exclusive"],
                 ImageUrl = "https://example.test/backend.png",
                 CourseUrl = "https://example.test/backend"
             },
@@ -97,6 +99,8 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.Equal("Backend desde cero", route.Goal);
         Assert.Equal("manual-v1", route.RecommendationMethod);
         Assert.Equal(new long[] { 2, 1 }, route.Courses.Select(course => course.CourseId));
+        Assert.Equal(new[] { "pro-exclusive" }, route.Courses[0].CatalogKinds);
+        Assert.Equal(new[] { "free", "mini-course" }, route.Courses[1].CatalogKinds);
     }
 
     [Fact]
@@ -112,6 +116,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.Equal("semantic-groq-v2", route.RecommendationMethod);
         Assert.Equal("https://example.test/backend.png", route.Courses[0].ImageUrl);
         Assert.Equal("https://example.test/backend", route.Courses[0].CourseUrl);
+        Assert.Equal(new[] { "pro-exclusive" }, route.Courses[0].CatalogKinds);
 
         var stored = await Db.LearningRoutes.AsNoTracking().Include(route => route.Courses).SingleAsync();
         Assert.Equal("{\"goal\":\"Original\"}", stored.PreferencesSnapshot);
@@ -322,10 +327,11 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
         Assert.Equal("python", courses[1].Slug);
         Assert.Equal("https://example.test/python.png", courses[1].ImageUrl);
         Assert.Equal("https://example.test/python", courses[1].CourseUrl);
+        Assert.Equal(new[] { "free", "mini-course" }, courses[1].CatalogKinds);
 
         var json = System.Text.Json.JsonSerializer.SerializeToElement(courses[1]);
         Assert.Equal(
-            new[] { "CourseId", "Slug", "Title", "Level", "ImageUrl", "ImageAlt", "CourseUrl" },
+            new[] { "CourseId", "Slug", "Title", "Level", "ImageUrl", "ImageAlt", "CourseUrl", "CatalogKinds" },
             json.EnumerateObject().Select(property => property.Name));
     }
 
@@ -532,6 +538,7 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
                     nameof(Course.CourseId) or nameof(Course.Title) or nameof(Course.IsActive)
                     or nameof(Course.Slug) or nameof(Course.Level) or nameof(Course.ImageUrl)
                     or nameof(Course.ImageAlt) or nameof(Course.CourseUrl) or nameof(Course.Description)
+                    or nameof(Course.CatalogKinds)
                     or nameof(Course.Categories) or nameof(Course.Tags)))
                 {
                     course.Ignore(property.Name);
@@ -539,6 +546,9 @@ public sealed class LearningRouteMutationTests : IAsyncLifetime
             }
             course.HasKey(course => course.CourseId);
             course.Property(course => course.CourseId).ValueGeneratedNever();
+            course.Property(course => course.CatalogKinds).HasConversion(
+                value => System.Text.Json.JsonSerializer.Serialize(value, (System.Text.Json.JsonSerializerOptions?)null),
+                value => System.Text.Json.JsonSerializer.Deserialize<string[]>(value, (System.Text.Json.JsonSerializerOptions?)null)!);
             var category = modelBuilder.Entity<Category>();
             category.HasKey(item => item.CategoryId);
             category.Property(item => item.CategoryId).ValueGeneratedNever();

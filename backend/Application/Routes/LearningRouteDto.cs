@@ -10,6 +10,7 @@ namespace CodeQuest2026.Server.Application.Routes;
 /// <param name="ImageUrl">Enlace a la miniatura actual del curso.</param>
 /// <param name="CourseUrl">Enlace a la página web del curso.</param>
 /// <param name="ProgressPercentage">Avance entero de 0 a 100 en esta ruta.</param>
+/// <param name="CatalogKinds">Categorías verificadas del catálogo, independientes de la dificultad.</param>
 public sealed record RouteCourseDto(
     long CourseId,
     int Position,
@@ -17,7 +18,8 @@ public sealed record RouteCourseDto(
     string? Reason,
     string ImageUrl,
     string CourseUrl,
-    int ProgressPercentage = 0);
+    int ProgressPercentage = 0,
+    string[]? CatalogKinds = null);
 /// <summary>Ruta de aprendizaje guardada para el usuario.</summary>
 /// <param name="RouteId">Identificador de la ruta.</param>
 /// <param name="Goal">Objetivo del usuario al crear la ruta.</param>

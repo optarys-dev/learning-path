@@ -11,7 +11,8 @@ public sealed record CourseDto(
     string? Level,
     string ImageUrl,
     string ImageAlt,
-    string CourseUrl);
+    string CourseUrl,
+    string[]? CatalogKinds = null);
 
 internal static class CourseMapping
 {
@@ -22,5 +23,6 @@ internal static class CourseMapping
         course.Level,
         course.ImageUrl,
         course.ImageAlt,
-        course.CourseUrl);
+        course.CourseUrl,
+        course.CatalogKinds);
 }

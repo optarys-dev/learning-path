@@ -12,6 +12,7 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
         {
             table.HasCheckConstraint("ck_courses_duration_minutes", "duration_minutes IS NULL OR duration_minutes > 0");
             table.HasCheckConstraint("ck_courses_level", "level IS NULL OR level IN ('Principiante', 'Intermedio', 'Avanzado')");
+            table.HasCheckConstraint("ck_courses_catalog_kinds", "catalog_kinds <@ ARRAY['course', 'free', 'mini-course', 'pro-exclusive', 'legacy', 'in-development']::text[]");
             table.HasCheckConstraint("ck_courses_url", "course_url LIKE 'https://cursos.devtalles.com/courses/%'");
             table.HasCheckConstraint("ck_courses_image_url", "image_url LIKE 'https://import.cdn.thinkific.com/%'");
         });
@@ -25,6 +26,7 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
         builder.Property(course => course.ImageUrl).HasColumnName("image_url").HasColumnType("text").IsRequired();
         builder.Property(course => course.ImageAlt).HasColumnName("image_alt").HasMaxLength(255).IsRequired();
         builder.Property(course => course.Level).HasColumnName("level").HasMaxLength(20);
+        builder.Property(course => course.CatalogKinds).HasColumnName("catalog_kinds").HasColumnType("text[]").HasDefaultValueSql("ARRAY[]::text[]").IsRequired();
         builder.Property(course => course.Topics).HasColumnName("topics").HasColumnType("jsonb").HasDefaultValueSql("'[]'::jsonb").IsRequired();
         builder.Property(course => course.Description).HasColumnName("description").HasColumnType("text");
         builder.Property(course => course.Syllabus).HasColumnName("syllabus").HasColumnType("text");
