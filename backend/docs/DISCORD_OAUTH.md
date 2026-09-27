@@ -8,6 +8,11 @@ Discord no se guardan ni se envían al frontend. El callback crea o actualiza el
 
 ## Configuración
 
+Obtén tus propias credenciales en [Discord Developer Portal](https://discord.com/developers/applications):
+crea una aplicación, abre **OAuth2** y copia **Client ID** y **Client Secret**.
+En **OAuth2 → Redirects**, registra el callback del entorno que vas a ejecutar.
+Para Docker Compose local es `http://localhost:8080/auth/discord/callback`.
+
 La configuración busca primero `Discord:DISCORD_CLIENT_ID`,
 `Discord:DISCORD_CLIENT_SECRET` y `Discord:DISCORD_CALLBACK_PATH`. Si una clave de
 la sección no existe o está vacía, busca respectivamente `DISCORD_CLIENT_ID`,
@@ -22,7 +27,7 @@ $env:Discord__DISCORD_CLIENT_ID = 'TU_CLIENT_ID'
 $env:Discord__DISCORD_CLIENT_SECRET = 'TU_CLIENT_SECRET'
 $env:ASPNETCORE_ENVIRONMENT = 'Development'
 $env:Discord__DISCORD_CALLBACK_PATH = '/auth/discord/callback'
-$env:Discord__DISCORD_FORCE_HTTPS_CALLBACK = 'true'
+$env:Discord__DISCORD_FORCE_HTTPS_CALLBACK = 'false'
 dotnet run --launch-profile http
 ```
 
@@ -32,7 +37,7 @@ Variables directas equivalentes:
 $env:DISCORD_CLIENT_ID = 'TU_CLIENT_ID'
 $env:DISCORD_CLIENT_SECRET = 'TU_CLIENT_SECRET'
 $env:DISCORD_CALLBACK_PATH = '/auth/discord/callback'
-$env:DISCORD_FORCE_HTTPS_CALLBACK = 'true'
+$env:DISCORD_FORCE_HTTPS_CALLBACK = 'false'
 ```
 
 Si no se configura el callback se usa `/auth/discord/callback`. Una clave no vacía
