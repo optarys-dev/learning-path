@@ -24,8 +24,10 @@ de la fuente revisada; regenerar el JSON no cambia esa migración.
 
 La base del equipo tiene **91 cursos activos**, comprobados en una transacción
 de solo lectura. Las listas oficiales clasifican **90**. El curso
-`https://cursos.devtalles.com/courses/Vue-intermedio` no aparece en ellas y conserva
-un arreglo vacío hasta confirmar su categoría.
+`https://cursos.devtalles.com/courses/Vue-intermedio` no aparece en ellas: el
+responsable del proyecto autorizó clasificarlo como `course` («Curso»).
+La carga incluye esta asignación explícita aparte de las 90 verificadas en la
+fuente pública, para cubrir los **91 cursos** sin atribuirle una categoría Pro.
 
 ## Presentación y despliegue
 

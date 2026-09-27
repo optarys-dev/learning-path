@@ -1,6 +1,7 @@
 namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations;
 
 // Frozen snapshot from CourseCatalogKinds.Public.json, verified 2026-09-27T04:46:12.396Z.
+// Vue-intermedio is classified as a regular course by explicit project-owner instruction.
 // Match public URLs exactly; preserve unknown courses and any already classified rows.
 public partial class AddCourseCatalogKinds
 {
@@ -96,6 +97,7 @@ public partial class AddCourseCatalogKinds
             ('https://cursos.devtalles.com/courses/vibe-coding', ARRAY['course']::text[]),
             ('https://cursos.devtalles.com/courses/visual-studio-code', ARRAY['course', 'free']::text[]),
             ('https://cursos.devtalles.com/courses/vue-cero-a-experto', ARRAY['course']::text[]),
+            ('https://cursos.devtalles.com/courses/Vue-intermedio', ARRAY['course']::text[]),
             ('https://cursos.devtalles.com/courses/vue-js', ARRAY['legacy']::text[]),
             ('https://cursos.devtalles.com/courses/zustand-gestor-de-estado-para-react', ARRAY['course', 'mini-course']::text[])
         ) AS source(course_url, kinds)

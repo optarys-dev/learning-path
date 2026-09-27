@@ -108,6 +108,7 @@ BEGIN
         ('https://cursos.devtalles.com/courses/vibe-coding', ARRAY['course']::text[]),
         ('https://cursos.devtalles.com/courses/visual-studio-code', ARRAY['course', 'free']::text[]),
         ('https://cursos.devtalles.com/courses/vue-cero-a-experto', ARRAY['course']::text[]),
+        ('https://cursos.devtalles.com/courses/Vue-intermedio', ARRAY['course']::text[]),
         ('https://cursos.devtalles.com/courses/vue-js', ARRAY['legacy']::text[]),
         ('https://cursos.devtalles.com/courses/zustand-gestor-de-estado-para-react', ARRAY['course', 'mini-course']::text[])
     ) AS source(course_url, kinds)
