@@ -11,7 +11,7 @@ public enum UpdateRouteStatus { Updated, NotFound, InvalidRoute, CourseUnavailab
 public sealed record UpdateRouteResult(UpdateRouteStatus Status, LearningRouteDto? Route = null);
 
 public sealed record UpdateLearningRouteCommand(
-    string DiscordId,
+    string UserId,
     Guid RouteId,
     UpdateLearningRouteRequest Request) : IRequest<UpdateRouteResult>;
 
@@ -46,7 +46,7 @@ public sealed class UpdateLearningRouteCommandHandler(AppDbContext db)
             var route = await db.LearningRoutes
                 .AsNoTracking()
                 .SingleOrDefaultAsync(
-                    route => route.RouteId == command.RouteId && route.User.DiscordId == command.DiscordId,
+                    route => route.RouteId == command.RouteId && route.UserId == command.UserId,
                     cancellationToken);
 
             if (route is null)
@@ -71,7 +71,7 @@ public sealed class UpdateLearningRouteCommandHandler(AppDbContext db)
 
             // Actualizar primero la fila padre serializa las ediciones concurrentes de esta ruta.
             var updated = await db.LearningRoutes
-                .Where(route => route.RouteId == command.RouteId && route.User.DiscordId == command.DiscordId)
+                .Where(route => route.RouteId == command.RouteId && route.UserId == command.UserId)
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(route => route.Goal, goal)
                     .SetProperty(route => route.Explanation, explanation), cancellationToken);
@@ -80,6 +80,10 @@ public sealed class UpdateLearningRouteCommandHandler(AppDbContext db)
             {
                 return new UpdateRouteResult(UpdateRouteStatus.NotFound);
             }
+
+            var progress = await db.LearningRouteCourses.AsNoTracking()
+                .Where(course => course.RouteId == command.RouteId)
+                .ToDictionaryAsync(course => course.CourseId, course => course.ProgressPercentage, cancellationToken);
 
             await db.LearningRouteCourses
                 .Where(course => course.RouteId == command.RouteId)
@@ -90,6 +94,7 @@ public sealed class UpdateLearningRouteCommandHandler(AppDbContext db)
                 RouteId = command.RouteId,
                 CourseId = course.CourseId,
                 Position = index + 1,
+                ProgressPercentage = progress.GetValueOrDefault(course.CourseId),
                 Reason = course.Reason?.Trim()
             }).ToArray();
 

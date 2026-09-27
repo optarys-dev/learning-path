@@ -1,5 +1,7 @@
 using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Oauth2.Discord;
+using CodeQuest2026.Server.Application.Oauth2;
+using CodeQuest2026.Server.Application.Oauth2.Google;
 using CodeQuest2026.Server.Application.Users;
 using CodeQuest2026.Server.Application.Users.Queries;
 using MediatR;
@@ -14,7 +16,7 @@ namespace CodeQuest2026.Server.Controllers;
 [ApiController]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 [Route("auth")]
-public class AuthController(ISender sender) : ControllerBase
+public class AuthController(ISender sender, IConfiguration configuration) : ControllerBase
 {
     /// <summary>Inicia el registro o inicio de sesión con Discord.</summary>
     /// <remarks>
@@ -30,13 +32,45 @@ public class AuthController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status400BadRequest)]
     public IActionResult Discord([FromQuery] string? returnUrl = null)
     {
-        //if (returnUrl is not null && !Url.IsLocalUrl(returnUrl))
-        //    return BadRequest(new { error = "invalid_return_url" });
+        if (!IsAllowedReturnUrl(returnUrl))
+            return BadRequest(new ApiErrorDto("invalid_return_url", "La URL de retorno no está permitida."));
+
+        // A valid Code Quest session does not need a new OAuth challenge. This avoids
+        // showing Discord's authorization screen again when a signed-in user reaches
+        // the login entry point a second time.
+        if (User.Identity?.IsAuthenticated == true)
+            return Redirect(returnUrl ?? "/auth/me");
 
         return Challenge(new AuthenticationProperties
         {
             RedirectUri = returnUrl ?? "/auth/me"
         }, DiscordAuthentication.Scheme);
+    }
+
+    [HttpGet("providers")]
+    public IActionResult Providers() => Ok(new { google = GoogleAuthentication.IsConfigured(configuration) });
+
+    [HttpGet("google")]
+    public IActionResult Google([FromQuery] string? returnUrl = null)
+    {
+        if (!IsAllowedReturnUrl(returnUrl))
+            return BadRequest(new ApiErrorDto("invalid_return_url", "La URL de retorno no está permitida."));
+        if (!GoogleAuthentication.IsConfigured(configuration))
+            return StatusCode(503, new ApiErrorDto("google_not_configured", "El acceso con Google todavía no está configurado."));
+        if (User.Identity?.IsAuthenticated == true) return Redirect(returnUrl ?? "/auth/me");
+        return Challenge(new AuthenticationProperties { RedirectUri = returnUrl ?? "/auth/me" }, GoogleAuthentication.Scheme);
+    }
+
+    private bool IsAllowedReturnUrl(string? returnUrl)
+    {
+        if (returnUrl is null) return true;
+        if (Url.IsLocalUrl(returnUrl)) return true;
+        if (!Uri.TryCreate(returnUrl, UriKind.Absolute, out var target) || target.Scheme is not ("https" or "http")
+            || !string.IsNullOrEmpty(target.UserInfo)) return false;
+        var origins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+        return target.AbsolutePath == "/login/callback" && origins.Any(origin =>
+            Uri.TryCreate(origin, UriKind.Absolute, out var allowed) && allowed.GetLeftPart(UriPartial.Authority)
+                .Equals(target.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>Cierra la sesión local creada tras autenticar con Discord.</summary>
@@ -62,16 +96,19 @@ public class AuthController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<AuthUserDto>> Me(CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(discordId))
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
 
-        var user = await sender.Send(new GetCurrentUserQuery(discordId), cancellationToken);
+        var user = await sender.Send(new GetCurrentUserQuery(userId), cancellationToken);
         if (user is null)
-            return Unauthorized(new ApiErrorDto("user_not_registered", "Inicia sesión nuevamente con Discord."));
+            return Unauthorized(new ApiErrorDto("user_not_registered", "Inicia sesión nuevamente."));
 
-        // Preserve the existing session response: id remains the Discord ID.
-        return Ok(new AuthUserDto(user.DiscordId, user.UserId, user.Username,
-            user.DisplayName, user.Avatar, user.IsNewUser));
+        var provider = User.FindFirstValue(SessionIdentity.ProviderClaim) ?? DiscordAuthentication.Scheme;
+        var avatarUrl = provider == GoogleAuthentication.Scheme ? user.Avatar : user.Avatar is null ? null
+            : $"https://cdn.discordapp.com/avatars/{Uri.EscapeDataString(user.DiscordId!)}/{Uri.EscapeDataString(user.Avatar)}.png?size=80";
+        // Keep Discord's public id stable so existing local course notes remain accessible.
+        return Ok(new AuthUserDto(user.DiscordId ?? user.UserId, user.UserId, user.Username,
+            user.DisplayName, user.Avatar, user.IsNewUser, provider, avatarUrl));
     }
 }

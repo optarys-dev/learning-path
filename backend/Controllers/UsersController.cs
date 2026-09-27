@@ -5,7 +5,7 @@ using CodeQuest2026.Server.Application.Users.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using CodeQuest2026.Server.Application.Oauth2;
 
 namespace CodeQuest2026.Server.Controllers;
 
@@ -19,9 +19,9 @@ public class UsersController(ISender sender) : ControllerBase
     /// <summary>Obtiene el perfil persistido del usuario autenticado.</summary>
     /// <remarks>
     /// Requiere la cookie CodeQuest.Session. El perfil se crea durante el primer
-    /// callback de Discord y se actualiza en cada inicio de sesión posterior.
+    /// callback del proveedor externo y se actualiza en cada inicio de sesión posterior.
     /// </remarks>
-    /// <response code="200">Perfil sincronizado con Discord.</response>
+    /// <response code="200">Perfil sincronizado .</response>
     /// <response code="401">Falta la sesión o el usuario no está registrado.</response>
     /// <response code="500">Error inesperado; error = internal_error.</response>
     [HttpGet("me")]
@@ -29,13 +29,13 @@ public class UsersController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UserDto>> Me(CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(discordId))
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
 
-        var user = await sender.Send(new GetCurrentUserQuery(discordId), cancellationToken);
+        var user = await sender.Send(new GetCurrentUserQuery(userId), cancellationToken);
         if (user is null)
-            return Unauthorized(new ApiErrorDto("user_not_registered", "Inicia sesión nuevamente con Discord."));
+            return Unauthorized(new ApiErrorDto("user_not_registered", "Inicia sesión nuevamente."));
 
         return Ok(user);
     }
@@ -52,10 +52,10 @@ public class UsersController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserPreferenceDto>> GetPreferences(CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(discordId))
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
-        var preference = await sender.Send(new GetUserPreferencesQuery(discordId), cancellationToken);
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
+        var preference = await sender.Send(new GetUserPreferencesQuery(userId), cancellationToken);
         return preference is null
             ? NotFound(new ApiErrorDto("preferences_not_found", "Todavía no has guardado tus preferencias."))
             : Ok(preference);
@@ -78,20 +78,13 @@ public class UsersController(ISender sender) : ControllerBase
     public async Task<ActionResult<UserPreferenceDto>> SavePreferences(
         SaveUserPreferenceRequest request, CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(discordId))
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
-        try
-        {
-            var preference = await sender.Send(
-                new SaveUserPreferencesCommand(discordId, request), cancellationToken);
-            return preference is null
-                ? Unauthorized(new ApiErrorDto("user_not_registered", "Inicia sesión nuevamente con Discord."))
-                : Ok(preference);
-        }
-        catch (ArgumentException exception) when (exception.Message == "invalid_preferences")
-        {
-            return BadRequest(new ApiErrorDto("invalid_preferences", "Revisa el objetivo, intereses y habilidades enviados."));
-        }
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
+        var preference = await sender.Send(
+            new SaveUserPreferencesCommand(userId, request), cancellationToken);
+        return preference is null
+            ? Unauthorized(new ApiErrorDto("user_not_registered", "Inicia sesión nuevamente."))
+            : Ok(preference);
     }
 }

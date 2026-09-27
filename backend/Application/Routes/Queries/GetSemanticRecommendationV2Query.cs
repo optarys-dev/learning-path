@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeQuest2026.Server.Application.Routes.Queries;
 
-public sealed record GetSemanticRecommendationV2Query(string DiscordId) : IRequest<SemanticRecommendationV2Result>;
+public sealed record GetSemanticRecommendationV2Query(string UserId, IReadOnlyList<long>? ExcludedCourseIds = null) : IRequest<SemanticRecommendationV2Result>;
 
 public sealed record SemanticRecommendationV2Result(
     bool PreferencesRequired,
@@ -23,14 +23,14 @@ public sealed class GetSemanticRecommendationV2QueryHandler(
     {
         var preference = await db.UserPreferences
             .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.User.DiscordId == request.DiscordId, cancellationToken);
+            .SingleOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
 
         if (preference is null)
         {
             return new(true, false, null);
         }
 
-        var result = await semantic.RecommendAsync(preference, cancellationToken);
+        var result = await semantic.RecommendAsync(preference, cancellationToken, request.ExcludedCourseIds);
 
         if (result.Recommendation is null)
         {

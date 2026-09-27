@@ -1,7 +1,8 @@
-using CodeQuest2026.Server.Application.Common;
 using CodeQuest2026.Server.Application.Oauth2.Discord;
+using CodeQuest2026.Server.Application.Oauth2.Google;
 using CodeQuest2026.Server.Extensions;
 using CodeQuest2026.Server.Infrastructure;
+using CodeQuest2026.Server.Infrastructure.DataSource;
 using CodeQuest2026.Server.Infrastructure.OpenApi;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
@@ -10,17 +11,23 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+var initializeOnly = args.Contains("--initialize-db");
+if (initializeOnly || builder.Configuration.GetValue<bool>("DatabaseInitialization:Enabled"))
+{
+    await DatabaseInitializer.RunAsync(builder.Configuration);
+    if (initializeOnly) return;
+}
+
+builder.Services.AddControllers(options => options.Filters.Add<ApiErrorResponseFilter>());
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
-        var message = string.Join(" ", context.ModelState.Values
-            .SelectMany(value => value.Errors)
-            .Select(error => error.ErrorMessage)
-            .Where(error => !string.IsNullOrWhiteSpace(error)));
-        return new BadRequestObjectResult(new ApiErrorDto("validation_error",
-            string.IsNullOrWhiteSpace(message) ? "Los datos de la solicitud son inválidos." : message));
+        var problem = ApiProblemDetailsFactory.CreateValidation(context.HttpContext, context.ModelState);
+        return new BadRequestObjectResult(problem)
+        {
+            ContentTypes = { "application/problem+json" }
+        };
     };
 });
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
@@ -32,7 +39,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "CodeQuest2026 API",
         Version = "v1",
-        Description = "API para autenticación con Discord, usuarios y recomendaciones de aprendizaje. " +
+        Description = "API para autenticación con Discord o Google, usuarios y recomendaciones de aprendizaje. " +
                       "Para probar rutas protegidas, inicia sesión abriendo /auth/discord en este mismo navegador."
     });
     options.AddSecurityDefinition("sessionCookie", new OpenApiSecurityScheme
@@ -40,7 +47,7 @@ builder.Services.AddSwaggerGen(options =>
         Type = SecuritySchemeType.ApiKey,
         In = ParameterLocation.Cookie,
         Name = "CodeQuest.Session",
-        Description = "Cookie HttpOnly creada por el inicio de sesión con Discord. El navegador la envía automáticamente."
+        Description = "Cookie HttpOnly creada por el inicio de sesión. El navegador la envía automáticamente."
     });
     options.OperationFilter<SessionCookieOperationFilter>();
     var xmlFile = $"{typeof(Program).Assembly.GetName().Name}.xml";
@@ -48,6 +55,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.ConfigureService(builder.Configuration);
 builder.Services.AddDiscordAuthentication(builder.Configuration, builder.Environment.IsDevelopment());
+builder.Services.AddGoogleAuthentication(builder.Configuration, builder.Environment.IsDevelopment());
 
 const string frontendCorsPolicy = "Frontend";
 var allowedOrigins = builder.Configuration
@@ -70,27 +78,25 @@ var app = builder.Build();
 app.UseExceptionHandler();
 
 app.UseDiscordHttpsCallback(builder.Configuration, app.Environment.IsDevelopment());
-
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
+    app.Use(async (context, next) =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "CodeQuest2026 API v1");
-        options.RoutePrefix = "swagger";
-        options.DocumentTitle = "CodeQuest2026 API";
-        options.DocExpansion(DocExpansion.List);
-        options.DisplayRequestDuration();
-        options.EnableTryItOutByDefault();
+        if (context.Request.Path.StartsWithSegments("/auth/google")) context.Request.Scheme = "https";
+        await next(context);
     });
 }
-else if (File.Exists(Path.Combine(app.Environment.WebRootPath
-    ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot"), "index.html")))
+
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
-    app.UseDefaultFiles();
-    app.MapStaticAssets();
-    app.MapFallbackToFile("/index.html");
+    UseSwaggerAndOpenApi();
+}
+
+if (app.Environment.IsStaging() ||
+    File.Exists(Path.Combine(app.Environment.WebRootPath
+        ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot"), "index.html")))
+{
+    UseStaticFiles();
 }
 
 if (!app.Environment.IsDevelopment())
@@ -115,3 +121,25 @@ app.MapHealthChecks("/health/db", new HealthCheckOptions
 });
 
 app.Run();
+
+void UseSwaggerAndOpenApi()
+{
+    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "CodeQuest2026 API v1");
+        options.RoutePrefix = "swagger";
+        options.DocumentTitle = "CodeQuest2026 API";
+        options.DocExpansion(DocExpansion.List);
+        options.DisplayRequestDuration();
+        options.EnableTryItOutByDefault();
+    });
+}
+
+void UseStaticFiles()
+{
+    app.UseDefaultFiles();
+    app.MapStaticAssets();
+    app.MapFallbackToFile("/index.html");
+}

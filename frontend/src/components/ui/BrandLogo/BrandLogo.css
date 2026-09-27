@@ -2,8 +2,23 @@
   display: block;
 }
 
+.brand-logo--full {
+  display: inline-flex;
+  align-items: center;
+  padding: .3rem .55rem;
+  border: 1px solid rgb(184 158 255 / 34%);
+  border-radius: .72rem;
+  background: #211438;
+  box-shadow: 0 .5rem 1.25rem rgb(27 15 52 / 20%);
+}
+
 .brand-logo img {
   display: block;
+  width: 100%;
+  height: auto;
+}
+
+.brand-logo--full img {
   width: 100%;
   height: auto;
 }

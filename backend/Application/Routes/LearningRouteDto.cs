@@ -9,13 +9,15 @@ namespace CodeQuest2026.Server.Application.Routes;
 /// <param name="Reason">Motivo por el que se recomendó el curso.</param>
 /// <param name="ImageUrl">Enlace a la miniatura actual del curso.</param>
 /// <param name="CourseUrl">Enlace a la página web del curso.</param>
+/// <param name="ProgressPercentage">Avance entero de 0 a 100 en esta ruta.</param>
 public sealed record RouteCourseDto(
     long CourseId,
     int Position,
     string Title,
     string? Reason,
     string ImageUrl,
-    string CourseUrl);
+    string CourseUrl,
+    int ProgressPercentage = 0);
 /// <summary>Ruta de aprendizaje guardada para el usuario.</summary>
 /// <param name="RouteId">Identificador de la ruta.</param>
 /// <param name="Goal">Objetivo del usuario al crear la ruta.</param>
@@ -24,11 +26,19 @@ public sealed record RouteCourseDto(
 /// <param name="CreatedAt">Fecha de creación en UTC.</param>
 /// <param name="Courses">Cursos ordenados por Position.</param>
 public sealed record LearningRouteDto(Guid RouteId, string Goal, string RecommendationMethod,
-    string? Explanation, DateTimeOffset CreatedAt, IReadOnlyList<RouteCourseDto> Courses);
+    string? Explanation, DateTimeOffset CreatedAt, IReadOnlyList<RouteCourseDto> Courses)
+{
+    /// <summary>Promedio del avance de todos los cursos, con igual peso y redondeado a dos decimales. Sin cursos, devuelve 0.</summary>
+    public decimal ProgressPercentage => Courses.Count == 0
+        ? 0m
+        : Math.Round(Courses.Average(course => (decimal)course.ProgressPercentage), 2, MidpointRounding.AwayFromZero);
+}
 
 /// <summary>Resultado de un análisis de recomendación listo para guardar.</summary>
 public sealed class SaveLearningRouteRequest
 {
+    /// <summary>Nombre u objetivo de la ruta. Si se omite, se conserva el objetivo del perfil.</summary>
+    [StringLength(1000)] public string? Goal { get; set; }
     /// <summary>Nombre y versión del método que generó la ruta.</summary>
     [Required, StringLength(80, MinimumLength = 1)]
     public string RecommendationMethod { get; set; } = string.Empty;

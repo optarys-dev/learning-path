@@ -322,6 +322,12 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("position");
 
+                    b.Property<int>("ProgressPercentage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("progress_percentage");
+
                     b.Property<string>("Reason")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)")
@@ -337,6 +343,8 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
                     b.ToTable("learning_route_courses", null, t =>
                         {
                             t.HasCheckConstraint("ck_learning_route_courses_position", "position > 0");
+
+                            t.HasCheckConstraint("ck_learning_route_courses_progress", "progress_percentage BETWEEN 0 AND 100");
                         });
                 });
 
@@ -379,8 +387,8 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
                         .HasColumnName("user_id");
 
                     b.Property<string>("Avatar")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
                         .HasColumnName("avatar");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -388,7 +396,6 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("DiscordId")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("discord_id");
@@ -416,6 +423,32 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
                         .HasDatabaseName("ix_users_discord_id");
 
                     b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.UserExternalLogin", b =>
+                {
+                    b.Property<string>("Provider")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("provider");
+
+                    b.Property<string>("ProviderUserId")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("provider_user_id");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Provider", "ProviderUserId");
+
+                    b.HasIndex("UserId", "Provider")
+                        .IsUnique();
+
+                    b.ToTable("user_external_logins", (string)null);
                 });
 
             modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.UserPreference", b =>
@@ -542,6 +575,17 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
                     b.Navigation("Route");
                 });
 
+            modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.UserExternalLogin", b =>
+                {
+                    b.HasOne("CodeQuest2026.Server.Infrastructure.DataSource.Entities.User", "User")
+                        .WithMany("ExternalLogins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.UserPreference", b =>
                 {
                     b.HasOne("CodeQuest2026.Server.Infrastructure.DataSource.Entities.User", "User")
@@ -595,6 +639,8 @@ namespace CodeQuest2026.Server.Infrastructure.DataSource.Migrations
 
             modelBuilder.Entity("CodeQuest2026.Server.Infrastructure.DataSource.Entities.User", b =>
                 {
+                    b.Navigation("ExternalLogins");
+
                     b.Navigation("Preferences");
 
                     b.Navigation("Routes");

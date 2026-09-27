@@ -68,8 +68,9 @@ HTTPS para que ASP.NET Core reciba el esquema y host públicos correctos.
 4. Un callback sin `state`, con `state` alterado, con código inválido o con una
    autorización cancelada devuelve HTTP 400 sin exponer tokens ni errores internos.
 
-El parámetro opcional `returnUrl` acepta exclusivamente rutas locales al backend,
-por ejemplo `/auth/discord?returnUrl=/`. Las URL externas devuelven HTTP 400.
+El parámetro opcional `returnUrl` acepta rutas locales al backend,
+por ejemplo `/auth/discord?returnUrl=/`, y `/login/callback` absoluto de un origen
+registrado en `Cors:AllowedOrigins`. Otros destinos externos devuelven HTTP 400.
 Iniciar siempre desde `/auth/discord`; abrir el callback directamente no crea sesión.
 
 Desde React, navegar al endpoint de inicio usando `window.location.assign`, no `fetch`.
@@ -89,6 +90,6 @@ await fetch(`${apiBaseUrl}/auth/logout`, {
 Configurar el origen exacto del frontend en `Cors:AllowedOrigins:0` (variable
 `Cors__AllowedOrigins__0`). Las cookies usan SameSite=Lax: utilizar el mismo sitio
 y esquema para frontend y API; en producción se recomienda servirlos en el mismo
-origen. No se incluye integración del botón del frontend en este cambio.
+origen. La integración Google y la migración de identidad están documentadas en [GOOGLE_OAUTH.md](GOOGLE_OAUTH.md).
 
 Referencia: [OAuth2 de Discord](https://docs.discord.com/developers/topics/oauth2).

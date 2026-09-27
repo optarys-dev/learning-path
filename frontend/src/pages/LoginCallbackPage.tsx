@@ -1,20 +1,19 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { appRoutes } from '@/config/navigation';
+import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { PageState } from '../components/ui/PageState/PageState';
-import { getCurrentSession } from '../features/auth/session';
+import { PageState } from '@/components/ui';
+import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 
 export function LoginCallbackPage() {
-  const navigate = useNavigate();
+  const { user, isLoading, sessionError, refresh } = useAuthSession();
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const controller = new AbortController();
-    void getCurrentSession(controller.signal)
-      .then(user => navigate(user ? '/my-path' : '/login', { replace: true }))
-      .catch(() => navigate('/login', { replace: true }));
-    return () => controller.abort();
-  }, [navigate]);
+  if (sessionError) return <PageState kind="error" title={t('errors.sessionUnavailable')}
+    description={t('errors.sessionUnavailableDescription')} onRetry={() => { void refresh(); }} />;
+
+  if (!isLoading) {
+    return <Navigate to={user ? (user.isNewUser === true ? appRoutes.createRoute : appRoutes.savedRoutes) : appRoutes.login} replace />;
+  }
 
   return <PageState kind="loading" title={t('welcome.connecting')} />;
 }

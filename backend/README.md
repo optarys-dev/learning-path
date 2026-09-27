@@ -29,7 +29,8 @@ del catálogo** y **refinamiento opcional con IA**.
 | Refinamiento V2 | Groq organiza los cursos y personaliza las razones con JSON Schema estricto. |
 | Rutas | Guardado explícito, consulta y copia de las preferencias utilizadas. |
 
-El cuestionario y el seguimiento de progreso aún no están implementados.
+El cuestionario aún no está implementado. Cada curso de una ruta guardada incluye
+su progreso como porcentaje entero de 0 a 100.
 
 <details>
 <summary>Tecnologías y procedencia de los datos</summary>
@@ -150,8 +151,8 @@ El frontend se ejecuta por separado desde `frontend/` con `npm install` y
 | --- | --- | --- |
 | GET | `/auth/discord` | Iniciar sesión con Discord. |
 | GET | `/auth/me` | Consultar la sesión. |
-| GET | `/courses` | Listar cursos activos con datos básicos, ordenados por título e ID. |
-| GET | `/courses/{courseId}` | Consultar un curso activo, sin metadatos de aprendizaje. |
+| GET | `/courses?page=1&pageSize=20` | Listar públicamente cursos activos paginados, ordenados por título e ID. |
+| GET | `/courses/{courseId}` | Consultar públicamente un curso activo, sin metadatos de aprendizaje. |
 | GET / PUT | `/users/me/preferences` | Consultar o guardar preferencias. |
 | GET | `/routes/recommendation/semantic` | Obtener una propuesta semántica. |
 | GET | `/routes/recommendation/semantic/v2` | Refinar el orden y las razones con IA. |
@@ -160,6 +161,7 @@ El frontend se ejecuta por separado desde `frontend/` con `npm install` y
 | GET | `/routes/{routeId}` | Consultar una ruta propia. |
 | PUT | `/routes/{routeId}` | Reemplazar objetivo, explicación y cursos de una ruta propia. |
 | DELETE | `/routes/{routeId}` | Eliminar una ruta propia. |
+| PATCH | `/routes/{routeId}/courses/{courseId}/progress` | Actualizar el avance de un curso en una ruta propia. |
 
 Las preferencias y rutas requieren sesión de Discord. Las dos recomendaciones
 son **vistas previas**: para persistir una, enviar su `method` como
@@ -167,10 +169,32 @@ son **vistas previas**: para persistir una, enviar su `method` como
 `POST /routes`. Se acepta de 1 a 30 cursos activos, sin duplicados, en el orden
 solicitado. La respuesta es `201 Created` con un encabezado `Location`.
 
-El catálogo requiere sesión y devuelve `courseId`, `slug`, `title`, `level`,
-`imageUrl`, `imageAlt` y `courseUrl`. `GET /courses` devuelve un arreglo sin
-paginación; el detalle devuelve `404 course_not_found` si el curso no existe o
-está inactivo. No incluye descripción, temario, requisitos ni embeddings.
+Para registrar avance, enviar `PATCH /routes/{routeId}/courses/{courseId}/progress`
+con `{"progressPercentage": 65}` y la cookie de sesión. El porcentaje es obligatorio
+y entero: 0 significa pendiente y 100 completado; se permite reducirlo o reiniciarlo.
+La respuesta `200` contiene la ruta actualizada. Cada elemento de `courses` incluye
+`progressPercentage` también al crear, editar, listar y consultar rutas.
+La ruta también incluye `progressPercentage` en el nivel principal: es el promedio
+del avance de todos sus cursos, con igual peso y redondeado a dos decimales
+(por ejemplo, cursos al 100 y al 50 producen una ruta al 75). Se recalcula al
+actualizar avances o cambiar los cursos; una ruta sin cursos devuelve 0.
+Este total es calculado y no requiere una migración adicional.
+Una ruta ajena, inexistente o un curso fuera de ella devuelve `404 route_course_not_found`.
+Valores omitidos, nulos o fuera de rango devuelven `400`.
+
+El avance es independiente para cada combinación de ruta y curso. Los cursos nuevos
+y los de rutas existentes comienzan en 0. Editar o reordenar una ruta conserva el
+avance de los cursos que permanecen; quitar un curso elimina su avance y volverlo a
+agregar lo inicia en 0. Se puede actualizar un curso guardado aunque esté inactivo.
+Aplicar la migración `AddLearningRouteCourseProgress` con
+`dotnet ef database update --context AppDbContext` antes de usar esta versión.
+
+El catálogo es público y devuelve `courseId`, `slug`, `title`, `level`,
+`imageUrl`, `imageAlt` y `courseUrl`. `GET /courses` acepta `page` (predeterminado
+1) y `pageSize` (predeterminado 20, máximo 100), y responde con `items`, `page`,
+`pageSize`, `totalCount`, `totalPages`, `hasPreviousPage` y `hasNextPage`. El
+detalle devuelve `404 course_not_found` si el curso no existe o está inactivo.
+No incluye descripción, temario, requisitos ni embeddings.
 
 Los cursos de las rutas guardadas incluyen `imageUrl` (miniatura) y `courseUrl`
 (página web), además de ID, posición, título y razón. Estos campos aparecen en
@@ -473,6 +497,62 @@ docs/                              Guías específicas
 <a id="docker"></a>
 
 ## Docker
+
+### Arranque completo con Docker Compose
+
+Desde la raíz de la solución, configurar `.env` a partir de `.env.example` y ejecutar:
+
+```powershell
+docker compose up --build -d
+docker compose logs web-app
+```
+
+Las variables de PostgreSQL, embeddings, conexión de la API, Discord (incluido
+el callback) y Groq son obligatorias. Google es opcional y
+`DISCORD_FORCE_HTTPS_CALLBACK` usa `false` si no se define. Compose valida la configuración
+antes de arrancar: si una variable falta o está vacía, indica
+`Define NOMBRE_VARIABLE en .env con un valor no vacio`. Comprobar la configuración
+con `docker compose config --quiet`. El puerto web está fijado en `8080:8080`;
+`API_PORT` no se utiliza. Para HTTP local, seguir la configuración de Development
+del [README principal](../README.md#iniciar-localmente).
+
+Compose espera a que PostgreSQL y el worker estén saludables. El propio contenedor
+`web-app` ejecuta este flujo antes de comenzar a atender peticiones:
+
+1. Aplica las migraciones pendientes de EF Core.
+2. Importa los datos de `database/seeds/Seed DataCourses.sql`.
+3. Importa los datos de `database/seeds/Seed Embeddings.sql`.
+4. Inicia el servidor web con la API y el frontend.
+
+Compose activa este comportamiento con `DatabaseInitialization__Enabled=true` y
+monta los seeds en `/seeds`. Fuera de Compose, la inicialización al arrancar está
+desactivada por defecto. `--initialize-db` sigue disponible para ejecutar solo la
+inicialización y salir. Si falla la inicialización, el proceso termina sin abrir
+el servidor web; Compose lo reintenta con su política de reinicio.
+
+Los archivos SQL se montan en modo lectura. Son dumps completos: el inicializador
+extrae únicamente sus `INSERT`, con el orden de columnas explícito de estos dumps;
+el esquema, las restricciones y los índices los administran las migraciones.
+Esto evita recrear tablas, depender del propietario `postgres` o del esquema
+`extensions` del servidor de origen. El catálogo se combina por ID con el seed
+de las migraciones, actualizando sus datos y las relaciones de los cursos importados.
+Los archivos actuales contienen 91 cursos y 91 embeddings.
+
+Ambos seeds se aplican en una sola transacción y se registran en `app_seed_history`
+con la versión `initial-catalog-2026-09-26-v1`. En siguientes arranques se verifican
+las migraciones y se omite esa carga inicial, conservando las ediciones posteriores,
+usuarios, rutas y progreso. Cambiar los archivos SQL no vuelve a importarlos
+automáticamente. Si falla un seed, ambos se revierten y la API no inicia; corregir
+el problema y repetir `docker compose up --build -d`. Las migraciones ya aplicadas
+permanecen. La primera carga actualiza el catálogo también en volúmenes existentes
+que aún no tengan el registro de inicialización.
+
+El worker sigue siendo necesario para generar los embeddings de las consultas.
+El modelo configurado debe coincidir con el seed: `Qwen/Qwen3-Embedding-0.6B`,
+revisión `main`, formato `course-text-v1`. El servicio puede necesitar descargar
+el modelo al iniciar por primera vez.
+
+### Imagen de la API ejecutada por separado
 
 La imagen reúne frontend y API .NET. **PostgreSQL y el worker se ejecutan por separado.**
 

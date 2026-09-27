@@ -1,5 +1,6 @@
 import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './ThemeToggle.css';
 
 type Theme = 'light' | 'dark';
@@ -7,27 +8,22 @@ type Theme = 'light' | 'dark';
 const themeStorageKey = 'codequest.theme';
 
 function getInitialTheme(): Theme {
-  if (typeof window === 'undefined') {
+  if (typeof document === 'undefined') {
     return 'dark';
   }
 
-  const storedTheme = window.localStorage.getItem(themeStorageKey);
-
-  if (storedTheme === 'light' || storedTheme === 'dark') {
-    return storedTheme;
-  }
-
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
+  // index.html already resolved storage/system preference before the first paint.
+  return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 }
 
 export function ThemeToggle() {
+  const { t } = useTranslation();
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem(themeStorageKey, theme);
+    try { window.localStorage.setItem(themeStorageKey, theme); }
+    catch { /* The active theme still works when browser storage is unavailable. */ }
   }, [theme]);
 
   const toggleTheme = () => {
@@ -43,13 +39,13 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={
         theme === 'dark'
-          ? 'Cambiar a modo claro'
-          : 'Cambiar a modo oscuro'
+          ? t('theme.switchToLight')
+          : t('theme.switchToDark')
       }
       title={
         theme === 'dark'
-          ? 'Modo claro'
-          : 'Modo oscuro'
+          ? t('theme.light')
+          : t('theme.dark')
       }
     >
       {theme === 'dark'

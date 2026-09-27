@@ -5,7 +5,7 @@ using CodeQuest2026.Server.Application.Routes.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using CodeQuest2026.Server.Application.Oauth2;
 
 namespace CodeQuest2026.Server.Controllers;
 
@@ -15,6 +15,31 @@ namespace CodeQuest2026.Server.Controllers;
 [Route("routes")]
 public class RoutesController(ISender sender) : ControllerBase
 {
+    /// <summary>Actualiza el porcentaje de avance de un curso en una ruta propia.</summary>
+    /// <remarks>Permite valores de 0 a 100 y reiniciar el avance. Devuelve la ruta actualizada.</remarks>
+    [HttpPatch("{routeId:guid}/courses/{courseId:long}/progress")]
+    [ProducesResponseType<LearningRouteDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ApiErrorDto>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<LearningRouteDto>> UpdateCourseProgress(
+        Guid routeId, long courseId, UpdateCourseProgressRequest request, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
+
+        var result = await sender.Send(new UpdateCourseProgressCommand(userId, routeId, courseId, request), cancellationToken);
+        return result.Status switch
+        {
+            UpdateCourseProgressStatus.InvalidProgress => BadRequest(new ApiErrorDto(
+                "invalid_progress", "Indica un porcentaje entero entre 0 y 100.")),
+            UpdateCourseProgressStatus.NotFound => NotFound(new ApiErrorDto(
+                "route_course_not_found", "No se encontró el curso en la ruta solicitada.")),
+            _ => Ok(result.Route)
+        };
+    }
+
     /// <summary>Busca cursos con embeddings locales a partir de las preferencias guardadas.</summary>
     /// <remarks>El servicio Python genera el vector de consulta. La API combina similitud en pgvector con títulos y asociaciones observadas entre categorías, tags y cursos. No guarda una ruta.</remarks>
     /// <response code="200">Cursos relevantes con cobertura temática, ordenados para estudio por nivel y requisitos publicados.</response>
@@ -30,13 +55,13 @@ public class RoutesController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status503ServiceUnavailable)]
     public async Task<ActionResult<SemanticRecommendationDto>> PreviewSemanticRecommendation(CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(discordId))
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
         SemanticRecommendationResult result;
         try
         {
-            result = await sender.Send(new GetSemanticRecommendationQuery(discordId), cancellationToken);
+            result = await sender.Send(new GetSemanticRecommendationQuery(userId), cancellationToken);
         }
         catch (HttpRequestException exception) when (exception.StatusCode is not null
             && exception.StatusCode != System.Net.HttpStatusCode.ServiceUnavailable)
@@ -67,15 +92,17 @@ public class RoutesController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status409Conflict)]
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status502BadGateway)]
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status503ServiceUnavailable)]
-    public async Task<ActionResult<SemanticRecommendationV2Dto>> PreviewSemanticRecommendationV2(CancellationToken cancellationToken)
+    public async Task<ActionResult<SemanticRecommendationV2Dto>> PreviewSemanticRecommendationV2(
+        [FromQuery] long[]? excludeCourseIds,
+        CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(discordId))
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
         SemanticRecommendationV2Result result;
         try
         {
-            result = await sender.Send(new GetSemanticRecommendationV2Query(discordId), cancellationToken);
+            result = await sender.Send(new GetSemanticRecommendationV2Query(userId, excludeCourseIds), cancellationToken);
         }
         catch (HttpRequestException exception) when (exception.StatusCode is not null
             && exception.StatusCode != System.Net.HttpStatusCode.ServiceUnavailable)
@@ -100,7 +127,8 @@ public class RoutesController(ISender sender) : ControllerBase
 
     /// <summary>Guarda una ruta de aprendizaje ya analizada para el usuario autenticado.</summary>
     /// <remarks>
-    /// Requiere preferencias previas y la cookie CodeQuest.Session. El orden del arreglo Courses
+    /// Requiere la cookie CodeQuest.Session. Las rutas recomendadas requieren preferencias previas.
+    /// Goal permite nombrar una ruta manual; si se omite en una recomendación, se usa el objetivo del perfil. El orden del arreglo Courses
     /// define la posición de cada curso. Acepta entre 1 y 30 cursos activos, sin repetidos.
     /// Guarda una copia de las preferencias utilizadas y devuelve la ruta creada.
     /// </remarks>
@@ -117,18 +145,10 @@ public class RoutesController(ISender sender) : ControllerBase
     public async Task<ActionResult<LearningRouteDto>> Save(
         SaveLearningRouteRequest request, CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(discordId))
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
-        SaveRouteResult result;
-        try
-        {
-            result = await sender.Send(new SaveLearningRouteCommand(discordId, request), cancellationToken);
-        }
-        catch (ArgumentException exception) when (exception.Message == "invalid_route")
-        {
-            return BadRequest(new ApiErrorDto("invalid_route", "La ruta debe incluir de 1 a 30 cursos activos, sin repetir."));
-        }
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
+        var result = await sender.Send(new SaveLearningRouteCommand(userId, request), cancellationToken);
         return result.Status switch
         {
             SaveRouteStatus.PreferencesRequired => Conflict(new ApiErrorDto("preferences_required", "Guarda tus preferencias antes de crear una ruta.")),
@@ -157,15 +177,15 @@ public class RoutesController(ISender sender) : ControllerBase
         UpdateLearningRouteRequest request,
         CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.GetUserId();
 
-        if (string.IsNullOrWhiteSpace(discordId))
+        if (string.IsNullOrWhiteSpace(userId))
         {
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
         }
 
         var result = await sender.Send(
-            new UpdateLearningRouteCommand(discordId, routeId, request),
+            new UpdateLearningRouteCommand(userId, routeId, request),
             cancellationToken);
 
         return result.Status switch
@@ -191,15 +211,15 @@ public class RoutesController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid routeId, CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.GetUserId();
 
-        if (string.IsNullOrWhiteSpace(discordId))
+        if (string.IsNullOrWhiteSpace(userId))
         {
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
         }
 
         var deleted = await sender.Send(
-            new DeleteLearningRouteCommand(discordId, routeId),
+            new DeleteLearningRouteCommand(userId, routeId),
             cancellationToken);
 
         return deleted
@@ -216,10 +236,10 @@ public class RoutesController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<IReadOnlyList<LearningRouteDto>>> List(CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(discordId))
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
-        return Ok(await sender.Send(new GetLearningRoutesQuery(discordId), cancellationToken));
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
+        return Ok(await sender.Send(new GetLearningRoutesQuery(userId), cancellationToken));
     }
 
     /// <summary>Consulta una ruta guardada que pertenece al usuario autenticado.</summary>
@@ -235,10 +255,10 @@ public class RoutesController(ISender sender) : ControllerBase
     [ProducesResponseType<ApiErrorDto>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<LearningRouteDto>> GetById(Guid routeId, CancellationToken cancellationToken)
     {
-        var discordId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(discordId))
-            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión con Discord para continuar."));
-        var route = await sender.Send(new GetLearningRouteByIdQuery(discordId, routeId), cancellationToken);
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new ApiErrorDto("unauthorized", "Inicia sesión para continuar."));
+        var route = await sender.Send(new GetLearningRouteByIdQuery(userId, routeId), cancellationToken);
         return route is null
             ? NotFound(new ApiErrorDto("route_not_found", "No se encontró la ruta solicitada."))
             : Ok(route);

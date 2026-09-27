@@ -1,0 +1,329 @@
+import { useCourseReorder } from '@/features/routes/hooks/useCourseReorder';
+import { routeLimits } from '@/features/routes/model/constants';
+import { appRoutes } from '@/config/navigation';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { FileText, Map as MapIcon, Plus, Share2, Sparkles, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Button, PageState } from '@/components/ui';
+import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
+import type { CatalogCourse } from '@/features/catalog';
+import { deleteRoute, getSavedRoute, updateCourseProgress, updateRoute } from '@/features/routes/api/routes';
+import { RouteCourseItem } from '@/features/routes/components/RouteCourseItem';
+import { RouteRaceTrack } from '@/features/routes/components/RouteRaceTrack';
+import { RouteNoteDialog } from '@/features/routes/components/RouteNoteDialog';
+import { RouteReplaceDialog } from '@/features/routes/components/RouteReplaceDialog';
+import { RouteShareDialog } from '@/features/routes/components/RouteShareDialog';
+import { RouteCoursePickerDialog } from '@/features/routes/components/RouteCoursePickerDialog';
+import { buildUpdateRouteRequest, createSavedRouteDraft } from '@/features/routes/model/draftRoute';
+import { getCourseNote, getCoursePriority, readRouteCourseLocalState, removeCourseNote, routeStats, saveCourseNote, setCoursePriority } from '@/features/routes/model/routeLocalState';
+import { type DraftSavedRoute, type DraftSavedRouteCourse, type RouteCourseLocalState, type RouteRequestErrorKind } from '@/features/routes/model/types';
+import { replaceSavedRouteCourse } from '@/features/routes/model/editSavedRoute';
+import { useRouteError } from '@/features/routes/hooks/useRouteError';
+import './MyPathPage.css';
+
+const EMPTY_COURSES: DraftSavedRouteCourse[] = [];
+
+type Operation = 'idle' | 'saving' | 'deleting' | 'progress';
+type LoadState = { status: 'loading' } | { status: 'error'; kind: RouteRequestErrorKind; message: string } | { status: 'ready' };
+
+export function SavedRouteDetailPage() {
+  const { routeId } = useParams();
+  const { user } = useAuthSession();
+  if (!routeId) return <Navigate to={appRoutes.savedRoutes} replace />;
+  return <SavedRouteDetail key={user?.userId + ':' + routeId} routeId={routeId} />;
+}
+
+function SavedRouteDetail({ routeId }: { routeId: string }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isLoading: isSessionLoading } = useAuthSession();
+  const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' });
+  const [route, setRoute] = useState<DraftSavedRoute | null>(null);
+  const [draft, setDraft] = useState<DraftSavedRoute | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [modified, setModified] = useState(false);
+  const [operation, setOperation] = useState<Operation>('idle');
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState('');
+  const [retryVersion, setRetryVersion] = useState(0);
+  const [localState, setLocalState] = useState<RouteCourseLocalState>(() => readRouteCourseLocalState());
+  const [noteCourse, setNoteCourse] = useState<DraftSavedRouteCourse | null>(null);
+  const [replacementCourse, setReplacementCourse] = useState<DraftSavedRouteCourse | null>(null);
+  const [shareOpen, setShareOpen] = useState(() => window.location.hash === '#share');
+  const [coursePickerOpen, setCoursePickerOpen] = useState(false);
+  const mutationInFlight = useRef(false);
+  const courseElements = useRef(new Map<string, HTMLElement>());
+  const emptyStateRef = useRef<HTMLDivElement>(null);
+  const { displayedCourses, bindCourse } = useCourseReorder((editing ? draft?.courses : route?.courses) ?? EMPTY_COURSES, courseElements,
+    (courses, moved, position) => setCourses(courses, t('myPath.movedAnnouncement', { title: moved.title, position })));
+
+  const translatedError = useRouteError();
+
+  const onLoadError = useEffectEvent((error: unknown) => {
+    setLoadState({ status: 'error', ...translatedError(error) });
+  });
+  const userId = user?.userId;
+  useEffect(() => {
+    if (isSessionLoading || !userId) return;
+    const controller = new AbortController();
+    const savedRouteRequest = getSavedRoute(routeId, controller.signal);
+    savedRouteRequest.then(savedRoute => {
+      if (controller.signal.aborted) return;
+      const next = createSavedRouteDraft(savedRoute);
+      setRoute(next);
+      setDraft(next);
+      setLoadState({ status: 'ready' });
+      document.title = `${savedRoute.goal} · CODE QUEST 2026`;
+    }).catch(error => {
+      if (controller.signal.aborted) return;
+      onLoadError(error);
+    });
+    return () => controller.abort();
+  }, [isSessionLoading, retryVersion, routeId, userId]);
+
+
+  if (isSessionLoading) return <PageState kind="loading" title={t('myPath.sessionLoading')} />;
+  if (user === null) return <Navigate to={appRoutes.login} replace />;
+  if (!routeId) return <Navigate to={appRoutes.savedRoutes} replace />;
+
+  if (loadState.status === 'loading') {
+    return <div className="my-path-page"><div className="my-path"><PageState kind="loading" title={t('myPath.loadingRoute')} /></div></div>;
+  }
+  if (loadState.status === 'error') {
+    return <div className="my-path-page"><div className="my-path">
+      {loadState.kind === 'not-found' ? (
+        <PageState kind="empty" title={t('myPath.routeNotFound')} description={t('myPath.routeNotFoundDescription')}>
+          <Link className="cq-button cq-button--secondary" to={appRoutes.savedRoutes}>{t('myPath.backToRoutes')}</Link>
+        </PageState>
+      ) : (
+        <PageState kind="error" title={t('myPath.routeLoadError')} description={loadState.message}
+          onRetry={() => {
+            setLoadState({ status: 'loading' });
+            setRetryVersion(version => version + 1);
+          }} />
+      )}
+    </div></div>;
+  }
+  if (!route || !draft) return null;
+
+  const currentRoute = editing ? draft : route;
+  const locked = operation !== 'idle';
+  const stats = routeStats(currentRoute, localState);
+
+  function setCourses(courses: DraftSavedRouteCourse[], message: string) {
+    setDraft(previous => previous ? {
+      ...previous,
+      courses: courses.map((course, index) => ({ ...course, position: index + 1 })),
+    } : previous);
+    setModified(true);
+    setActionError(null);
+    setActionSuccess(null);
+    setAnnouncement(message);
+  }
+
+  function removeCourse(courseKey: string) {
+    if (!editing || !draft || locked) return;
+    const index = draft.courses.findIndex(course => course.uiKey === courseKey);
+    if (index < 0) return;
+    const removed = draft.courses[index];
+    const focusKey = draft.courses[index + 1]?.uiKey ?? draft.courses[index - 1]?.uiKey;
+    setCourses(draft.courses.filter(course => course.uiKey !== courseKey),
+      t('myPath.removedSavedAnnouncement', { title: removed.title }));
+    requestAnimationFrame(() => focusKey ? courseElements.current.get(focusKey)?.focus() : emptyStateRef.current?.focus());
+  }
+
+  function addCourse(course: CatalogCourse) {
+    if (!editing || !draft || draft.courses.length >= routeLimits.courses || draft.courses.some(item => item.courseId === String(course.courseId))) return;
+    setCourses([...draft.courses, {
+      courseId: String(course.courseId),
+      uiKey: `${course.courseId}:${crypto.randomUUID()}`,
+      position: draft.courses.length + 1,
+      title: course.title,
+      reason: null,
+      imageUrl: course.imageUrl,
+      courseUrl: course.courseUrl,
+      progressPercentage: 0,
+    }], t('manualRoute.addedAnnouncement', { title: course.title }));
+    setCoursePickerOpen(false);
+  }
+
+  async function changeCourseStatus(course: DraftSavedRouteCourse) {
+    if (!route || locked || mutationInFlight.current || !route.courses.some(item => item.courseId === course.courseId)) return;
+    mutationInFlight.current = true;
+    setOperation('progress');
+    setActionError(null);
+    const completed = course.progressPercentage !== 100;
+    const apply = (value: DraftSavedRoute | null) => value ? ({ ...value, courses: value.courses.map(item => item.courseId === course.courseId ? { ...item, progressPercentage: completed ? 100 : 0 } : item) }) : value;
+    setRoute(apply); setDraft(apply);
+    try {
+      const updated = createSavedRouteDraft(await updateCourseProgress(route.routeId, course.courseId, completed));
+      setRoute(updated);
+      setDraft(previous => previous ? { ...previous, courses: previous.courses.map(item => {
+        const persisted = updated.courses.find(next => next.courseId === item.courseId);
+        return persisted ? { ...item, progressPercentage: persisted.progressPercentage } : item;
+      }) } : updated);
+      setAnnouncement(t(completed ? 'myPath.completedAnnouncement' : 'myPath.notStartedAnnouncement', { title: course.title }));
+    } catch (error) {
+      const restore = (value: DraftSavedRoute | null) => value ? ({ ...value, courses: value.courses.map(item => item.courseId === course.courseId ? { ...item, progressPercentage: course.progressPercentage } : item) }) : value;
+      setRoute(restore); setDraft(restore); setActionError(translatedError(error).message);
+    } finally { mutationInFlight.current = false; setOperation('idle'); }
+  }
+
+  function changePriority(course: DraftSavedRouteCourse, priority: 'high' | 'medium' | 'normal') {
+    if (!route) return;
+    try { setLocalState(setCoursePriority(route.routeId, course.courseId, priority)); }
+    catch { setActionError(t('myPath.storageError')); }
+  }
+
+  async function replaceCourse(course: DraftSavedRouteCourse, alternative: { courseId: number; title: string; imageUrl: string; courseUrl: string }) {
+    if (!route || !draft || locked || mutationInFlight.current) return;
+    const next = replaceSavedRouteCourse(editing ? draft : route, course.uiKey, alternative);
+    if (editing) {
+      setCourses(next.courses, t('myPath.replacedAnnouncement', { title: alternative.title }));
+      setReplacementCourse(null);
+      return;
+    }
+    mutationInFlight.current = true;
+    setActionError(null);
+    setOperation('saving');
+    try {
+      const updated = createSavedRouteDraft(await updateRoute(route.routeId, buildUpdateRouteRequest(next)));
+      setRoute(updated); setDraft(updated); setModified(false); setReplacementCourse(null);
+      setAnnouncement(t('myPath.replacedAnnouncement', { title: alternative.title }));
+    } catch (error) { setActionError(translatedError(error).message); }
+    finally { mutationInFlight.current = false; setOperation('idle'); }
+  }
+
+  async function saveChanges() {
+    if (!draft || !modified || draft.courses.length === 0 || locked || mutationInFlight.current) return;
+    mutationInFlight.current = true;
+    setOperation('saving');
+    setActionError(null);
+    setActionSuccess(null);
+    try {
+      const updated = createSavedRouteDraft(await updateRoute(draft.routeId, buildUpdateRouteRequest(draft)));
+      setRoute(updated);
+      setDraft(updated);
+      setModified(false);
+      setEditing(false);
+      const message = t('myPath.updateSuccess');
+      setActionSuccess(message);
+      setAnnouncement(message);
+    } catch (error) {
+      setActionError(translatedError(error).message);
+    } finally {
+      mutationInFlight.current = false;
+      setOperation('idle');
+    }
+  }
+
+  async function removeRoute() {
+    if (locked || mutationInFlight.current || !window.confirm(t('myPath.confirmDeleteRoute', { goal: route!.goal }))) return;
+    mutationInFlight.current = true;
+    setOperation('deleting');
+    setActionError(null);
+    setActionSuccess(null);
+    try {
+      await deleteRoute(route!.routeId);
+      navigate(appRoutes.savedRoutes, { replace: true, state: { routeDeleted: true } });
+    } catch (error) {
+      setActionError(translatedError(error).message);
+      setOperation('idle');
+    } finally { mutationInFlight.current = false; }
+  }
+
+  function cancelEditing() {
+    if (modified && !window.confirm(t('myPath.confirmCancelEdit'))) return;
+    setDraft(route!);
+    setModified(false);
+    setEditing(false);
+    setActionError(null);
+    setActionSuccess(null);
+  }
+
+  return (
+    <div className="my-path-page my-path-page--saved-detail">
+      <div className="my-path my-path--saved-detail" aria-busy={locked}>
+        {(location.state as { routeCreated?: boolean } | null)?.routeCreated &&
+          <p className="my-path__feedback my-path__feedback--success" role="status">{t('myPath.saveSuccess')}</p>}
+        <header className="my-path__hero">
+          <div className="my-path__hero-copy">
+            <p className="my-path__eyebrow"><Sparkles size={16} aria-hidden="true" />{t('myPath.savedRouteEyebrow')}</p>
+            <h1>{t('myPath.savedRouteTitle')}</h1>
+            <p>{t('myPath.savedRouteDescription')}</p>
+          </div>
+          <section className="my-path__recommendation" aria-labelledby="saved-route-goal">
+            <div className="my-path__recommendation-heading"><p>{t('myPath.goalLabel')}</p>
+              <p className="my-path__course-count">{t('myPath.courseCount', { count: currentRoute.courses.length })}</p></div>
+            {editing ? <div className="my-path__route-fields"><input disabled={locked} aria-label={t('manualRoute.nameLabel')} value={draft.goal} maxLength={routeLimits.goalLength} onChange={event => { setDraft({ ...draft, goal: event.target.value }); setModified(true); }} /><textarea disabled={locked} aria-label={t('manualRoute.descriptionLabel')} value={draft.explanation ?? ''} maxLength={routeLimits.explanationLength} onChange={event => { setDraft({ ...draft, explanation: event.target.value }); setModified(true); }} placeholder={t('manualRoute.descriptionPlaceholder')} /></div> : <><h2 id="saved-route-goal">{currentRoute.goal}</h2>{currentRoute.explanation && <p>{currentRoute.explanation}</p>}</>}
+            <div className="my-path__route-summary"><span><strong>{Math.round(stats.percentage)}%</strong>{t('myPath.progressLabel')}</span><span>✓ {stats.completed} {t('myPath.completed')}</span><span>○ {stats.notStarted} {t('myPath.notStarted')}</span><span><FileText size={14} aria-hidden="true" />{t('myPath.notesCount', { count: stats.notes })}</span><span><Star size={14} aria-hidden="true" />{t('myPath.priorityCount', { count: stats.priorities })}</span></div>
+            <div className="my-path__route-progress"><i style={{ width: `${stats.percentage}%` }} /></div>
+          </section>
+        </header>
+
+        <section className="my-path__route-panel" aria-labelledby="saved-route-panel-title">
+          <div className="my-path__route-panel-header">
+            <div className="my-path__route-panel-title"><span aria-hidden="true"><MapIcon size={20} /></span>
+              <h2 id="saved-route-panel-title">{t(editing ? 'myPath.editingRoute' : 'myPath.savedRoute')}</h2>
+              {modified && <span className="my-path__modified">{t('myPath.unsavedChanges')}</span>}
+              <div className="my-path__route-overview"><p>{t('myPath.routeSummary', { count: currentRoute.courses.length })}</p></div>
+            </div>
+            {editing && <div className="my-path__route-panel-actions"><Button variant="secondary" onClick={() => setCoursePickerOpen(true)} disabled={locked || currentRoute.courses.length >= routeLimits.courses}><Plus size={16} aria-hidden="true" />{t('manualRoute.addCourse')}</Button></div>}
+          </div>
+
+          {displayedCourses.length === 0 ? (
+            <div className="my-path__empty" role="alert" tabIndex={-1} ref={emptyStateRef}>
+              <h2>{t('myPath.emptySavedTitle')}</h2><p>{t('myPath.emptySavedDescription')}</p>
+            </div>
+          ) : (
+            <div className="my-path__course-track">
+              <RouteRaceTrack courseKeys={displayedCourses.map(course => course.uiKey)} />
+              <ol className="my-path__course-list" aria-label={t('myPath.courseListLabel')}>
+              {displayedCourses.map((course, position) => (
+                <RouteCourseItem key={course.uiKey} course={course} position={position}
+                  showControls canReorder={editing} locked={locked} completed={course.progressPercentage === 100}
+                  hasNote={Boolean(getCourseNote(localState, currentRoute.routeId, course.courseId))}
+                  priority={getCoursePriority(localState, currentRoute.routeId, course.courseId)}
+                  onToggleCompleted={route.courses.some(item => item.courseId === course.courseId) ? () => { void changeCourseStatus(course); } : undefined} onNote={() => setNoteCourse(course)}
+                  onPriorityChange={priority => changePriority(course, priority)} onReplace={() => { setActionError(null); setReplacementCourse(course); }} {...bindCourse(course.uiKey)}
+                  onRemove={() => removeCourse(course.uiKey)} />
+              ))}
+            </ol>
+            </div>
+          )}
+
+          {actionError && <p className="my-path__feedback my-path__feedback--error" role="alert">{actionError}</p>}
+          {actionSuccess && <p className="my-path__feedback my-path__feedback--success" role="status">{actionSuccess}</p>}
+          <footer className="my-path__completion">
+            <div className="my-path__completion-copy"><Sparkles size={20} aria-hidden="true" /><div>
+              <h2>{t(editing ? 'myPath.editActionTitle' : 'myPath.savedActionTitle')}</h2>
+              <p>{t(editing ? 'myPath.editActionDescription' : 'myPath.savedActionDescription')}</p>
+            </div></div>
+            <div className="my-path__primary-actions">
+              {editing ? <>
+                <Button variant="secondary" onClick={cancelEditing} disabled={locked}>{t('myPath.cancel')}</Button>
+                <Button onClick={() => { void saveChanges(); }} isLoading={operation === 'saving'}
+                  loadingLabel={t('myPath.savingChanges')} disabled={!modified || !currentRoute.goal.trim() || currentRoute.courses.length === 0 || locked}>
+                  {t('myPath.saveChanges')}
+                </Button>
+              </> : <>
+                <Button variant="secondary" onClick={() => setShareOpen(true)} disabled={locked}><Share2 size={16} aria-hidden="true" />{t('myPath.shareRoute')}</Button>
+                <Button variant="secondary" onClick={() => { setActionSuccess(null); setEditing(true); }} disabled={locked}>{t('myPath.editRoute')}</Button>
+                <Button className="my-path__delete-route" onClick={() => { void removeRoute(); }} isLoading={operation === 'deleting'}
+                  loadingLabel={t('myPath.deletingRoute')} disabled={locked}>{t('myPath.deleteRoute')}</Button>
+              </>}
+            </div>
+          </footer>
+        </section>
+        <p className="my-path__sr-only" aria-live="polite" aria-atomic="true">{announcement}</p>
+        {noteCourse && <RouteNoteDialog courseTitle={noteCourse.title} note={getCourseNote(localState, currentRoute.routeId, noteCourse.courseId)} onClose={() => setNoteCourse(null)} onSave={content => setLocalState(saveCourseNote(currentRoute.routeId, noteCourse.courseId, content))} onDelete={() => setLocalState(removeCourseNote(currentRoute.routeId, noteCourse.courseId))} />}
+        {replacementCourse && <RouteReplaceDialog error={actionError} busy={locked} course={replacementCourse} routeCourseIds={currentRoute.courses.map(course => course.courseId)} onClose={() => { if (!locked) setReplacementCourse(null); }} onReplace={alternative => { void replaceCourse(replacementCourse, alternative); }} />}
+        {shareOpen && <RouteShareDialog route={currentRoute} localState={localState} onClose={() => setShareOpen(false)} />}
+        {coursePickerOpen && <RouteCoursePickerDialog excludedCourseIds={currentRoute.courses.map(course => course.courseId)} onClose={() => setCoursePickerOpen(false)} onAdd={addCourse} />}
+      </div>
+    </div>
+  );
+}

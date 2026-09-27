@@ -16,5 +16,7 @@ public sealed record SemanticRecommendationDto(
 /// <param name="Score">Puntuación interna de relevancia; no es una probabilidad.</param>
 /// <param name="Reason">Motivo de la selección.</param>
 /// <param name="EstimatedWeeks">Semanas estimadas según duración publicada y tiempo semanal; null si falta alguno.</param>
+/// <param name="ImageUrl">Miniatura del curso; null si no dispone de imagen.</param>
 public sealed record RecommendedCourseDto(
-    long CourseId, int Position, string Title, double Score, string Reason, int? EstimatedWeeks);
+    long CourseId, int Position, string Title, double Score, string Reason, int? EstimatedWeeks,
+    string? ImageUrl = null);

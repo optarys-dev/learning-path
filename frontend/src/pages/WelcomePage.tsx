@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { WelcomeView } from '../features/welcome/WelcomeView';
+import { WelcomeView } from '@/features/welcome/components/WelcomeView';
 
 export function WelcomePage() {
   const { t } = useTranslation();

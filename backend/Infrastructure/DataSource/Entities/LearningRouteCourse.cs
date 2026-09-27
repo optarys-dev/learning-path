@@ -7,5 +7,6 @@ public class LearningRouteCourse
     public long CourseId { get; set; }
     public Course Course { get; set; } = null!;
     public int Position { get; set; }
+    public int ProgressPercentage { get; set; }
     public string? Reason { get; set; }
 }

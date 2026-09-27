@@ -7,6 +7,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<LearningRoute> LearningRoutes => Set<LearningRoute>();
     public DbSet<LearningRouteCourse> LearningRouteCourses => Set<LearningRouteCourse>();
