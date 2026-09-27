@@ -44,7 +44,9 @@ de ancho configurable, con sesión ficticia y sin peticiones a la API.
 
 Abrir `/tests/startup.html`: usa el HTML y los estilos reales de arranque. Alternar tema
 e idioma permite revisar los cuatro casos, también a 320px. «Start React» carga la
-entrada real y debe reemplazar el loader por la página; no hay una demora artificial
-ni dependencia de la petición de sesión. La fixture simula una sesión anónima.
+entrada real y debe retirar el loader con una salida suave. Se mantiene al menos
+1,1 segundos desde el inicio y luego desvanece durante 240ms, sin depender de la
+petición de sesión. La página se renderiza debajo; el teclado no accede a controles
+tapados. La fixture simula una sesión anónima.
 Las pruebas automáticas comprueban preferencias persistidas, valores desconocidos
-y almacenamiento bloqueado. El loader no tiene tiempo mínimo: con caché puede verse apenas un instante.
+y almacenamiento bloqueado. En cargas lentas no se agrega otro segundo de espera.

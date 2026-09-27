@@ -1,8 +1,9 @@
 import { appRoutes } from '@/config/navigation';
-import { lazy } from 'react';
+import { lazy, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { AppLayout } from './components/layout/AppLayout';
+import { finishStartup } from './components/layout/startupTransition';
 import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
 import { LoginCallbackPage } from './pages/LoginCallbackPage';
 import { LoginPage } from './pages/LoginPage';
@@ -20,6 +21,7 @@ const WelcomePreviewPage = import.meta.env.DEV
   : null;
 
 function App() {
+  useEffect(finishStartup, []);
   return (
     <Routes>
       <Route element={<AppLayout variant="welcome" />}>

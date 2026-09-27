@@ -24,6 +24,7 @@
           // Match i18n's Spanish fallback when storage is unavailable.
         }
         document.documentElement.lang = storedLanguage?.split('-')[0].toLowerCase() === 'en' ? 'en' : 'es';
+        document.documentElement.dataset.startupStartedAt = String(performance.now());
       })();
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -32,9 +33,8 @@
     <title>CODE QUEST 2026</title>
   </head>
   <body>
-    <div id="root">
-      <!-- React replaces this fallback on its first commit; no timer or session request blocks the landing. -->
-      <section class="app-startup" role="status" aria-live="polite">
+      <!-- The app renders underneath while this overlay completes its short entrance. -->
+      <section id="app-startup" class="app-startup" role="status" aria-live="polite">
         <div class="app-startup__brand">
           <img src="/src/assets/brand/codequest-logo.svg" alt="CODE QUEST 2026" width="192" height="86" />
         </div>
@@ -45,7 +45,7 @@
         </p>
         <noscript><p class="app-startup__no-script"><span lang="es">Activá JavaScript para entrar a la plataforma.</span><span lang="en">Enable JavaScript to enter the platform.</span></p></noscript>
       </section>
-    </div>
+    <div id="root" inert aria-busy="true"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

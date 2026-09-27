@@ -5,6 +5,7 @@
   --startup-accent: #c7b5ff;
   --startup-track: #4b435f;
   position: fixed;
+  z-index: 100;
   inset: 0;
   display: flex;
   flex-direction: column;
@@ -17,7 +18,10 @@
   color: var(--startup-ink);
   font-family: "Segoe UI", sans-serif;
   text-align: center;
+  transition: opacity 240ms ease;
 }
+.app-startup[data-state="leaving"] { opacity: 0; }
+html:has(#app-startup) { overflow: hidden; scrollbar-gutter: stable; }
 [data-theme="light"] .app-startup {
   --startup-bg: #f7f5ff;
   --startup-ink: #231933;
@@ -44,4 +48,7 @@ html[lang^="en"] .app-startup [lang="en"] { display: inline; }
 .app-startup:has(.app-startup__no-script) .app-startup__copy,
 .app-startup:has(.app-startup__no-script) .app-startup__orbit { display: none; }
 @keyframes startup-orbit { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .app-startup__orbit { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .app-startup { transition: none; }
+  .app-startup__orbit { animation: none; }
+}
