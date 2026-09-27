@@ -29,12 +29,14 @@
     "src/lib/api/latestRequest.ts",
     "src/lib/api/parseProblemDetails.ts",
     "src/features/auth/model/parseSession.ts",
+    "src/features/auth/model/loginProvider.ts",
     "src/features/catalog/model/parseCatalogPage.ts",
     "src/features/routes/model/*.ts",
     "src/config/navigation.ts",
     "src/i18n/courseLevel.ts",
     "src/i18n/locales/*.ts",
     "src/features/questionnaire/model/validation.ts",
+    "src/features/questionnaire/model/draft.ts",
     "src/features/routes/api/paths.ts"
   ]
 }

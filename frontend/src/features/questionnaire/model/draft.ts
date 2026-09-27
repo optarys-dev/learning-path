@@ -47,8 +47,10 @@ function canResumeAt(step: number, answers: QuestionnaireAnswers): boolean {
 }
 
 export function loadQuestionnaireDraft(): QuestionnaireState {
+  // Retire drafts from previous sessions without importing them into this tab.
+  try { localStorage.removeItem(DRAFT_KEY); } catch { /* Storage unavailable. */ }
   try {
-    const raw = localStorage.getItem(DRAFT_KEY);
+    const raw = sessionStorage.getItem(DRAFT_KEY);
 
     if (raw === null) return initialQuestionnaireState;
 
@@ -62,20 +64,20 @@ export function loadQuestionnaireDraft(): QuestionnaireState {
 
       if (answers !== null && canResumeAt(draft.currentStep, answers)) return { currentStep: draft.currentStep, answers };
     }
-    localStorage.removeItem(DRAFT_KEY);
+    sessionStorage.removeItem(DRAFT_KEY);
   } catch {
     // Storage may be unavailable or contain malformed JSON.
-    try { localStorage.removeItem(DRAFT_KEY); } catch { /* Storage unavailable. */ }
+    try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* Storage unavailable. */ }
   }
   return initialQuestionnaireState;
 }
 
 export function saveQuestionnaireDraft(state: QuestionnaireState): void {
   try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ draftVersion: DRAFT_VERSION, currentStep: state.currentStep, answers: state.answers }));
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ draftVersion: DRAFT_VERSION, currentStep: state.currentStep, answers: state.answers }));
   } catch { /* Continue in memory when storage is unavailable. */ }
 }
 
 export function clearQuestionnaireDraft(): void {
-  try { localStorage.removeItem(DRAFT_KEY); } catch { /* Storage unavailable. */ }
+  try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* Storage unavailable. */ }
 }

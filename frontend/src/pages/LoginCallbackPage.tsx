@@ -1,12 +1,16 @@
 import { appRoutes } from '@/config/navigation';
+import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageState } from '@/components/ui';
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
+import { clearLoginProvider, loginLoadingTranslationKey } from '@/features/auth/model/loginProvider';
 
 export function LoginCallbackPage() {
   const { user, isLoading, sessionError, refresh } = useAuthSession();
   const { t } = useTranslation();
+  const [loadingTranslationKey] = useState(loginLoadingTranslationKey);
+  useEffect(() => { clearLoginProvider(); }, []);
 
   if (sessionError) return <PageState kind="error" title={t('errors.sessionUnavailable')}
     description={t('errors.sessionUnavailableDescription')} onRetry={() => { void refresh(); }} />;
@@ -15,5 +19,5 @@ export function LoginCallbackPage() {
     return <Navigate to={user ? (user.isNewUser === true ? appRoutes.createRoute : appRoutes.savedRoutes) : appRoutes.login} replace />;
   }
 
-  return <PageState kind="loading" title={t('welcome.connecting')} />;
+  return <PageState kind="loading" title={t(loadingTranslationKey)} />;
 }

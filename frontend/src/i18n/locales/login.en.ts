@@ -6,6 +6,7 @@ export const loginEn = {
   accountInfo: 'About your accounts',
   sceneLabel: 'A place for your journey',
   googleContinue: 'Continue with Google', googleConnecting: 'Connecting to Google…',
+  completingSignIn: 'Completing sign in…',
   googleError: 'We could not complete Google sign-in. Please try again.',
   back: 'Back to welcome', developmentNote: 'We are preparing Discord sign-in. Explore the experience on the welcome page.',
   asideTitle: 'Your next chapter <accent>starts here.</accent>',

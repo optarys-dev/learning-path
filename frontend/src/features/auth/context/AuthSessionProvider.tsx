@@ -3,6 +3,7 @@ import { endSession, getCurrentSession, type AuthenticatedUser } from '@/feature
 import { AuthSessionContext } from './authSessionContext';
 import { ApiError, subscribeToUnauthenticated } from '@/lib/api';
 import { createLatestRequest } from '@/lib/api/latestRequest';
+import { clearQuestionnaireDraft } from '@/features/questionnaire/model/draft';
 
 export function AuthSessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
@@ -49,6 +50,7 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     await endSession();
+    clearQuestionnaireDraft();
     requests.current.cancel();
     setUser(null);
     setSessionError(null);
