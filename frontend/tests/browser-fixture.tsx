@@ -14,9 +14,11 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ManualRoutePage } from '../src/features/routes/pages/ManualRoutePage';
 import { MyPathPage } from '../src/features/routes/pages/MyPathPage';
+import { CatalogPage } from '../src/features/catalog/pages/CatalogPage';
 
 const courses = [1, 2, 3].map(courseId => ({ courseId, slug: 'course-' + courseId, title: 'Curso ' + courseId,
-  level: 'Intermedio', imageAlt: '', imageUrl: '', courseUrl: 'https://example.com/course-' + courseId }));
+  level: 'Intermedio', imageAlt: '', imageUrl: '', courseUrl: 'https://example.com/course-' + courseId,
+  catalogKinds: courseId === 1 ? ['free', 'mini-course'] : courseId === 2 ? ['pro-exclusive', 'legacy'] : ['course'] }));
 let saved = { routeId: 'fixture', goal: 'Ruta de prueba', recommendationMethod: 'manual', explanation: 'Datos ficticios',
   createdAt: '2026-09-26T12:00:00Z', courses: courses.slice(0, 2).map((course, index) => ({ ...course, courseId: String(course.courseId), position: index + 1, reason: null, progressPercentage: 0 })) };
 let catalogFails = false;
@@ -27,14 +29,19 @@ window.fetch = async (input, options = {}) => {
   const apiRequest = ['/auth', '/courses', '/routes', '/users'].some(prefix => url.pathname === prefix || url.pathname.startsWith(prefix + '/'));
   if (!apiRequest && (url.origin === window.location.origin || url.protocol === 'data:' ||
     url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com')) return assetFetch(input, options);
-  requests.push((options.method ?? 'GET') + ' ' + url.pathname);
+  requests.push((options.method ?? 'GET') + ' ' + url.pathname + url.search);
   await new Promise<void>((resolve, reject) => {
     const timer = window.setTimeout(resolve, url.pathname.includes('/progress') ? 500 : 50);
     options.signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')); }, { once: true });
   });
   if (url.pathname === '/auth/me') return Response.json({ id: 'google-fixture', userId: 'fixture-user', username: 'Review', displayName: null, avatar: null, avatarUrl: null, provider: 'Google', isNewUser: false });
   if (url.pathname === '/courses' && catalogFails) { catalogFails = false; return Response.json({ detail: 'Fixture failure' }, { status: 503 }); }
-  if (url.pathname === '/courses') return Response.json({ items: courses, page: 1, pageSize: 100, totalCount: 3, totalPages: 1, hasNextPage: false, hasPreviousPage: false });
+  if (url.pathname === '/courses') {
+    const kind = url.searchParams.get('catalogKind');
+    const search = url.searchParams.get('search')?.toLowerCase() ?? '';
+    const items = courses.filter(course => (!kind || course.catalogKinds.includes(kind)) && course.title.toLowerCase().includes(search));
+    return Response.json({ items, page: 1, pageSize: 100, totalCount: items.length, totalPages: items.length ? 1 : 0, hasNextPage: false, hasPreviousPage: false });
+  }
   if (url.pathname.endsWith('/progress')) {
     const courseId = url.pathname.split('/')[4];
     const body = JSON.parse(String(options.body)) as { progressPercentage: number };
@@ -92,10 +99,12 @@ export function Fixture() {
     <button onClick={() => setLog(requests.join('\n'))}>Ver solicitudes</button>
     <button onClick={() => { void simulateDrag(); }}>Simular arrastre</button>
     <Link to="/create-route">Ruta manual</Link>
+    <Link to="/catalog">Catálogo de prueba</Link>
   </nav><pre aria-label="Requests">{log}</pre><Routes>
     <Route path="*" element={<SavedRouteDetailPage />} />
     <Route path="/tests/routes/:routeId" element={<SavedRouteDetailPage />} />
     <Route path="/create-route" element={<ManualRoutePage />} />
+    <Route path="/catalog" element={<CatalogPage />} />
     <Route path="/my-path" element={<MyPathPage mode="collection" />} />
   </Routes>{blockedNote && <RouteNoteDialog courseTitle="Nota de prueba" onClose={() => setBlockedNote(false)} onSave={() => { throw new Error('Storage blocked'); }} onDelete={() => { throw new Error('Storage blocked'); }} />}</>;
 }

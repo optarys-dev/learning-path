@@ -15,6 +15,7 @@ Ejecutar Vite y abrir `/tests/dialogs.html`. Es una entrada de desarrollo, fuera
 5. Nota sin almacenamiento abre un editor cuyo guardado falla intencionalmente. Escribir y guardar: error anunciado y texto conservado.
 6. Modal: Tab/Shift+Tab entre extremos, Escape y retorno al disparador; foco inicial en textarea. Alternar tema y revisar claro/oscuro. Probar nota a 390x844.
 7. Compartir ruta genera un PNG en memoria. No usar share del sistema ni descargar para verificar la preview.
+8. Catálogo de prueba: alternar categorías muestra los cursos y badges correspondientes; Gratis muestra Curso 1 y Exclusivo PRO muestra Curso 2. Ver solicitudes permite comprobar `catalogKind` sin consultar la API real.
 
 Las comprobaciones de navegador documentadas se hicieron manualmente con esta fixture. No son E2E automatizados. El mock no prueba OAuth, autorización del servidor ni concurrencia real de base de datos.
 
