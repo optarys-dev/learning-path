@@ -99,6 +99,57 @@ function proposalHandler(name, dependencies) {
   return vm.runInNewContext(`(${handler.getText(source)})`, dependencies);
 }
 
+function logoutHandler(dependencies) {
+  const filename = path.join(__dirname, '../src/features/auth/context/AuthSessionProvider.tsx');
+  const source = ts.createSourceFile(filename, fs.readFileSync(filename, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let handler;
+  function visit(node) {
+    if (ts.isVariableDeclaration(node) && node.name.getText(source) === 'logout') handler = node.initializer.arguments[0];
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  assert.ok(handler, 'Missing central logout handler');
+  return vm.runInNewContext(`(${handler.getText(source)})`, dependencies);
+}
+
+for (const scenario of ['draft', 'no draft', 'failure']) {
+  test(`central logout with ${scenario} respects the draft lifecycle and unrelated preferences`, async t => {
+    setup(t);
+    if (scenario !== 'no draft') saveQuestionnaireDraft(draft);
+    for (const store of [localStorage, sessionStorage]) {
+      for (const key of ['codequest-language', 'codequest-theme', 'other']) store.setItem(key, 'keep');
+    }
+    let resolveLogout, rejectLogout;
+    const request = new Promise((resolve, reject) => { resolveLogout = resolve; rejectLogout = reject; });
+    let user = { id: 'A' };
+    let cancelled = false;
+    const logout = logoutHandler({ endSession: () => request, clearQuestionnaireDraft,
+      requests: { current: { cancel: () => { cancelled = true; } } },
+      setUser: value => { user = value; }, setSessionError: () => {}, setIsLoading: () => {} });
+    const loggingOut = logout();
+    assert.equal(sessionStorage.getItem(DRAFT_KEY) !== null, scenario !== 'no draft');
+    assert.equal(user.id, 'A');
+    if (scenario === 'failure') {
+      rejectLogout(new Error('Logout failed'));
+      await assert.rejects(loggingOut, /Logout failed/);
+      assert.deepEqual(loadQuestionnaireDraft(), draft);
+      assert.equal(user.id, 'A');
+      assert.equal(cancelled, false);
+    } else {
+      resolveLogout();
+      await loggingOut;
+      assert.equal(sessionStorage.getItem(DRAFT_KEY), null);
+      assert.equal(user, null);
+      assert.equal(cancelled, true);
+      // The next user's questionnaire initializes from the same tab's storage.
+      assert.deepEqual(loadQuestionnaireDraft(), initialQuestionnaireState);
+    }
+    for (const store of [localStorage, sessionStorage]) {
+      for (const key of ['codequest-language', 'codequest-theme', 'other']) assert.equal(store.getItem(key), 'keep');
+    }
+  });
+}
+
 test('confirmed Cancel clears session draft; declining confirmation preserves the attempt', t => {
   setup(t);
   saveQuestionnaireDraft(draft);

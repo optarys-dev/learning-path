@@ -3,6 +3,7 @@ import { apiUrl } from '@/config/api';
 import { ApiError, requestJson, requestVoid } from '@/lib/api';
 import { parseSession, type AuthenticatedUser } from '@/features/auth/model/parseSession';
 import { isRecord } from '@/lib/validation';
+import { rememberLoginProvider } from '@/features/auth/model/loginProvider';
 export type { AuthenticatedUser } from '@/features/auth/model/parseSession';
 
 export async function getCurrentSession(signal?: AbortSignal): Promise<AuthenticatedUser | null> {
@@ -26,6 +27,7 @@ export function startDiscordLogin() {
 
   loginUrl.searchParams.set('returnUrl', returnUrl);
 
+  rememberLoginProvider('Discord');
   window.location.assign(loginUrl.toString());
 }
 
@@ -41,5 +43,6 @@ export function startGoogleLogin() {
   const loginUrl = new URL(`${apiUrl}/auth/google`, window.location.origin);
   loginUrl.searchParams.set('returnUrl', import.meta.env.VITE_GOOGLE_RETURN_URL?.trim()
     || import.meta.env.VITE_DISCORD_RETURN_URL?.trim() || appRoutes.loginCallback);
+  rememberLoginProvider('Google');
   window.location.assign(loginUrl.toString());
 }

@@ -6,6 +6,7 @@ export const loginEs = {
   accountInfo: 'Sobre tus cuentas',
   sceneLabel: 'Un lugar para tu recorrido',
   googleContinue: 'Continuar con Google', googleConnecting: 'Conectando con Google…',
+  completingSignIn: 'Completando inicio de sesión…',
   googleError: 'No pudimos completar el acceso con Google. Podés intentarlo nuevamente.',
   back: 'Volver a la bienvenida',
   developmentNote: 'Estamos preparando el acceso con Discord. Podés explorar la propuesta desde la bienvenida.',
