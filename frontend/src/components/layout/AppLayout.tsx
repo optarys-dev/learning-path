@@ -35,6 +35,8 @@ export function AppLayout({
   } = useAuthSession();
 
   const menuButton = useRef<HTMLButtonElement>(null);
+  const header = useRef<HTMLElement>(null);
+  const publicNavigation = useRef<HTMLDivElement>(null);
   const profileMenu = useRef<HTMLDivElement>(null);
   const profileButton = useRef<HTMLButtonElement>(null);
   const main = useRef<HTMLElement>(null);
@@ -58,6 +60,37 @@ export function AppLayout({
     });
     return () => window.cancelAnimationFrame(frame);
   }, [pathname, hash]);
+
+  useEffect(() => {
+    if (!menuOpen || user) return;
+
+    const mobile = window.matchMedia('(max-width: 68rem)');
+    const frame = window.requestAnimationFrame(() => {
+      if (mobile.matches) publicNavigation.current?.querySelector<HTMLAnchorElement>('nav a')?.focus();
+    });
+
+    function dismissOnOutside(event: PointerEvent) {
+      if (event.target instanceof Node && !header.current?.contains(event.target)) setMenuOpen(false);
+    }
+    function dismissOnEscape(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      setMenuOpen(false);
+      menuButton.current?.focus();
+    }
+    function dismissOnDesktop(event: MediaQueryListEvent) {
+      if (!event.matches) setMenuOpen(false);
+    }
+
+    document.addEventListener('pointerdown', dismissOnOutside);
+    document.addEventListener('keydown', dismissOnEscape);
+    mobile.addEventListener('change', dismissOnDesktop);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener('pointerdown', dismissOnOutside);
+      document.removeEventListener('keydown', dismissOnEscape);
+      mobile.removeEventListener('change', dismissOnDesktop);
+    };
+  }, [menuOpen, user]);
 
   useEffect(() => {
     if (!profileMenuOpen) return;
@@ -170,7 +203,7 @@ export function AppLayout({
         {t('layout.skip')}
       </a>
 
-      <header className="app-header">
+      <header className="app-header" ref={header}>
         <div className="app-header__inner">
           <Link
             to={appRoutes.home}
@@ -181,7 +214,7 @@ export function AppLayout({
           </Link>
 
           {isSessionLoading ? (
-            <div className="welcome-navigation">
+            <div className="header-actions">
               <ThemeToggle />
               <LanguageSelector />
 
@@ -273,8 +306,7 @@ export function AppLayout({
               aria-expanded={menuOpen} aria-controls="public-navigation" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
             </Button>
-            <div className="app-navigation welcome-navigation public-navigation" data-open={menuOpen} id="public-navigation"
-              onKeyDown={event => { if (event.key === 'Escape') { setMenuOpen(false); menuButton.current?.focus(); } }}>
+            <div ref={publicNavigation} className="app-navigation public-navigation" data-open={menuOpen} id="public-navigation">
               <nav
                 aria-label={t(
                   'landing.navigation',
@@ -292,16 +324,19 @@ export function AppLayout({
 
               </nav>
 
-              <ThemeToggle />
-              <LanguageSelector />
-
-              <NavLink
-                className="welcome-navigation__login"
-                to={appRoutes.login}
-                onClick={() => setMenuOpen(false)}
-              >
-                {t('login.navigation')}
-              </NavLink>
+              <div className="public-navigation__controls">
+                <div className="public-navigation__preferences">
+                  <ThemeToggle />
+                  <LanguageSelector />
+                </div>
+                <NavLink
+                  className="public-navigation__login"
+                  to={appRoutes.login}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {t('login.navigation')}
+                </NavLink>
+              </div>
             </div>
             </>
           )}
