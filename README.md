@@ -122,35 +122,19 @@ En la aplicación de Discord, registra el callback
 en ambas URLs si cambias el puerto publicado de `web-app` en `compose.yaml`. Consulta las guías de
 [Discord](backend/docs/DISCORD_OAUTH.md) y [Google](backend/docs/GOOGLE_OAUTH.md).
 
-### 3. Configurar HTTP para desarrollo local
-
-Crea `compose.local.yaml` en la raíz con este contenido:
-
-```yaml
-services:
-  web-app:
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      Discord__DISCORD_FORCE_HTTPS_CALLBACK: "false"
-```
-
 Este archivo permite usar HTTP local y las cookies de autenticación de desarrollo.
 Definir `ASPNETCORE_ENVIRONMENT` solo en `.env` no basta: el Compose principal
 actual no transmite esa variable al contenedor. Usa este archivo adicional solo
 para desarrollo; un despliegue público requiere la configuración de HTTPS correspondiente.
 
-### 4. Construir e iniciar
+### 3. Construir e iniciar
 
 ```powershell
-docker compose -f compose.yaml -f compose.local.yaml config --quiet
-docker compose -f compose.yaml -f compose.local.yaml up --build -d --remove-orphans
-docker compose -f compose.yaml -f compose.local.yaml ps
-docker compose -f compose.yaml -f compose.local.yaml logs -f web-app embeddings
+docker compose -f compose.yaml --build -d
 ```
 
 La validación indica el nombre de cualquier variable obligatoria ausente o vacía.
 La primera construcción y descarga del modelo pueden tardar varios minutos.
-`Ctrl+C` sale del seguimiento de logs; los contenedores siguen ejecutándose.
 
 Cuando PostgreSQL y el worker están saludables, `web-app` aplica las migraciones,
 carga primero `Seed DataCourses.sql` y después `Seed Embeddings.sql`, y finalmente
@@ -158,7 +142,7 @@ inicia el servidor. Los seeds actuales contienen **91 cursos y 91 embeddings**.
 La carga queda registrada para no repetirse en cada arranque. Si falla un seed,
 se revierten ambos y el servidor web no inicia; revisa los logs antes de reintentar.
 
-### 5. Abrir y comprobar
+### 4. Abrir y comprobar
 
 Con el puerto `8080:8080` definido en `compose.yaml`, abre:
 
