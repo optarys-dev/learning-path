@@ -130,7 +130,7 @@ para desarrollo; un despliegue público requiere la configuración de HTTPS corr
 ### 3. Construir e iniciar
 
 ```powershell
-docker compose -f compose.yaml --build -d
+docker compose -f 'compose.yaml' up -d --build
 ```
 
 La validación indica el nombre de cualquier variable obligatoria ausente o vacía.
